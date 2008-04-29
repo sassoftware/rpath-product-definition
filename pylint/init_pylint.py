@@ -15,6 +15,6 @@
 import os
 import sys
 sys.path.insert(0, os.environ['CONARY_PATH'])
-sys.path.insert(0, os.path.abspath('../code-dir'))
+sys.path.insert(0, os.path.abspath('../..'))
 
 from rpath_common.proddef import api1

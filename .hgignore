@@ -6,6 +6,6 @@
 .*\.so$
 ^tmp/
 rpath_common/proddef/proddef_constants.pyc?$
+rpath_common/xmllib/
 ^pylint/reports/
-^pylint/code-dir/
 ^rpath-common-.*.tar.bz2
