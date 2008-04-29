@@ -17,7 +17,7 @@ all: default-subdirs default-all
 export TOPDIR = $(shell pwd)
 export DISTDIR = $(TOPDIR)/rbuild-$(VERSION)
 
-SUBDIRS=rpath_common xsd doc
+SUBDIRS=rpath_common xsd doc pylint
 
 extra_files = \
 	Make.rules 		\
