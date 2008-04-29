@@ -1,0 +1,13 @@
+This is a component of the rpath_common set of modules.  It provides
+a stable interface for managing rPath product definition components
+as stored in rBuilder.
+
+Note that until version 1.0 is released, public APIs are subject to
+change.  All documentation regarding stable interfaces is relevant
+only to published stable releases; it is not in force for alpha
+and beta releases, including 0.x releases and any automated builds.
+
+To use the latest version of the interface:
+    from rpath_common import proddef
+To use a specific API Version of the interface:
+    from rpath_common.proddef import api1 as proddef

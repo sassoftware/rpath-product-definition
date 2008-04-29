@@ -1,0 +1,7 @@
+Changes in @NEW@:
+  o API Changes:
+    * proddef.py moved into rpath_common module.
+    * More consistent API function and method naming: elem_dict
+      changed to elementDict, elem_obj changed to elementObject,
+      elem_list change to elementList.
+    * API versioning added via explicit imports

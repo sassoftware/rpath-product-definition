@@ -1,0 +1,10 @@
+(^|/)\.hg($|/)
+.*\.pyc$
+.*\~$
+.*,cover$
+.*\.o$
+.*\.so$
+^tmp/
+rpath_common/proddef/proddef_constants.py
+^pylint/reports/
+^rpath-common-.*.tar.bz2
