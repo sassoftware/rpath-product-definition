@@ -5,6 +5,6 @@
 .*\.o$
 .*\.so$
 ^tmp/
-rpath_common/proddef/proddef_constants.py
+rpath_common/proddef/proddef_constants.pyc?$
 ^pylint/reports/
 ^rpath-common-.*.tar.bz2
