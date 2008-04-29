@@ -1,7 +1,6 @@
 import os
 import sys
 sys.path.insert(0, os.environ['CONARY_PATH'])
-sys.path.insert(0, os.environ['RMAKE_PATH'])
 sys.path.insert(0, os.environ['PRODUCT_DEFINITION_PATH'])
 sys.path.insert(0, os.environ['XMLDATA_PATH'])
 
