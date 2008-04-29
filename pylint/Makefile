@@ -14,12 +14,14 @@
 
 dist_files = init_pylint.py  Makefile  pylintrc  run_pylint
 
-all:
+all: clean pylint-dirs
 install:
 
 dist: default-dist
 
-pylint: code-dir/rpath_common/__init__.py code-dir/rpath_common/proddef code-dir/rpath_common/xmllib
+pylint-dirs: code-dir/rpath_common/__init__.py code-dir/rpath_common/proddef code-dir/rpath_common/xmllib
+
+pylint: pylint-dirs
 	@echo running pylint...
 	@./run_pylint
 	@echo Done.  Error output is in the reports/ directory.
