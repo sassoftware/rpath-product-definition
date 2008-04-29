@@ -16,8 +16,11 @@ dist_files = Makefile pd.xsd
 
 all: default-all
 
-install: all default-install
+install: all default-install $(DESTDIR)$(datadir)/rpath_common
 	install pd.xsd $(DESTDIR)$(datadir)/rpath_common/pd.xsd
+
+$(DESTDIR)$(datadir)/rpath_common:
+	install -d -m755 $@
 
 dist: default-dist
 

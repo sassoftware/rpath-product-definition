@@ -16,8 +16,11 @@ dist_files = Makefile example.xml
 
 all: default-all
 
-install: all default-install
+install: all default-install $(DESTDIR)$(docdir)
 	install example.xml $(DESTDIR)$(docdir)/example.xml
+
+$(DESTDIR)$(docdir):
+	install -d -m755 $@
 
 dist: default-dist
 
