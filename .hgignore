@@ -7,4 +7,5 @@
 ^tmp/
 rpath_common/proddef/proddef_constants.pyc?$
 ^pylint/reports/
+^pylint/code-dir/
 ^rpath-common-.*.tar.bz2

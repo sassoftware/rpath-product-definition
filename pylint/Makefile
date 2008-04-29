@@ -19,13 +19,25 @@ install:
 
 dist: default-dist
 
-pylint:
+pylint: code-dir/rpath_common/__init__.py code-dir/rpath_common/proddef code-dir/rpath_common/xmllib
 	@echo running pylint...
 	@./run_pylint
 	@echo Done.  Error output is in the reports/ directory.
 
+code-dir/rpath_common/__init__.py: code-dir/rpath_common
+	@touch $@
+
+code-dir/rpath_common/proddef: code-dir/rpath_common
+	[ -h $@ ] || ln -s ../../../rpath_common/proddef $<
+
+code-dir/rpath_common/xmllib: code-dir/rpath_common
+	[ -n "$$XMLLIB_PATH" ] && [ -h code-dir/rpath_common/xmllib ] || ln -s $$XMLLIB_PATH/rpath_common/xmllib $<
+
+code-dir/rpath_common:
+	install -d -m755 $@
+
 clean:
-	rm -rf reports *,cover
+	rm -rf reports *,cover code-dir
 
 include ../Make.rules
 include ../Make.defs
