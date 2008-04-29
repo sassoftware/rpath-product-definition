@@ -5,3 +5,4 @@ Changes in @NEW@:
       changed to elementDict, elem_obj changed to elementObject,
       elem_list change to elementList.
     * API versioning added via explicit imports
+    * Use rpath_common.xmllib instead of conary.lib.xmldata

@@ -18,7 +18,7 @@ All interfaces in this modules that do not start with a C{_}
 character are public interfaces.
 """
 
-from rpath_common.xmldata import api1 as xmldata
+from rpath_common.xmllib import api1 as xmllib
 
 class ProductDefinition(object):
     """
@@ -34,8 +34,8 @@ class ProductDefinition(object):
 
         self.elementDict = elementDict
 
-        self.xmldb = xmldata.DataBinder()
-        self.xmldb.registerType('baseFlavor', xmldata.StringNode)
+        self.xmldb = xmllib.DataBinder()
+        self.xmldb.registerType('baseFlavor', xmllib.StringNode)
 
         if xml is None:
             # No xml was passed in, create an empty object that we will build
@@ -48,7 +48,7 @@ class ProductDefinition(object):
             # Create the object from the passed in xml using our DataBinder.
             self.xmlobj = self.xmldb.parseString(xml)
 
-        # A special attribute recognized by xmldata to preserve child order.
+        # A special attribute recognized by xmllib to preserve child order.
         self.xmlobj._childOrder = ['baseFlavor', 'stages', 'upstreamSources',
                                    'buildDefinition']
 
