@@ -18,6 +18,8 @@ All interfaces in this modules that do not start with a C{_}
 character are public interfaces.
 """
 
+__all__ = [ 'ProductDefinition' ]
+
 from rpath_common.xmllib import api1 as xmllib
 
 class ProductDefinition(object):
