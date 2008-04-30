@@ -112,12 +112,12 @@
 	    </xsd:attribute>
     </xsd:complexType>
 
-	<xsd:complexType name="vmwareEsxImageType">
-	    <xsd:attributeGroup ref="common" />
+    <xsd:complexType name="vmwareEsxImageType">
+        <xsd:attributeGroup ref="common" />
         <xsd:attribute name="swapSize" type="xsd:nonNegativeInteger" />
         <xsd:attribute name="freespace" type="xsd:nonNegativeInteger" />
         <xsd:attribute name="natNetworking" type="xsd:boolean" />
-	</xsd:complexType>
+    </xsd:complexType>
 	
     <xsd:complexType name="vmwareImageType">
         <xsd:attributeGroup ref="common" />
