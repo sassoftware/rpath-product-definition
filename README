@@ -11,3 +11,12 @@ To use the latest version of the interface:
     from rpath_common import proddef
 To use a specific API Version of the interface:
     from rpath_common.proddef import api1 as proddef
+
+The schema definitions are versioned with major and minor numbers.
+Within a major version, only new elements will be added; elements
+will not be removed and semantics will not be changed.  A document
+that validates against schema version 1.0 should validate without
+changes against schema version 1.1 or 1.2.  Incompatible schema
+version changes will cause the major version to be incremented.
+The schema version is included in the filename: rpd-1.0.xsd
+implements version 1.0 of the schema.

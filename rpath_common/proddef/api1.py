@@ -74,7 +74,7 @@ class ProductDefinition(object):
 
     def _setNameSpace(self):
         setattr(self.xmlobj.__class__, 'xmlns',
-                'http://www.rpath.com/permanent/pd.xsd')
+                'http://www.rpath.com/permanent/rpd-1.0.xsd')
 
     def _setNameSpaceXsi(self):
         setattr(self.xmlobj.__class__, 'xmlns:xsi',
@@ -82,7 +82,7 @@ class ProductDefinition(object):
 
     def _setXsiSchemaLocation(self):
         setattr(self.xmlobj.__class__, 'xsi:schemaLocation',
-                'http://www.rpath.com/permanent/pd.xsd pd.xsd')
+                'http://www.rpath.com/permanent/rpd-1.0.xsd rpd-1.0.xsd')
 
     def _setVersion(self):
         setattr(self.xmlobj.__class__, 'version', '1.0')
