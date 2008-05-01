@@ -20,39 +20,47 @@ character are public interfaces.
 
 __all__ = [ 'ProductDefinition' ]
 
+import StringIO
+
 from rpath_common.xmllib import api1 as xmllib
+from rpath_common.proddef import _xmlConstants
+from rpath_common.proddef import _imageTypes
 
 class ProductDefinition(object):
     """
     Represents the definition of a product.
     """
-    def __init__(self, elementDict={}, xml=None):
+    defaultNamespace = _xmlConstants.defaultNamespace
+    xmlSchemaNamespace = _xmlConstants.xmlSchemaNamespace
+    xmlSchemaLocation = _xmlConstants.xmlSchemaLocation
+
+    def __init__(self, fromStream = None):
         """
         Pass in either a dictionary as constructed in the example below, or an
         xml string to create an instance.
         """
-        # Static text that needs to be at the beginning of our xml.
-        self.xml_header_tag = '<?xml version="1.0" encoding="UTF-8"?>'
 
-        self.elementDict = elementDict
+        self._initFields()
 
-        self.xmldb = xmllib.DataBinder()
-        self.xmldb.registerType('baseFlavor', xmllib.StringNode)
+        if fromStream:
+            if isinstance(fromStream, (str, unicode)):
+                fromStream = StringIO.StringIO(fromStream)
+            self.parseStream(fromStream)
 
-        if xml is None:
-            # No xml was passed in, create an empty object that we will build
-            # out later to represent the dict.
-            XmlObj = type('XmlObj', (object,), {})
-            XmlObj.__name__ = 'productDefinition'
-            self.xmlobj = XmlObj()
-            self._setFromDict()
-        else:
-            # Create the object from the passed in xml using our DataBinder.
-            self.xmlobj = self.xmldb.parseString(xml)
+    def parseStream(self, stream):
+        binder = xmllib.DataBinder()
+        binder.registerType(_ProductDefinition, 'productDefinition')
+        xmlObj = binder.parseFile(stream)
+        self.baseFlavor = getattr(xmlObj, 'baseFlavor', None)
+        self.stages = getattr(xmlObj, 'stages', [])
+        self.upstreamSources = getattr(xmlObj, 'upstreamSources', [])
+        self.buildDefinition = getattr(xmlObj, 'buildDefinition', [])
 
-        # A special attribute recognized by xmllib to preserve child order.
-        self.xmlobj._childOrder = ['baseFlavor', 'stages', 'upstreamSources',
-                                   'buildDefinition']
+    def _initFields(self):
+        self.baseFlavor = None
+        self.stages = []
+        self.upstreamSources = []
+        self.buildDefinition = []
 
     def _setFromDict(self):
         # Functions to call to set attributes on the root element.
@@ -177,35 +185,111 @@ class ProductDefinition(object):
             builds.append(buildData)                    
 
         return builds                               
-            
-    
-def cls(**kwargs):
-    """
-    Return a class instance that has a class attribute set for each key/value
-    pair in kwargs.  If one of the values in the kwargs is a dict itself, that
-    signifies a child element.  In that case, create an object for that
-    element using recursion and add the produced object to our instance's main
-    dictionary.
-    """
 
-    # Just an empty class on which to set attributes.
-    class Cls(object):
-        #pylint: disable-msg=R0903
-        pass
+#{ Objects for the representation of ProductDefinition fields
+class _Stage(object):
+    __slots__ = [ 'name', 'label' ]
 
-    # Empty dict to store attrs for our instance.
-    attrs = {}
+    def __init__(self, name = None, label = None):
+        self.name = name
+        self.label = label
 
-    for k, v in kwargs.items():
-        # If v is a dict, create an object for it.
-        if type(v) == type({}):
-            attrs[k] = [cls(**v)]
-        # Else, just set it as a class attribute on Cls
-        else:
-            setattr(Cls, k, v)
+class _UpstreamSource(object):
+    __slots__ = [ 'troveName', 'label' ]
 
-    # Instantiate our modified class and update it's internal dictionary to
-    # represent any child elements.
-    x = Cls()
-    x.__dict__.update(attrs)
-    return x
+    def __init__(self, troveName = None, label = None):
+        self.troveName = troveName
+        self.label = label
+
+class _BuildDefinition(object):
+    __slots__ = [ 'name', 'baseFlavor', 'imageType', 'byDefault' ]
+
+    def __init__(self, name = None, baseFlavor = None,
+                 imageType = None, byDefault = None):
+        self.name = name
+        self.baseFlavor = baseFlavor
+        self.imageType = imageType
+        if byDefault is None:
+            byDefault = True
+        self.byDefault = byDefault
+
+#}
+
+class _ProductDefinition(xmllib.BaseNode):
+    ndNameBaseFlavor = "{%s}%s" % (ProductDefinition.defaultNamespace,
+                                   'baseFlavor')
+    ndNameStages = "{%s}%s" % (ProductDefinition.defaultNamespace,
+                               'stages')
+    ndNameUpstreamSources = "{%s}%s" % (ProductDefinition.defaultNamespace,
+                                        'upstreamSources')
+    ndNameBuildDefinition = "{%s}%s" % (ProductDefinition.defaultNamespace,
+                                        'buildDefinition')
+
+    ndNameInstIso = "{%s}%s" % (ProductDefinition.defaultNamespace,
+                                'installbleIsoImage')
+
+    ndNameRawFs = "{%s}%s" % (ProductDefinition.defaultNamespace,
+                             'rawFsImage')
+    ndNameRawHd = "{%s}%s" % (ProductDefinition.defaultNamespace,
+                             'rawHdImage')
+
+
+    def addChild(self, childNode):
+        chName = childNode.getAbsoluteName()
+        if chName == self.ndNameBaseFlavor:
+            self.baseFlavor = childNode.getText()
+            return
+
+        if chName == self.ndNameStages:
+            children = childNode.getChildren('stage')
+            self._addStages(children)
+            return
+
+        if chName == self.ndNameUpstreamSources:
+            children = childNode.getChildren('upstreamSource')
+            self._addUpstreamSources(children)
+            return
+
+        if chName == self.ndNameBuildDefinition:
+            children = childNode.getChildren('build')
+            self._addBuildDefinition(children)
+            return
+
+    def _addStages(self, stagesNodes):
+        stages = self.stages = []
+        for node in stagesNodes:
+            # XXX getAttribute should be getAbsoluteAttribute
+            pyObj = _Stage(name = node.getAttribute('name'),
+                           label = node.getAttribute('label'))
+            stages.append(pyObj)
+
+    def _addUpstreamSources(self, upstreamSources):
+        sources = self.upstreamSources = []
+        for node in upstreamSources:
+            pyObj = _UpstreamSource(
+                troveName = node.getAttribute('troveName'),
+                label = node.getAttribute('label'))
+            sources.append(pyObj)
+
+    def _addBuildDefinition(self, buildNodes):
+        builds = self.buildDefinition = []
+        for node in buildNodes:
+            imgType = None
+            for subNode in node.iterChildren():
+                if not isinstance(subNode, xmllib.BaseNode):
+                    continue
+                imgType = _imageTypes.ImageType_Dispatcher.dispatch(subNode)
+                if imgType is not None:
+                    break
+            if imgType is None:
+                raise Exception("")
+            byDefault = node.getAttribute('byDefault')
+            if byDefault is None:
+                byDefault = True
+            else:
+                byDefault = byDefault.upper() in ['TRUE', 1] and True or False
+            pyobj = _BuildDefinition(
+                baseFlavor = node.getAttribute('baseFlavor'),
+                byDefault = byDefault,
+                imageType = imgType)
+            builds.append(pyobj)
