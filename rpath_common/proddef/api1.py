@@ -30,6 +30,7 @@ class ProductDefinition(object):
     """
     Represents the definition of a product.
     """
+    version = '1.0'
     defaultNamespace = _xmlConstants.defaultNamespace
     xmlSchemaNamespace = _xmlConstants.xmlSchemaNamespace
     xmlSchemaLocation = _xmlConstants.xmlSchemaLocation
@@ -48,19 +49,69 @@ class ProductDefinition(object):
             self.parseStream(fromStream)
 
     def parseStream(self, stream):
+        self._initFields()
         binder = xmllib.DataBinder()
         binder.registerType(_ProductDefinition, 'productDefinition')
         xmlObj = binder.parseFile(stream)
         self.baseFlavor = getattr(xmlObj, 'baseFlavor', None)
-        self.stages = getattr(xmlObj, 'stages', [])
-        self.upstreamSources = getattr(xmlObj, 'upstreamSources', [])
-        self.buildDefinition = getattr(xmlObj, 'buildDefinition', [])
+        self.stages.extend(getattr(xmlObj, 'stages', []))
+        self.upstreamSources.extend(getattr(xmlObj, 'upstreamSources', []))
+        self.buildDefinition.extend(getattr(xmlObj, 'buildDefinition', []))
+
+    def serialize(self, stream):
+        """Serialize the current object"""
+        baseFlavor = xmllib.TextNode(name = 'baseFlavor')
+        baseFlavor.characters(self.baseFlavor)
+        class N(xmllib.BaseNode):
+            def iterChildren(slf):
+                return [ baseFlavor,
+                         self.stages,
+                         self.upstreamSources,
+                         self.buildDefinition ]
+        attrs = {'version' : ProductDefinition.version,
+                 'xmlns' : ProductDefinition.defaultNamespace,
+                 'xmlns:xsi' : ProductDefinition.xmlSchemaNamespace,
+                 "xsi:schemaLocation" : ProductDefinition.xmlSchemaLocation,
+        }
+        nameSpaces = {}
+        n = N(attrs, nameSpaces, name = "productDefinition")
+        binder = xmllib.DataBinder()
+        stream.write(binder.toXml(n))
+
+    def getBaseFlavor(self):
+        return self.baseFlavor
+
+    def setBaseFlavor(self, baseFlavor):
+        self.baseFlavor = baseFlavor
+
+    def getStages(self):
+        return self.stages
+
+    def addStage(self, name = None, label = None):
+        obj = _Stage(name = name, label = label)
+        self.stages.append(obj)
+
+    def getUpstreamSources(self):
+        return self.upstreamSources
+
+    def addUpstreamSource(self, troveName = None, label = None):
+        obj = _UpstreamSource(troveName = troveName, label = label)
+        self.upstreamSources.append(obj)
+
+    def getBuildDefinitions(self):
+        return self.buildDefinition
+
+    def addBuildDefinition(self, name = None, baseFlavor = None,
+                           byDefault = None, imageType = None):
+        obj = _Build(name = name, baseFlavor = baseFlavor,
+                               byDefault = byDefault, imageType = imageType)
+        self.buildDefinition.append(obj)
 
     def _initFields(self):
         self.baseFlavor = None
-        self.stages = []
-        self.upstreamSources = []
-        self.buildDefinition = []
+        self.stages = _Stages()
+        self.upstreamSources = _UpstreamSources()
+        self.buildDefinition = _BuildDefinition()
 
     def _setFromDict(self):
         # Functions to call to set attributes on the root element.
@@ -128,81 +179,65 @@ class ProductDefinition(object):
     def toXml(self):
         return self.xmldb.toXml(self.xmlobj, 'productDefinition')
 
-    def setXmlObj(self, xmlobj):
-        self.xmlobj = xmlobj
-
-    def setStages(self, stages):
-        elementObject = self._genElemObj(stages)
-        self._setElemObj('stages', 'stage', elementObject)
-
-    def getStages(self): 
-        stages = []
-        for stage in getattr(self.xmlobj.stages[0], 'stage', []):
-            stages.append(dict(name=stage.name, label=stage.label))
-        return stages
-
-    def setUpstreamSources(self, sources):
-        elementObject = self._genElemObj(sources)
-        self._setElemObj('upstreamSources', 'upstreamSource', elementObject)
-
-    def getUpstreamSources(self):
-        upstreamSources = []
-        for source in getattr(self.xmlobj.upstreamSources[0],
-                'upstreamSource', []):
-            upstreamSources.append(dict(troveName=source.troveName,
-                                        label=source.label))
-        return upstreamSources
-
-    def setBaseFlavor(self, baseFlavor):
-        self.xmlobj.baseFlavor = [baseFlavor]
-
-    def getBaseFlavor(self):
-        return self.xmlobj.baseFlavor[0]
-
-    def setBuildDefinition(self, builddef):
-        elementObject = self._genElemObj(builddef)
-        self._setElemObj('buildDefinition', 'build', elementObject)
-
-    def getBuildDefinition(self):
-        builds = []
-        for build in getattr(self.xmlobj.buildDefinition[0], 'build', []):
-            buildData = {}
-            for key in dir(build):
-                if key.startswith('_'):
-                    continue
-                value = getattr(build, key)
-                if type(value) == type([]):
-                    buildDataValue = {}
-                    for k in dir(value[0]):
-                        if k.startswith('_'):
-                            continue
-                        else:
-                            buildDataValue[k] = getattr(value[0], k)
-                    buildData[key] = buildDataValue
-                else:
-                    buildData[key] = value
-
-            builds.append(buildData)                    
-
-        return builds                               
-
 #{ Objects for the representation of ProductDefinition fields
-class _Stage(object):
+class _List(list):
+    def getElementTree(self, parent = None):
+        elem = xmllib.createElementTree(self.tag, {}, {}, parent = parent)
+        for child in self:
+            child.getElementTree(parent = elem)
+
+class _Stages(_List):
+    tag = "stages"
+
+class _UpstreamSources(_List):
+    tag = "upstreamSources"
+
+class _BuildDefinition(_List):
+    tag = "buildDefinition"
+
+class _SerializableObject(xmllib.SerializableObject):
+    def _getName(self):
+        return self.tag
+
+    def _getLocalNamespaces(self):
+        return {}
+
+    def _iterAttributes(self):
+        return self._splitData()[0].items()
+
+    def _iterChildren(self):
+        return self._splitData()[1]
+
+    def _splitData(self):
+        attrs = {}
+        children = []
+        for fName in self.__slots__:
+            fVal = getattr(self, fName)
+            if isinstance(fVal, (bool, int, str, unicode)):
+                attrs[fName] = fVal
+            else:
+                children.append(fVal)
+        return attrs, children
+
+class _Stage(_SerializableObject):
     __slots__ = [ 'name', 'label' ]
+    tag = "stage"
 
     def __init__(self, name = None, label = None):
         self.name = name
         self.label = label
 
-class _UpstreamSource(object):
+class _UpstreamSource(_SerializableObject):
     __slots__ = [ 'troveName', 'label' ]
+    tag = "upstreamSource"
 
     def __init__(self, troveName = None, label = None):
         self.troveName = troveName
         self.label = label
 
-class _BuildDefinition(object):
+class _Build(_SerializableObject):
     __slots__ = [ 'name', 'baseFlavor', 'imageType', 'byDefault' ]
+    tag = "build"
 
     def __init__(self, name = None, baseFlavor = None,
                  imageType = None, byDefault = None):
@@ -212,6 +247,9 @@ class _BuildDefinition(object):
         if byDefault is None:
             byDefault = True
         self.byDefault = byDefault
+
+    def _iterChildren(self):
+        yield self.imageType
 
 #}
 
@@ -288,7 +326,7 @@ class _ProductDefinition(xmllib.BaseNode):
                 byDefault = True
             else:
                 byDefault = byDefault.upper() in ['TRUE', 1] and True or False
-            pyobj = _BuildDefinition(
+            pyobj = _Build(
                 baseFlavor = node.getAttribute('baseFlavor'),
                 byDefault = byDefault,
                 imageType = imgType)

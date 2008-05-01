@@ -15,6 +15,7 @@
 Private interface.
 """
 
+from rpath_common import xmllib
 from rpath_common.proddef import _xmlConstants
 
 class ImageType_Dispatcher(object):
@@ -47,7 +48,7 @@ class ImageType_Dispatcher(object):
         return obj
 
 #{ Image Type Classes
-class ImageType_Base(object):
+class ImageType_Base(xmllib.SerializableObject):
     _defaultNamespace = _xmlConstants.defaultNamespace
 
     _attributes = {
@@ -59,6 +60,19 @@ class ImageType_Base(object):
 
     def __init__(self, fields):
         self.fields = fields
+
+    def _getName(self):
+        return self.tag
+
+    def _getLocalNamespaces(self):
+        return {}
+
+    def _iterAttributes(self):
+        return self.fields.iteritems()
+
+    def _iterChildren(self):
+        return []
+
 
 class ImageType_AMI(ImageType_Base):
     tag = "amiImage"
@@ -85,6 +99,8 @@ class ImageType_LiveIso(ImageType_Base):
     tag = "liveIsoImage"
     _attributes = ImageType_Base._attributes.copy()
     _attributes.update({
+        'unionfs'                   : (bool, ),
+        'zisofs'                    : (bool, ),
     })
 
 class ImageType_Netboot(ImageType_Base):
@@ -97,6 +113,8 @@ class ImageType_RawFs(ImageType_Base):
     tag = "rawFsImage"
     _attributes = ImageType_Base._attributes.copy()
     _attributes.update({
+        'swapSize'          : (int, ),
+        'freespace'         : (int, ),
     })
 
 class ImageType_RawHd(ImageType_Base):
@@ -111,30 +129,45 @@ class ImageType_Tarball(ImageType_Base):
     tag = "tarballImage"
     _attributes = ImageType_Base._attributes.copy()
     _attributes.update({
+        'swapSize'          : (int, ),
     })
 
 class ImageType_UpdateIso(ImageType_Base):
     tag = "updateIsoImage"
-    _attributes = ImageType_Base._attributes.copy()
-    _attributes.update({
-    })
+    # No inheritance
+    _attributes = {
+        'baseFileName'          : (str, ),
+        'mediaTemplateTrove'    : (str, ),
+    }
 
 class ImageType_VHD(ImageType_Base):
     tag = "vhdImage"
     _attributes = ImageType_Base._attributes.copy()
     _attributes.update({
+        'swapSize'          : (int, ),
+        'freespace'         : (int, ),
+        'vhdDiskType'       : (str, ),
     })
 
 class ImageType_VMWare(ImageType_Base):
     tag = "vmwareImage"
     _attributes = ImageType_Base._attributes.copy()
     _attributes.update({
+        'swapSize'          : (int, ),
+        'freespace'         : (int, ),
+        'natNetworking'     : (bool, ),
+        'diskAdapter'       : (str, ),
+        'vmSnapshots'       : (bool, ),
+        'vmMemory'          : (int, ),
     })
 
 class ImageType_VMWareEsx(ImageType_Base):
     tag = "vmwareEsxImage"
     _attributes = ImageType_Base._attributes.copy()
     _attributes.update({
+        'swapSize'          : (int, ),
+        'freespace'         : (int, ),
+        'natNetworking'     : (bool, ),
     })
 #}
 
