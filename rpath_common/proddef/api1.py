@@ -159,26 +159,6 @@ class ProductDefinition(object):
         setattr(e, name, elementObject)
         setattr(self.xmlobj, elem, [e])
 
-    @staticmethod
-    def _genElemObj(elementList):        
-        """
-        Create an object (using the cls helper function) that has elements set
-        as attributes and xml attributes set as class attributes for each item
-        in elementList.  Returns the list of objects.
-        """
-        elementObjList = []
-
-        # For each item in that list, we expect a dict representing the
-        # attributes (or possible more child elements).
-        for element in elementList:
-            # Append an object created from the element dict to elementObjList.
-            elementObjList.append(cls(**element))
-
-        return elementObjList
-
-    def toXml(self):
-        return self.xmldb.toXml(self.xmlobj, 'productDefinition')
-
 #{ Objects for the representation of ProductDefinition fields
 
 class _Stages(xmllib.SerializableList):
