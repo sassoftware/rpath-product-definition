@@ -17,6 +17,6 @@
 @var xmlSchemaLocation: XML Schema location
 """
 
-defaultNamespace = "http://www.rpath.com/permanent/rpd.xsd"
+defaultNamespace = "http://www.rpath.com/permanent/rpd-1.0.xsd"
 xmlSchemaNamespace = "http://www.w3.org/2001/XMLSchema-instance"
 xmlSchemaLocation = "http://www.rpath.com/permanent/rpd-1.0.xsd rpd-1.0.xsd"
