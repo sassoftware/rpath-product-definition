@@ -180,46 +180,17 @@ class ProductDefinition(object):
         return self.xmldb.toXml(self.xmlobj, 'productDefinition')
 
 #{ Objects for the representation of ProductDefinition fields
-class _List(list):
-    def getElementTree(self, parent = None):
-        elem = xmllib.createElementTree(self.tag, {}, {}, parent = parent)
-        for child in self:
-            child.getElementTree(parent = elem)
 
-class _Stages(_List):
+class _Stages(xmllib.SerializableList):
     tag = "stages"
 
-class _UpstreamSources(_List):
+class _UpstreamSources(xmllib.SerializableList):
     tag = "upstreamSources"
 
-class _BuildDefinition(_List):
+class _BuildDefinition(xmllib.SerializableList):
     tag = "buildDefinition"
 
-class _SerializableObject(xmllib.SerializableObject):
-    def _getName(self):
-        return self.tag
-
-    def _getLocalNamespaces(self):
-        return {}
-
-    def _iterAttributes(self):
-        return self._splitData()[0].items()
-
-    def _iterChildren(self):
-        return self._splitData()[1]
-
-    def _splitData(self):
-        attrs = {}
-        children = []
-        for fName in self.__slots__:
-            fVal = getattr(self, fName)
-            if isinstance(fVal, (bool, int, str, unicode)):
-                attrs[fName] = fVal
-            else:
-                children.append(fVal)
-        return attrs, children
-
-class _Stage(_SerializableObject):
+class _Stage(xmllib.SlotBasedSerializableObject):
     __slots__ = [ 'name', 'label' ]
     tag = "stage"
 
@@ -227,7 +198,7 @@ class _Stage(_SerializableObject):
         self.name = name
         self.label = label
 
-class _UpstreamSource(_SerializableObject):
+class _UpstreamSource(xmllib.SlotBasedSerializableObject):
     __slots__ = [ 'troveName', 'label' ]
     tag = "upstreamSource"
 
@@ -235,7 +206,7 @@ class _UpstreamSource(_SerializableObject):
         self.troveName = troveName
         self.label = label
 
-class _Build(_SerializableObject):
+class _Build(xmllib.SlotBasedSerializableObject):
     __slots__ = [ 'name', 'baseFlavor', 'imageType', 'byDefault' ]
     tag = "build"
 
@@ -325,7 +296,7 @@ class _ProductDefinition(xmllib.BaseNode):
             if byDefault is None:
                 byDefault = True
             else:
-                byDefault = byDefault.upper() in ['TRUE', 1] and True or False
+                byDefault = xmllib.BooleanNode.fromString(byDefault)
             pyobj = _Build(
                 baseFlavor = node.getAttribute('baseFlavor'),
                 byDefault = byDefault,
