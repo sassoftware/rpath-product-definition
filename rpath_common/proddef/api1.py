@@ -60,7 +60,7 @@ class ProductDefinition(object):
 
     def serialize(self, stream):
         """Serialize the current object"""
-        baseFlavor = xmllib.TextNode(name = 'baseFlavor')
+        baseFlavor = xmllib.StringNode(name = 'baseFlavor')
         baseFlavor.characters(self.baseFlavor)
         class N(xmllib.BaseNode):
             def iterChildren(slf):
