@@ -12,11 +12,17 @@
 # full details.
 #
 """
-@var defaultNamespace: Default namespace
+@var defaultNamespaceList: List of supported namespaces, the preferred
+    namespace being first. Normally, augmenting the schema in a
+    backwards-compatible way (i.e. with pure additions) should not result in a
+    new namespace being generated.
+@type defaultNamespaceList: list
 @var xmlSchemaNamespace: XML Schema namespace
+@type xmlSchemaNamespace: C{str}
 @var xmlSchemaLocation: XML Schema location
+@type xmlSchemaLocaltion: C{str}
 """
 
-defaultNamespace = "http://www.rpath.com/permanent/rpd-1.0.xsd"
+defaultNamespaceList = [ "http://www.rpath.com/permanent/rpd-1.0.xsd" ]
 xmlSchemaNamespace = "http://www.w3.org/2001/XMLSchema-instance"
 xmlSchemaLocation = "http://www.rpath.com/permanent/rpd-1.0.xsd rpd-1.0.xsd"

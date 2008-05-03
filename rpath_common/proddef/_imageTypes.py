@@ -49,7 +49,7 @@ class ImageType_Dispatcher(object):
 
 #{ Image Type Classes
 class ImageType_Base(xmllib.SerializableObject):
-    _defaultNamespace = _xmlConstants.defaultNamespace
+    _defaultNamespace = _xmlConstants.defaultNamespaceList[0]
 
     _attributes = {
         'name'              : (str, ),

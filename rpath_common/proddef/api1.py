@@ -31,7 +31,7 @@ class ProductDefinition(object):
     Represents the definition of a product.
     """
     version = '1.0'
-    defaultNamespace = _xmlConstants.defaultNamespace
+    defaultNamespace = _xmlConstants.defaultNamespaceList[0]
     xmlSchemaNamespace = _xmlConstants.xmlSchemaNamespace
     xmlSchemaLocation = _xmlConstants.xmlSchemaLocation
 
@@ -58,6 +58,16 @@ class ProductDefinition(object):
         self.upstreamSources.extend(getattr(xmlObj, 'upstreamSources', []))
         self.buildDefinition.extend(getattr(xmlObj, 'buildDefinition', []))
 
+        ver = xmlObj.getAttribute('version')
+        if ver is not None and ver != self.version:
+            self.version = ver
+
+        for nsName, nsVal in xmlObj.iterNamespaces():
+            if nsName is None and nsVal != self.defaultNamespace:
+                self.defaultNamespace = nsVal
+                continue
+            # XXX We don't support changing the schema location for now
+
     def serialize(self, stream):
         """Serialize the current object"""
         baseFlavor = xmllib.StringNode(name = 'baseFlavor')
@@ -68,10 +78,10 @@ class ProductDefinition(object):
                          self.stages,
                          self.upstreamSources,
                          self.buildDefinition ]
-        attrs = {'version' : ProductDefinition.version,
-                 'xmlns' : ProductDefinition.defaultNamespace,
-                 'xmlns:xsi' : ProductDefinition.xmlSchemaNamespace,
-                 "xsi:schemaLocation" : ProductDefinition.xmlSchemaLocation,
+        attrs = {'version' : self.version,
+                 'xmlns' : self.defaultNamespace,
+                 'xmlns:xsi' : self.xmlSchemaNamespace,
+                 "xsi:schemaLocation" : self.xmlSchemaLocation,
         }
         nameSpaces = {}
         n = N(attrs, nameSpaces, name = "productDefinition")
