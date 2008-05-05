@@ -19,19 +19,19 @@ from rpath_common import xmllib
 from rpath_common.proddef import _xmlConstants
 
 class ImageType_Dispatcher(object):
-    _dispatcher = {}
+    def __init__(self, nsMap = None):
+        self._dispatcher = {}
+        self._nsMap = nsMap or {}
 
-    @classmethod
-    def addImageType(kls, imageType):
-        key = "{%s}%s" % (imageType._defaultNamespace, imageType.tag)
-        kls._dispatcher[key] = imageType
+    def addImageType(self, imageType):
+        key = "{%s}%s" % (self._nsMap[None], imageType.tag)
+        self._dispatcher[key] = imageType
 
-    @classmethod
-    def dispatch(kls, node):
+    def dispatch(self, node):
         absName = node.getAbsoluteName()
-        if absName not in kls._dispatcher:
+        if absName not in self._dispatcher:
             return None
-        nodeClass = kls._dispatcher.get(absName)
+        nodeClass = self._dispatcher.get(absName)
 
         fields = {}
         for attrName, values in nodeClass._attributes.items():
@@ -46,6 +46,15 @@ class ImageType_Dispatcher(object):
             fields[attrName] = val
         obj = nodeClass(fields)
         return obj
+
+    def registerClasses(self, module, baseClass):
+        """Register all classes that are a subclass of baseClass and are part
+        of the module."""
+        for symVal in module.__dict__.itervalues():
+            if not isinstance(symVal, type):
+                continue
+            if issubclass(symVal, baseClass) and symVal != baseClass:
+                self.addImageType(symVal)
 
 #{ Image Type Classes
 class ImageType_Base(xmllib.SerializableObject):
@@ -171,9 +180,4 @@ class ImageType_VMWareEsx(ImageType_Base):
     })
 #}
 
-# Globally register all image types defined in this module
-for symVal in globals().values():
-    if not isinstance(symVal, type):
-        continue
-    if issubclass(symVal, ImageType_Base) and symVal != ImageType_Base:
-        ImageType_Dispatcher.addImageType(symVal)
+

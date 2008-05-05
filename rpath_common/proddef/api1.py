@@ -51,6 +51,8 @@ class ProductDefinition(object):
     def parseStream(self, stream):
         self._initFields()
         binder = xmllib.DataBinder()
+        # We need to dynamically create a class here, so we can set the proper
+        # namespace for the class
         binder.registerType(_ProductDefinition, 'productDefinition')
         xmlObj = binder.parseFile(stream)
         self.baseFlavor = getattr(xmlObj, 'baseFlavor', None)
@@ -215,44 +217,34 @@ class _Build(xmllib.SlotBasedSerializableObject):
 #}
 
 class _ProductDefinition(xmllib.BaseNode):
-    ndNameBaseFlavor = "{%s}%s" % (ProductDefinition.defaultNamespace,
-                                   'baseFlavor')
-    ndNameStages = "{%s}%s" % (ProductDefinition.defaultNamespace,
-                               'stages')
-    ndNameUpstreamSources = "{%s}%s" % (ProductDefinition.defaultNamespace,
-                                        'upstreamSources')
-    ndNameBuildDefinition = "{%s}%s" % (ProductDefinition.defaultNamespace,
-                                        'buildDefinition')
-
-    ndNameInstIso = "{%s}%s" % (ProductDefinition.defaultNamespace,
-                                'installbleIsoImage')
-
-    ndNameRawFs = "{%s}%s" % (ProductDefinition.defaultNamespace,
-                             'rawFsImage')
-    ndNameRawHd = "{%s}%s" % (ProductDefinition.defaultNamespace,
-                             'rawHdImage')
-
+    def __init__(self, attributes = None, nsMap = None, name = None):
+        xmllib.BaseNode.__init__(self, attributes = attributes, nsMap = nsMap,
+                                 name = name)
+        self.defaultNamespace = self.getNamespaceMap().get(None)
 
     def addChild(self, childNode):
         chName = childNode.getAbsoluteName()
-        if chName == self.ndNameBaseFlavor:
+        if chName == self._makeAbsoluteName('baseFlavor'):
             self.baseFlavor = childNode.getText()
             return
 
-        if chName == self.ndNameStages:
+        if chName == self._makeAbsoluteName('stages'):
             children = childNode.getChildren('stage')
             self._addStages(children)
             return
 
-        if chName == self.ndNameUpstreamSources:
+        if chName == self._makeAbsoluteName('upstreamSources'):
             children = childNode.getChildren('upstreamSource')
             self._addUpstreamSources(children)
             return
 
-        if chName == self.ndNameBuildDefinition:
+        if chName == self._makeAbsoluteName('buildDefinition'):
             children = childNode.getChildren('build')
             self._addBuildDefinition(children)
             return
+
+    def _makeAbsoluteName(self, name):
+        return "{%s}%s" % (self.defaultNamespace, name)
 
     def _addStages(self, stagesNodes):
         stages = self.stages = []
@@ -271,13 +263,16 @@ class _ProductDefinition(xmllib.BaseNode):
             sources.append(pyObj)
 
     def _addBuildDefinition(self, buildNodes):
+        dispatcher = _imageTypes.ImageType_Dispatcher(self._nsMap)
+        dispatcher.registerClasses(_imageTypes, _imageTypes.ImageType_Base)
+
         builds = self.buildDefinition = []
         for node in buildNodes:
             imgType = None
             for subNode in node.iterChildren():
                 if not isinstance(subNode, xmllib.BaseNode):
                     continue
-                imgType = _imageTypes.ImageType_Dispatcher.dispatch(subNode)
+                imgType = dispatcher.dispatch(subNode)
                 if imgType is not None:
                     break
             if imgType is None:
