@@ -96,21 +96,17 @@ class ProductDefinition(object):
         """Serialize the current object"""
         baseFlavor = xmllib.StringNode(name = 'baseFlavor')
         baseFlavor.characters(self.baseFlavor)
-        class N(xmllib.BaseNode):
-            def iterChildren(slf):
-                return [ baseFlavor,
-                         self.stages,
-                         self.upstreamSources,
-                         self.buildDefinition ]
         attrs = {'version' : self.version,
                  'xmlns' : self.defaultNamespace,
                  'xmlns:xsi' : self.xmlSchemaNamespace,
                  "xsi:schemaLocation" : self.xmlSchemaLocation,
         }
         nameSpaces = {}
-        n = N(attrs, nameSpaces, name = "productDefinition")
+        serObj = _ProductDefinitionSerialization("productDefinition",
+            attrs, nameSpaces, baseFlavor, self.stages, self.upstreamSources,
+            self.buildDefinition)
         binder = xmllib.DataBinder()
-        stream.write(binder.toXml(n))
+        stream.write(binder.toXml(serObj))
 
     def getBaseFlavor(self):
         return self.baseFlavor
@@ -283,6 +279,21 @@ class _ProductDefinition(xmllib.BaseNode):
                 byDefault = byDefault,
                 imageType = imgType)
             builds.append(pyobj)
+
+class _ProductDefinitionSerialization(xmllib.BaseNode):
+    def __init__(self, name, attrs, namespaces,
+                 baseFlavor, stages, upstreamSources, buildDefinition):
+        xmllib.BaseNode.__init__(self, attrs, namespaces, name = name)
+        self.baseFlavor = baseFlavor
+        self.stages = stages
+        self.upstreamSources = upstreamSources
+        self.buildDefinition = buildDefinition
+
+    def iterChildren(self):
+        return [ self.baseFlavor,
+                 self.stages,
+                 self.upstreamSources,
+                 self.buildDefinition ]
 
 class _ImageTypeFakeNode(object):
     """Internal class for emulating the interface expected by the node
