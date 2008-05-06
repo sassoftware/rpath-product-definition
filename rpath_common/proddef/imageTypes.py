@@ -29,7 +29,7 @@ class ImageType_Base(xmllib.SerializableObject):
         'installLabelPath'  : (str, ),
     }
 
-    def __init__(self, node = None, fields = None):
+    def __init__(self, node = None):
         """
         Initialize an ImageType object, either from a Node, or from a
         dictionary of fields.
@@ -37,17 +37,12 @@ class ImageType_Base(xmllib.SerializableObject):
 
         self.fields = flds = {}
 
-        if node is None and fields is None:
+        if node is None:
             return
-
-        initFields = fields or {}
 
         for attrName, values in self._attributes.items():
             attrType = values[0]
-            if node is not None:
-                val = node.getAttribute(attrName)
-            else:
-                val = initFields.get(attrName)
+            val = node.getAttribute(attrName)
             if val is None:
                 continue
             if attrType == bool:

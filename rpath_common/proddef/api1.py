@@ -18,7 +18,8 @@ All interfaces in this modules that do not start with a C{_}
 character are public interfaces.
 """
 
-__all__ = [ 'ProductDefinition' ]
+__all__ = [ 'ProductDefinition', 'ProductDefinitionError',
+            'UnsupportedImageType' ]
 
 import StringIO
 
@@ -26,14 +27,35 @@ from rpath_common.xmllib import api1 as xmllib
 from rpath_common.proddef import _xmlConstants
 from rpath_common.proddef import imageTypes
 
+#{ Exception classes
+class ProductDefinitionError(Exception):
+    "Base class for product definition exceptions"
+
+class UnsupportedImageType(ProductDefinitionError):
+    "Raised when an unsupported image type was passed"
+#}
+
 class ProductDefinition(object):
     """
     Represents the definition of a product.
+    @cvar version:
+    @type version: C{str}
+    @cvar defaultNamespace:
+    @type defaultNamespace: C{str}
+    @cvar xmlSchemaNamespace:
+    @type xmlSchemaNamespace: C{str}
+    @cvar xmlSchemaLocation:
+    @type xmlSchemaLocation: C{str}
+    @cvar _imageTypeDispatcher: an object factory for imageType objects
+    @type _imageTypeDispatcher: C{xmllib.NodeDispatcher}
     """
     version = '1.0'
     defaultNamespace = _xmlConstants.defaultNamespaceList[0]
     xmlSchemaNamespace = _xmlConstants.xmlSchemaNamespace
     xmlSchemaLocation = _xmlConstants.xmlSchemaLocation
+
+    _imageTypeDispatcher = xmllib.NodeDispatcher({})
+    _imageTypeDispatcher.registerClasses(imageTypes, imageTypes.ImageType_Base)
 
     def __init__(self, fromStream = None):
         """
@@ -119,57 +141,29 @@ class ProductDefinition(object):
                                byDefault = byDefault, imageType = imageType)
         self.buildDefinition.append(obj)
 
+    @classmethod
+    def imageType(kls, name, fields = None):
+        """
+        Image type factory. Given an image type name, it will instantiate an
+        object of the proper type.
+        @param name: The name of the image type.
+        @type name: C{str}
+        @param fields: Fields to initialize the image type object
+        @type fields: C{dict}
+        @raise UnsupportedImageType: when an unsupported image type is passed
+        """
+        fnode = _ImageTypeFakeNode(name, fields or {})
+        obj = kls._imageTypeDispatcher.dispatch(fnode)
+        if obj is None:
+            raise UnsupportedImageType(name)
+        return obj
+
+
     def _initFields(self):
         self.baseFlavor = None
         self.stages = _Stages()
         self.upstreamSources = _UpstreamSources()
         self.buildDefinition = _BuildDefinition()
-
-    def _setFromDict(self):
-        # Functions to call to set attributes on the root element.
-        self._setNameSpace()
-        self._setNameSpaceXsi()
-        self._setXsiSchemaLocation()
-        self._setVersion()
-
-        self.setBaseFlavor(self.elementDict.pop('baseFlavor', ''))
-
-        # Set each of our 3 possible list elements.
-        self.setStages(self.elementDict.pop('stages', []))
-        self.setUpstreamSources(self.elementDict.pop('upstreamSources', []))
-        self.setBuildDefinition(self.elementDict.pop('buildDefinition', []))
-
-        # Merge any remaining items in self.elementDict into the instance's
-        # main dictionary, causing them to show up as elements.
-        self.xmlobj.__dict__.update(self.elementDict)
-
-    def _setNameSpace(self):
-        setattr(self.xmlobj.__class__, 'xmlns',
-                'http://www.rpath.com/permanent/rpd-1.0.xsd')
-
-    def _setNameSpaceXsi(self):
-        setattr(self.xmlobj.__class__, 'xmlns:xsi',
-                'http://www.w3.org/2001/XMLSchema-instance')
-
-    def _setXsiSchemaLocation(self):
-        setattr(self.xmlobj.__class__, 'xsi:schemaLocation',
-                'http://www.rpath.com/permanent/rpd-1.0.xsd rpd-1.0.xsd')
-
-    def _setVersion(self):
-        setattr(self.xmlobj.__class__, 'version', '1.0')
-
-    def _setElemObj(self, elem, name, elementObject):
-        """
-        Creates an object with an attribute called name set to elementObject.
-        Then, sets that object to an attribute called elem on self.xmlobj.
-
-        This method is typically used in conjuction with self._genElemObj to
-        set the returned list at the desired location.
-        """
-        Elem = type('Elem', (object,), {})
-        e = Elem()
-        setattr(e, name, elementObject)
-        setattr(self.xmlobj, elem, [e])
 
 #{ Objects for the representation of ProductDefinition fields
 
@@ -217,6 +211,7 @@ class _Build(xmllib.SlotBasedSerializableObject):
 #}
 
 class _ProductDefinition(xmllib.BaseNode):
+
     def __init__(self, attributes = None, nsMap = None, name = None):
         xmllib.BaseNode.__init__(self, attributes = attributes, nsMap = nsMap,
                                  name = name)
@@ -287,3 +282,28 @@ class _ProductDefinition(xmllib.BaseNode):
                 byDefault = byDefault,
                 imageType = imgType)
             builds.append(pyobj)
+
+class _ImageTypeFakeNode(object):
+    """Internal class for emulating the interface expected by the node
+    dispatcher for creating image types"""
+    def __init__(self, name, fields = None):
+        self.name = name
+        self.fields = fields or {}
+
+    def getAbsoluteName(self):
+        """
+        @return: the absolute node name
+        @rtype: C{str}
+        """
+        return '{}%s' % self.name
+
+    def getAttribute(self, name):
+        """
+        Get an attribute by name
+        @param name: The attribute name
+        @type name: C{str}
+        @return: The attribute with the specified name, or C{None} if one
+        could not be found.
+        @rtype: C{str} or C{None}
+        """
+        return self.fields.get(name)
