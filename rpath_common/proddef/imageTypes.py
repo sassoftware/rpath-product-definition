@@ -12,7 +12,7 @@
 # full details.
 #
 """
-Private interface.
+Image types.
 """
 
 from rpath_common import xmllib
