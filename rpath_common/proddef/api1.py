@@ -271,7 +271,7 @@ class _ProductDefinition(xmllib.BaseNode):
                 if imgType is not None:
                     break
             if imgType is None:
-                raise Exception("")
+                raise UnsupportedImageType(subNode.getName())
             byDefault = node.getAttribute('byDefault')
             if byDefault is None:
                 byDefault = True
