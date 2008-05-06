@@ -15,18 +15,9 @@
 all: default-subdirs default-all
 
 export TOPDIR = $(shell pwd)
-export DISTDIR = $(TOPDIR)/rbuild-$(VERSION)
+export DISTDIR = $(TOPDIR)/rpath-product-definition-$(VERSION)
 
 SUBDIRS=rpath_common xsd doc pylint
-
-extra_files = \
-	Make.rules 		\
-	Makefile		\
-	Make.defs		\
-	NEWS			\
-	README			\
-	EULA_product_common.txt		\
-	LICENSE
 
 dist_files = $(extra_files)
 
@@ -46,15 +37,8 @@ dist:
 	$(MAKE) forcedist
 
 
-archive: $(dist_files)
-	rm -rf $(DISTDIR)
-	mkdir $(DISTDIR)
-	for d in $(SUBDIRS); do make -C $$d DIR=$$d dist || exit 1; done
-	for f in $(dist_files); do \
-		mkdir -p $(DISTDIR)/`dirname $$f`; \
-		cp -a $$f $(DISTDIR)/$$f; \
-	done; \
-	tar cjf $(DISTDIR).tar.bz2 `basename $(DISTDIR)`
+archive:
+	hg --config 'ui.archivemeta=False' archive --exclude .hgignore -t tbz2 $(DISTDIR).tar.bz2
 
 forcedist: archive
 
@@ -62,6 +46,7 @@ tag:
 	hg tag -f rbuild-$(VERSION)
 
 clean: clean-subdirs default-clean
+	@rm -rf $(DISTDIR).tar.bz2
 
 include Make.rules
 include Make.defs
