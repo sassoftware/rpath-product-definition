@@ -103,8 +103,8 @@ class ProductDefinition(object):
         }
         nameSpaces = {}
         serObj = _ProductDefinitionSerialization("productDefinition",
-            attrs, nameSpaces, baseFlavor, self.stages, self.upstreamSources,
-            self.buildDefinition)
+            attrs, nameSpaces, self)
+        serObj.baseFlavor = baseFlavor
         binder = xmllib.DataBinder()
         stream.write(binder.toXml(serObj))
 
@@ -194,6 +194,7 @@ class _Build(xmllib.SlotBasedSerializableObject):
 
     def __init__(self, name = None, baseFlavor = None,
                  imageType = None, byDefault = None):
+        xmllib.SlotBasedSerializableObject.__init__(self)
         self.name = name
         self.baseFlavor = baseFlavor
         self.imageType = imageType
@@ -281,13 +282,12 @@ class _ProductDefinition(xmllib.BaseNode):
             builds.append(pyobj)
 
 class _ProductDefinitionSerialization(xmllib.BaseNode):
-    def __init__(self, name, attrs, namespaces,
-                 baseFlavor, stages, upstreamSources, buildDefinition):
+    def __init__(self, name, attrs, namespaces, prodDef):
         xmllib.BaseNode.__init__(self, attrs, namespaces, name = name)
-        self.baseFlavor = baseFlavor
-        self.stages = stages
-        self.upstreamSources = upstreamSources
-        self.buildDefinition = buildDefinition
+        self.baseFlavor = prodDef.getBaseFlavor()
+        self.stages = prodDef.getStages()
+        self.upstreamSources = prodDef.getUpstreamSources()
+        self.buildDefinition = prodDef.getBuildDefinitions()
 
     def iterChildren(self):
         return [ self.baseFlavor,
