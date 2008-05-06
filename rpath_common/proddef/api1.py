@@ -138,7 +138,7 @@ class ProductDefinition(object):
         self.buildDefinition.append(obj)
 
     @classmethod
-    def imageType(kls, name, fields = None):
+    def imageType(cls, name, fields = None):
         """
         Image type factory. Given an image type name, it will instantiate an
         object of the proper type.
@@ -149,7 +149,7 @@ class ProductDefinition(object):
         @raise UnsupportedImageType: when an unsupported image type is passed
         """
         fnode = _ImageTypeFakeNode(name, fields or {})
-        obj = kls._imageTypeDispatcher.dispatch(fnode)
+        obj = cls._imageTypeDispatcher.dispatch(fnode)
         if obj is None:
             raise UnsupportedImageType(name)
         return obj
