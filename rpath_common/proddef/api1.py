@@ -263,7 +263,7 @@ class _ProductDefinition(xmllib.BaseNode):
             sources.append(pyObj)
 
     def _addBuildDefinition(self, buildNodes):
-        dispatcher = _imageTypes.ImageType_Dispatcher(self._nsMap)
+        dispatcher = xmllib.NodeDispatcher(self._nsMap)
         dispatcher.registerClasses(_imageTypes, _imageTypes.ImageType_Base)
 
         builds = self.buildDefinition = []

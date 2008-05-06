@@ -18,44 +18,6 @@ Private interface.
 from rpath_common import xmllib
 from rpath_common.proddef import _xmlConstants
 
-class ImageType_Dispatcher(object):
-    def __init__(self, nsMap = None):
-        self._dispatcher = {}
-        self._nsMap = nsMap or {}
-
-    def addImageType(self, imageType):
-        key = "{%s}%s" % (self._nsMap[None], imageType.tag)
-        self._dispatcher[key] = imageType
-
-    def dispatch(self, node):
-        absName = node.getAbsoluteName()
-        if absName not in self._dispatcher:
-            return None
-        nodeClass = self._dispatcher.get(absName)
-
-        fields = {}
-        for attrName, values in nodeClass._attributes.items():
-            attrType = values[0]
-            val = node.getAttribute(attrName)
-            if val is None:
-                continue
-            if attrType == bool:
-                val = (val.strip().upper() in ["TRUE", "1"] and True) or False
-            elif attrType == int:
-                val = int(val)
-            fields[attrName] = val
-        obj = nodeClass(fields)
-        return obj
-
-    def registerClasses(self, module, baseClass):
-        """Register all classes that are a subclass of baseClass and are part
-        of the module."""
-        for symVal in module.__dict__.itervalues():
-            if not isinstance(symVal, type):
-                continue
-            if issubclass(symVal, baseClass) and symVal != baseClass:
-                self.addImageType(symVal)
-
 #{ Image Type Classes
 class ImageType_Base(xmllib.SerializableObject):
     _defaultNamespace = _xmlConstants.defaultNamespaceList[0]
@@ -67,8 +29,36 @@ class ImageType_Base(xmllib.SerializableObject):
         'installLabelPath'  : (str, ),
     }
 
-    def __init__(self, fields):
-        self.fields = fields
+    def __init__(self, node = None, fields = None):
+        """
+        Initialize an ImageType object, either from a Node, or from a
+        dictionary of fields.
+        """
+
+        self.fields = flds = {}
+
+        if node is None and fields is None:
+            return
+
+        initFields = fields or {}
+
+        for attrName, values in self._attributes.items():
+            attrType = values[0]
+            if node is not None:
+                val = node.getAttribute(attrName)
+            else:
+                val = initFields.get(attrName)
+            if val is None:
+                continue
+            if attrType == bool:
+                val = xmllib.BooleanNode.fromString(val)
+            elif attrType == int:
+                val = int(val)
+            flds[attrName] = val
+
+    @classmethod
+    def getTag(kls):
+        return kls.tag
 
     def _getName(self):
         return self.tag
