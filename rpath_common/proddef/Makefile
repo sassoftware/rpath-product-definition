@@ -12,8 +12,7 @@
 # full details.
 #
 
-python_files =	__init__.py \
-		api1.py
+python_files =	$(wildcard *.py)
 
 dist_files = Makefile proddef_constants.py.in $(python_files)
 
