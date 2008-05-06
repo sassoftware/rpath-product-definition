@@ -24,7 +24,7 @@ import StringIO
 
 from rpath_common.xmllib import api1 as xmllib
 from rpath_common.proddef import _xmlConstants
-from rpath_common.proddef import _imageTypes
+from rpath_common.proddef import imageTypes
 
 class ProductDefinition(object):
     """
@@ -264,7 +264,7 @@ class _ProductDefinition(xmllib.BaseNode):
 
     def _addBuildDefinition(self, buildNodes):
         dispatcher = xmllib.NodeDispatcher(self._nsMap)
-        dispatcher.registerClasses(_imageTypes, _imageTypes.ImageType_Base)
+        dispatcher.registerClasses(imageTypes, imageTypes.ImageType_Base)
 
         builds = self.buildDefinition = []
         for node in buildNodes:
