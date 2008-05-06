@@ -59,8 +59,10 @@ class ProductDefinition(object):
 
     def __init__(self, fromStream = None):
         """
-        Pass in either a dictionary as constructed in the example below, or an
-        xml string to create an instance.
+        Initialize a ProductDefinition object, getting data from the optional
+        XML stream.
+        @param fromStream: An optional XML string or file
+        @type fromStream: C{str} or C{file}
         """
 
         self._initFields()
@@ -71,6 +73,11 @@ class ProductDefinition(object):
             self.parseStream(fromStream)
 
     def parseStream(self, stream):
+        """
+        Initialize the current object from an XML stream.
+        @param stream: An XML stream
+        @type stream: C{file}
+        """
         self._initFields()
         binder = xmllib.DataBinder()
         # We need to dynamically create a class here, so we can set the proper
@@ -93,7 +100,11 @@ class ProductDefinition(object):
             # XXX We don't support changing the schema location for now
 
     def serialize(self, stream):
-        """Serialize the current object"""
+        """
+        Serialize the current object as an XML stream.
+        @param stream: stream to write the serialized object
+        @type stream: C{file}
+        """
         baseFlavor = xmllib.StringNode(name = 'baseFlavor')
         baseFlavor.characters(self.baseFlavor)
         attrs = {'version' : self.version,
@@ -109,30 +120,79 @@ class ProductDefinition(object):
         stream.write(binder.toXml(serObj))
 
     def getBaseFlavor(self):
+        """
+        @return: the base flavor
+        @rtype: C{str}
+        """
         return self.baseFlavor
 
     def setBaseFlavor(self, baseFlavor):
+        """
+        Set the base flavor.
+        @param baseFlavor: the base flavor
+        @type baseFlavor: C{str}
+        """
         self.baseFlavor = baseFlavor
 
     def getStages(self):
+        """
+        @return: the stages from this product definition
+        @rtype: C{list} of C{_Stage} objects
+        """
         return self.stages
 
     def addStage(self, name = None, label = None):
+        """
+        Add a stage.
+        @param name: the stage's name
+        @type name: C{str} or C{None}
+        @param label: Label for the stage
+        @type label: C{str} or C{None}
+        """
         obj = _Stage(name = name, label = label)
         self.stages.append(obj)
 
     def getUpstreamSources(self):
+        """
+        @return: the upstream sources from this product definition
+        @rtype: C{list} of C{_UpstreamSource} objects
+        """
         return self.upstreamSources
 
     def addUpstreamSource(self, troveName = None, label = None):
+        """
+        Add an upstream source.
+        @param troveName: the trove name for the upstream source.
+        @type name: C{str} or C{None}
+        @param label: Label for the upstream source
+        @type label: C{str} or C{None}
+        """
         obj = _UpstreamSource(troveName = troveName, label = label)
         self.upstreamSources.append(obj)
 
     def getBuildDefinitions(self):
+        """
+        @return: The build definitions from this product definition
+        @rtype: C{list} of C{_BuildDefinition} objects
+        """
         return self.buildDefinition
 
     def addBuildDefinition(self, name = None, baseFlavor = None,
                            byDefault = None, imageType = None):
+        """
+        Add a build definition.
+        Image types are specified by calling C{ProductDefinition.imageType}.
+        @param name: the name for the build definition
+        @type name: C{str} or C{None}
+        @param baseFlavor: the base flavor
+        @type baseFlavor: C{str}
+        @param byDefault: byDefault value
+        @type byDefault: C{bool}
+        @param imageType: an image type, as returned by
+        C{ProductDefinition.imageType}.
+        @type imageType: an instance of an C{imageTypes.ImageType_Base}
+        subclass.
+        """
         obj = _Build(name = name, baseFlavor = baseFlavor,
                                byDefault = byDefault, imageType = imageType)
         self.buildDefinition.append(obj)
@@ -154,7 +214,6 @@ class ProductDefinition(object):
             raise UnsupportedImageType(name)
         return obj
 
-
     def _initFields(self):
         self.baseFlavor = None
         self.stages = _Stages()
@@ -166,17 +225,24 @@ class ProductDefinition(object):
 class _Stages(xmllib.SerializableList):
     tag = "stages"
 
+# pylint: disable-msg=R0903
+# Too few public methods (1/2): this is an interface
 class _UpstreamSources(xmllib.SerializableList):
     tag = "upstreamSources"
 
+# pylint: disable-msg=R0903
+# Too few public methods (1/2): this is an interface
 class _BuildDefinition(xmllib.SerializableList):
     tag = "buildDefinition"
 
+# pylint: disable-msg=R0903
+# Too few public methods (1/2): this is an interface
 class _Stage(xmllib.SlotBasedSerializableObject):
     __slots__ = [ 'name', 'label' ]
     tag = "stage"
 
     def __init__(self, name = None, label = None):
+        xmllib.SlotBasedSerializableObject.__init__(self)
         self.name = name
         self.label = label
 
@@ -185,6 +251,7 @@ class _UpstreamSource(xmllib.SlotBasedSerializableObject):
     tag = "upstreamSource"
 
     def __init__(self, troveName = None, label = None):
+        xmllib.SlotBasedSerializableObject.__init__(self)
         self.troveName = troveName
         self.label = label
 
