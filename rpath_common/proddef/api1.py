@@ -278,6 +278,7 @@ class _ProductDefinition(xmllib.BaseNode):
             else:
                 byDefault = xmllib.BooleanNode.fromString(byDefault)
             pyobj = _Build(
+                name = node.getAttribute('name'),
                 baseFlavor = node.getAttribute('baseFlavor'),
                 byDefault = byDefault,
                 imageType = imgType)
