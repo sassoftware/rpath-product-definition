@@ -164,23 +164,29 @@
     </xsd:complexType>
 
     <xsd:complexType name="buildType">
-        <xsd:choice>
-            <xsd:element name="amiImage" type="rpd:amiImageType" />
-            <xsd:element name="applianceIsoImage" type="rpd:applianceIsoImageType" />
-            <xsd:element name="installableIsoImage" type="rpd:installableIsoImageType" />
-            <xsd:element name="liveIsoImage" type="rpd:liveIsoImageType" />
-            <xsd:element name="netbootImage" type="rpd:netbootImageType" />
-            <xsd:element name="rawFsImage" type="rpd:rawFsImageType" />
-            <xsd:element name="rawHdImage" type="rpd:rawHdImageType" />
-            <xsd:element name="tarballImage" type="rpd:tarballImageType" />
-            <xsd:element name="updateIsoImage" type="rpd:updateIsoImageType" />
-            <xsd:element name="vhdImage" type="rpd:vhdImageType" />
-            <xsd:element name="vmwareImage" type="rpd:vmwareImageType" />
-            <xsd:element name="vmwareEsxImage" type="rpd:vmwareEsxImageType" />
-            <xsd:element name="xenOvaImage" type="rpd:xenOvaImageType" />
-        </xsd:choice>
+        <xsd:sequence>
+            <xsd:choice>
+                <xsd:element name="amiImage" type="rpd:amiImageType" />
+                <xsd:element name="applianceIsoImage" type="rpd:applianceIsoImageType" />
+                <xsd:element name="installableIsoImage" type="rpd:installableIsoImageType" />
+                <xsd:element name="liveIsoImage" type="rpd:liveIsoImageType" />
+                <xsd:element name="netbootImage" type="rpd:netbootImageType" />
+                <xsd:element name="rawFsImage" type="rpd:rawFsImageType" />
+                <xsd:element name="rawHdImage" type="rpd:rawHdImageType" />
+                <xsd:element name="tarballImage" type="rpd:tarballImageType" />
+                <xsd:element name="updateIsoImage" type="rpd:updateIsoImageType" />
+                <xsd:element name="vhdImage" type="rpd:vhdImageType" />
+                <xsd:element name="vmwareImage" type="rpd:vmwareImageType" />
+                <xsd:element name="vmwareEsxImage" type="rpd:vmwareEsxImageType" />
+                <xsd:element name="xenOvaImage" type="rpd:xenOvaImageType" />
+            </xsd:choice>
+            <xsd:element name="stage" minOccurs="0" maxOccurs="unbounded">
+                <xsd:complexType>
+                    <xsd:attribute name="ref" type="xsd:string" use="required"/>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:sequence>
         <xsd:attribute name="baseFlavor" type="rpd:flavorStringType" />
-        <xsd:attribute name="byDefault" type="xsd:boolean" default="true" />
         <xsd:attribute name="imageGroup" type="rpd:troveSpecType" />
     </xsd:complexType>
 
