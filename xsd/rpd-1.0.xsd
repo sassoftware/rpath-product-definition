@@ -33,7 +33,7 @@
 
     <xsd:complexType name="stageListType">
         <xsd:sequence>
-                <xsd:element name="stage" type="stageType" minOccurs="1" maxOccurs="unbounded" />
+            <xsd:element name="stage" type="stageType" minOccurs="1" maxOccurs="unbounded" />
         </xsd:sequence>
     </xsd:complexType>
 
@@ -52,6 +52,17 @@
         <xsd:attributeGroup ref="common" />
         <xsd:attribute name="amiHugeDiskMountpoint" type="xsd:string" />
         <xsd:attribute name="freespace" type="xsd:nonNegativeInteger" />
+    </xsd:complexType>
+
+    <xsd:complexType name="applianceIsoImageType">
+        <xsd:attributeGroup ref="common" />
+        <xsd:attribute name="maxIsoSize" type="xsd:positiveInteger" />
+        <xsd:attribute name="bugsUrl" type="xsd:string" />
+        <xsd:attribute name="showMediaCheck" type="xsd:boolean" />
+        <xsd:attribute name="betaNag" type="xsd:boolean" />
+        <xsd:attribute name="mediaTemplateTrove" type="xsd:string" />
+        <xsd:attribute name="anacondaCustomTrove" type="xsd:string" />
+        <xsd:attribute name="anacondaTemplatesTrove" type="xsd:string" />
     </xsd:complexType>
 
     <xsd:complexType name="installableIsoImageType">
@@ -117,6 +128,7 @@
         <xsd:attribute name="swapSize" type="xsd:nonNegativeInteger" />
         <xsd:attribute name="freespace" type="xsd:nonNegativeInteger" />
         <xsd:attribute name="natNetworking" type="xsd:boolean" />
+        <xsd:attribute name="vmMemory" type="xsd:nonNegativeInteger" />
     </xsd:complexType>
 
     <xsd:complexType name="vmwareImageType">
@@ -136,6 +148,13 @@
         <xsd:attribute name="vmMemory" type="xsd:nonNegativeInteger" />
     </xsd:complexType>
 
+    <xsd:complexType name="xenOvaImageType">
+        <xsd:attributeGroup ref="common" />
+        <xsd:attribute name="swapSize" type="xsd:nonNegativeInteger" />
+        <xsd:attribute name="freespace" type="xsd:nonNegativeInteger" />
+        <xsd:attribute name="vmMemory" type="xsd:nonNegativeInteger" />
+    </xsd:complexType>
+
     <xsd:complexType name="buildDefinitionType">
         <xsd:sequence>
             <xsd:element name="build" type="rpd:buildType" minOccurs="1" maxOccurs="unbounded" />
@@ -145,6 +164,7 @@
     <xsd:complexType name="buildType">
         <xsd:choice>
             <xsd:element name="amiImage" type="rpd:amiImageType" />
+            <xsd:element name="applianceIsoImage" type="rpd:applianceIsoImageType" />
             <xsd:element name="installableIsoImage" type="rpd:installableIsoImageType" />
             <xsd:element name="liveIsoImage" type="rpd:liveIsoImageType" />
             <xsd:element name="netbootImage" type="rpd:netbootImageType" />
@@ -155,6 +175,7 @@
             <xsd:element name="vhdImage" type="rpd:vhdImageType" />
             <xsd:element name="vmwareImage" type="rpd:vmwareImageType" />
             <xsd:element name="vmwareEsxImage" type="rpd:vmwareEsxImageType" />
+            <xsd:element name="xenOvaImage" type="rpd:xenOvaImageType" />
         </xsd:choice>
         <xsd:attribute name="baseFlavor" type="rpd:flavorStringType" />
         <xsd:attribute name="byDefault" type="xsd:boolean" default="true" />
