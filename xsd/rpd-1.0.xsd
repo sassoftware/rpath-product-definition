@@ -6,14 +6,20 @@
         xmlns:rpd="http://www.rpath.com/permanent/rpd-1.0.xsd"
         xmlns="http://www.rpath.com/permanent/rpd-1.0.xsd">
 
-   <xsd:attributeGroup name="common">
+    <xsd:attributeGroup name="common">
        <xsd:attribute name="name" type="xsd:string" />
        <xsd:attribute name="autoResolve" type="xsd:boolean" />
        <xsd:attribute name="baseFileName" type="xsd:string" />
        <xsd:attribute name="installLabelPath" type="xsd:string" />
-   </xsd:attributeGroup>
+    </xsd:attributeGroup>
 
-   <xsd:simpleType name="troveSpecType">
+    <xsd:attributeGroup name="specialIsoTroves">
+        <xsd:attribute name="mediaTemplateTrove" type="rpd:troveSpecType" />
+        <xsd:attribute name="anacondaCustomTrove" type="rpd:troveSpecType" />
+        <xsd:attribute name="anacondaTemplatesTrove" type="rpd:troveSpecType" />
+    </xsd:attributeGroup>
+
+    <xsd:simpleType name="troveSpecType">
         <xsd:restriction base="xsd:string"></xsd:restriction>
         <!-- TODO: make a proper xsd:restriction here to validate troveSpecs -->
     </xsd:simpleType>
@@ -27,8 +33,8 @@
     </xsd:simpleType>
 
     <xsd:complexType name="stageType">
-        <xsd:attribute name="name" type="xsd:string"></xsd:attribute>
-        <xsd:attribute name="label" type="xsd:string"></xsd:attribute>
+        <xsd:attribute name="name" type="xsd:string" />
+        <xsd:attribute name="label" type="xsd:string" />
     </xsd:complexType>
 
     <xsd:complexType name="stageListType">
@@ -38,8 +44,8 @@
     </xsd:complexType>
 
     <xsd:complexType name="upstreamSourceType">
-        <xsd:attribute name="troveName" type="xsd:string"></xsd:attribute>
-        <xsd:attribute name="label" type="xsd:string"></xsd:attribute>
+        <xsd:attribute name="troveName" type="xsd:string" />
+        <xsd:attribute name="label" type="xsd:string" />
     </xsd:complexType>
 
     <xsd:complexType name="upstreamSourceListType">
@@ -60,9 +66,7 @@
         <xsd:attribute name="bugsUrl" type="xsd:string" />
         <xsd:attribute name="showMediaCheck" type="xsd:boolean" />
         <xsd:attribute name="betaNag" type="xsd:boolean" />
-        <xsd:attribute name="mediaTemplateTrove" type="xsd:string" />
-        <xsd:attribute name="anacondaCustomTrove" type="xsd:string" />
-        <xsd:attribute name="anacondaTemplatesTrove" type="xsd:string" />
+        <xsd:attributeGroup ref="specialIsoTroves" />
     </xsd:complexType>
 
     <xsd:complexType name="installableIsoImageType">
@@ -71,9 +75,7 @@
         <xsd:attribute name="bugsUrl" type="xsd:string" />
         <xsd:attribute name="showMediaCheck" type="xsd:boolean" />
         <xsd:attribute name="betaNag" type="xsd:boolean" />
-        <xsd:attribute name="mediaTemplateTrove" type="xsd:string" />
-        <xsd:attribute name="anacondaCustomTrove" type="xsd:string" />
-        <xsd:attribute name="anacondaTemplatesTrove" type="xsd:string" />
+        <xsd:attributeGroup ref="specialIsoTroves" />
     </xsd:complexType>
 
     <xsd:complexType name="liveIsoImageType">
@@ -179,11 +181,13 @@
         </xsd:choice>
         <xsd:attribute name="baseFlavor" type="rpd:flavorStringType" />
         <xsd:attribute name="byDefault" type="xsd:boolean" default="true" />
+        <xsd:attribute name="imageGroup" type="rpd:troveSpecType" />
     </xsd:complexType>
 
     <xsd:element name="productDefinition">
         <xsd:complexType>
             <xsd:sequence>
+                <xsd:element name="imageGroup" type="rpd:troveSpecType" />
                 <xsd:element name="baseFlavor" type="rpd:flavorStringType" />
                 <xsd:element name="stages" type="rpd:stageListType" />
                 <xsd:element name="upstreamSources" type="rpd:upstreamSourceListType" />
