@@ -116,9 +116,18 @@ class ProductDefinition(object):
         stream.write(binder.toXml(serObj))
 
     def getImageGroup(self):
+        """
+        @return: the image group
+        @rtype: C{str}
+        """
         return self.imageGroup
 
     def setImageGroup(self, imageGroup):
+        """
+        Set the image group name
+        @param imageGroup: the image group name
+        @type imageGroup: C{str}
+        """
         self.imageGroup = imageGroup
 
     def getBaseFlavor(self):
@@ -175,7 +184,7 @@ class ProductDefinition(object):
     def getBuildDefinitions(self):
         """
         @return: The build definitions from this product definition
-        @rtype: C{list} of C{_BuildDefinition} objects
+        @rtype: C{list} of C{_Build} objects
         """
         return self.buildDefinition
 
@@ -193,8 +202,9 @@ class ProductDefinition(object):
         @type imageType: an instance of an C{imageTypes.ImageType_Base}
         @param stages: Stages for which to build this image type
         @type stages: C{list} of C{str} referring to a C{_Stage} object's name
-        @param imageGroup: XXX
-        @type imageGroup: XXX
+        @param imageGroup: An optional image group that will override the
+        product definition's image group
+        @type imageGroup: C{str}
         subclass.
         """
         obj = _Build(name = name, baseFlavor = baseFlavor,
@@ -218,6 +228,20 @@ class ProductDefinition(object):
         if obj is None:
             raise UnsupportedImageType(name)
         return obj
+
+    def getBuildsForStage(self, stageName):
+        """
+        Retrieve all build definitions for a stage name.
+        @param stageName: stage name
+        @type stageName: C{str}
+        @return: A list of build definitions for the stage.
+        @rtype: C{list} of C{_Build} objects
+        """
+        ret = []
+        for build in self.getBuildDefinitions():
+            if stageName in build.stages:
+                ret.append(build)
+        return ret
 
     def _initFields(self):
         self.baseFlavor = None
