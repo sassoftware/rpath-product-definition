@@ -185,9 +185,10 @@
                     <xsd:attribute name="ref" type="xsd:string" use="required"/>
                 </xsd:complexType>
             </xsd:element>
+            <xsd:element name="imageGroup" type="rpd:troveSpecType" minOccurs="0" maxOccurs="1" />
         </xsd:sequence>
+        <xsd:attribute name="name" type="xsd:string" />
         <xsd:attribute name="baseFlavor" type="rpd:flavorStringType" />
-        <xsd:attribute name="imageGroup" type="rpd:troveSpecType" />
     </xsd:complexType>
 
     <xsd:element name="productDefinition">
