@@ -76,6 +76,20 @@ class ImageType_AMI(ImageType_Base):
         'freespace'                 : (int, ),
     })
 
+class ImageType_AppplianceIso(ImageType_Base):
+    tag = "applianceIsoImage"
+    _attributes = ImageType_Base._attributes.copy()
+    _attributes.update({
+        'maxIsoSize'                : (int, ),
+        'bugsUrl'                   : (str, ),
+        'showMediaCheck'            : (bool, ),
+        'betaNag'                   : (bool, ),
+        'mediaTemplateTrove'        : (str, ),
+        'anacondaCustomTrove'       : (str, ),
+        'anacondaTemplatesTrove'    : (str, ),
+    })
+
+
 class ImageType_InstallableISO(ImageType_Base):
     tag = "installableIsoImage"
     _attributes = ImageType_Base._attributes.copy()
@@ -162,6 +176,16 @@ class ImageType_VMWareEsx(ImageType_Base):
         'swapSize'          : (int, ),
         'freespace'         : (int, ),
         'natNetworking'     : (bool, ),
+        'vmMemory'          : (int, ),
+    })
+
+class ImageType_XenOva(ImageType_Base):
+    tag = "xenOvaImage"
+    _attributes = ImageType_Base._attributes.copy()
+    _attributes.update({
+        'swapSize'          : (int, ),
+        'freespace'         : (int, ),
+        'vmMemory'          : (int, ),
     })
 #}
 

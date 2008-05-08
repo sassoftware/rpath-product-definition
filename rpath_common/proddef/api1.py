@@ -80,10 +80,9 @@ class ProductDefinition(object):
         """
         self._initFields()
         binder = xmllib.DataBinder()
-        # We need to dynamically create a class here, so we can set the proper
-        # namespace for the class
         binder.registerType(_ProductDefinition, 'productDefinition')
         xmlObj = binder.parseFile(stream)
+        self.imageGroup = getattr(xmlObj, 'imageGroup', None)
         self.baseFlavor = getattr(xmlObj, 'baseFlavor', None)
         self.stages.extend(getattr(xmlObj, 'stages', []))
         self.upstreamSources.extend(getattr(xmlObj, 'upstreamSources', []))
@@ -105,8 +104,6 @@ class ProductDefinition(object):
         @param stream: stream to write the serialized object
         @type stream: C{file}
         """
-        baseFlavor = xmllib.StringNode(name = 'baseFlavor')
-        baseFlavor.characters(self.baseFlavor)
         attrs = {'version' : self.version,
                  'xmlns' : self.defaultNamespace,
                  'xmlns:xsi' : self.xmlSchemaNamespace,
@@ -115,9 +112,14 @@ class ProductDefinition(object):
         nameSpaces = {}
         serObj = _ProductDefinitionSerialization("productDefinition",
             attrs, nameSpaces, self)
-        serObj.baseFlavor = baseFlavor
         binder = xmllib.DataBinder()
         stream.write(binder.toXml(serObj))
+
+    def getImageGroup(self):
+        return self.imageGroup
+
+    def setImageGroup(self, imageGroup):
+        self.imageGroup = imageGroup
 
     def getBaseFlavor(self):
         """
@@ -178,7 +180,7 @@ class ProductDefinition(object):
         return self.buildDefinition
 
     def addBuildDefinition(self, name = None, baseFlavor = None,
-                           byDefault = None, imageType = None):
+                           imageType = None, stages = None, imageGroup = None):
         """
         Add a build definition.
         Image types are specified by calling C{ProductDefinition.imageType}.
@@ -186,15 +188,18 @@ class ProductDefinition(object):
         @type name: C{str} or C{None}
         @param baseFlavor: the base flavor
         @type baseFlavor: C{str}
-        @param byDefault: byDefault value
-        @type byDefault: C{bool}
         @param imageType: an image type, as returned by
         C{ProductDefinition.imageType}.
         @type imageType: an instance of an C{imageTypes.ImageType_Base}
+        @param stages: Stages for which to build this image type
+        @type stages: C{list} of C{str} referring to a C{_Stage} object's name
+        @param imageGroup: XXX
+        @type imageGroup: XXX
         subclass.
         """
         obj = _Build(name = name, baseFlavor = baseFlavor,
-                               byDefault = byDefault, imageType = imageType)
+                     imageType = imageType, stages = stages,
+                     imageGroup = imageGroup)
         self.buildDefinition.append(obj)
 
     @classmethod
@@ -217,6 +222,7 @@ class ProductDefinition(object):
     def _initFields(self):
         self.baseFlavor = None
         self.stages = _Stages()
+        self.imageGroup = None
         self.upstreamSources = _UpstreamSources()
         self.buildDefinition = _BuildDefinition()
 
@@ -255,22 +261,38 @@ class _UpstreamSource(xmllib.SlotBasedSerializableObject):
         self.troveName = troveName
         self.label = label
 
-class _Build(xmllib.SlotBasedSerializableObject):
-    __slots__ = [ 'name', 'baseFlavor', 'imageType', 'byDefault' ]
+class _Build(xmllib.SerializableObject):
+    __slots__ = [ 'name', 'baseFlavor', 'imageType', 'stages', 'imageGroup' ]
     tag = "build"
 
     def __init__(self, name = None, baseFlavor = None,
-                 imageType = None, byDefault = None):
+                 imageType = None, stages = None, imageGroup = None):
         xmllib.SlotBasedSerializableObject.__init__(self)
         self.name = name
         self.baseFlavor = baseFlavor
         self.imageType = imageType
-        if byDefault is None:
-            byDefault = True
-        self.byDefault = byDefault
+        self.stages = stages or []
+        self.imageGroup = imageGroup
+
+    def _getName(self):
+        return self.tag
+
+    def _getLocalNamespaces(self):
+        return {}
 
     def _iterChildren(self):
         yield self.imageType
+        for stage in self.stages:
+            yield xmllib.NullNode(dict(ref=stage), name = 'stage')
+        if self.imageGroup is not None:
+            yield xmllib.StringNode(name = 'imageGroup').characters(
+                self.imageGroup)
+
+    def _iterAttributes(self):
+        if self.name is not None:
+            yield ('name', self.name)
+        if self.baseFlavor is not None:
+            yield ('baseFlavor', self.baseFlavor)
 
 #}
 
@@ -283,6 +305,11 @@ class _ProductDefinition(xmllib.BaseNode):
 
     def addChild(self, childNode):
         chName = childNode.getAbsoluteName()
+
+        if chName == self._makeAbsoluteName('imageGroup'):
+            self.imageGroup = childNode.getText()
+            return
+
         if chName == self._makeAbsoluteName('baseFlavor'):
             self.baseFlavor = childNode.getText()
             return
@@ -336,28 +363,39 @@ class _ProductDefinition(xmllib.BaseNode):
                     break
             if imgType is None:
                 raise UnsupportedImageType(subNode.getName())
-            byDefault = node.getAttribute('byDefault')
-            if byDefault is None:
-                byDefault = True
+            imageGroup = node.getChildren('imageGroup')
+            if imageGroup:
+                imageGroup = imageGroup[0].getText()
             else:
-                byDefault = xmllib.BooleanNode.fromString(byDefault)
+                imageGroup = None
             pyobj = _Build(
                 name = node.getAttribute('name'),
                 baseFlavor = node.getAttribute('baseFlavor'),
-                byDefault = byDefault,
-                imageType = imgType)
+                imageType = imgType,
+                stages = [ x.getAttribute('ref')
+                           for x in node.getChildren('stage') ],
+                imageGroup = imageGroup,
+                )
             builds.append(pyobj)
 
 class _ProductDefinitionSerialization(xmllib.BaseNode):
     def __init__(self, name, attrs, namespaces, prodDef):
         xmllib.BaseNode.__init__(self, attrs, namespaces, name = name)
-        self.baseFlavor = prodDef.getBaseFlavor()
         self.stages = prodDef.getStages()
         self.upstreamSources = prodDef.getUpstreamSources()
         self.buildDefinition = prodDef.getBuildDefinitions()
 
+        self.imageGroup = xmllib.StringNode(name = 'imageGroup')
+        imageGroup = prodDef.getImageGroup()
+        if imageGroup:
+            self.imageGroup.characters(imageGroup)
+
+        self.baseFlavor = xmllib.StringNode(name = 'baseFlavor')
+        self.baseFlavor.characters(prodDef.getBaseFlavor())
+
     def iterChildren(self):
-        return [ self.baseFlavor,
+        return [ self.imageGroup,
+                 self.baseFlavor,
                  self.stages,
                  self.upstreamSources,
                  self.buildDefinition ]
