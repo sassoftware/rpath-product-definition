@@ -157,6 +157,15 @@ class ImageType_VHD(ImageType_Base):
         'vhdDiskType'       : (str, ),
     })
 
+class ImageType_VirtualIron(ImageType_Base):
+    tag = "virtualIronImage"
+    _attributes = ImageType_Base._attributes.copy()
+    _attributes.update({
+        'swapSize'          : (int, ),
+        'freespace'         : (int, ),
+        'vhdDiskType'       : (str, ),
+    })
+
 class ImageType_VMWare(ImageType_Base):
     tag = "vmwareImage"
     _attributes = ImageType_Base._attributes.copy()

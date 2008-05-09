@@ -114,15 +114,30 @@
         <xsd:attributeGroup ref="common" />
         <xsd:attribute name="swapSize" type="xsd:nonNegativeInteger" />
         <xsd:attribute name="freespace" type="xsd:nonNegativeInteger" />
-            <xsd:attribute name="vhdDiskType">
-                <xsd:simpleType>
-                    <xsd:restriction base="xsd:string">
-                        <xsd:enumeration value="fixed" />
-                        <xsd:enumeration value="dynamic" />
-                        <xsd:enumeration value="difference" />
-                    </xsd:restriction>
-                </xsd:simpleType>
-            </xsd:attribute>
+        <xsd:attribute name="vhdDiskType">
+            <xsd:simpleType>
+                <xsd:restriction base="xsd:string">
+                    <xsd:enumeration value="fixed" />
+                    <xsd:enumeration value="dynamic" />
+                    <xsd:enumeration value="difference" />
+                </xsd:restriction>
+            </xsd:simpleType>
+        </xsd:attribute>
+    </xsd:complexType>
+
+    <xsd:complexType name="virtualIronImageType">
+        <xsd:attributeGroup ref="common" />
+        <xsd:attribute name="swapSize" type="xsd:nonNegativeInteger" />
+        <xsd:attribute name="freespace" type="xsd:nonNegativeInteger" />
+        <xsd:attribute name="vhdDiskType">
+            <xsd:simpleType>
+                <xsd:restriction base="xsd:string">
+                    <xsd:enumeration value="fixed" />
+                    <xsd:enumeration value="dynamic" />
+                    <xsd:enumeration value="difference" />
+                </xsd:restriction>
+            </xsd:simpleType>
+        </xsd:attribute>
     </xsd:complexType>
 
     <xsd:complexType name="vmwareEsxImageType">
@@ -176,6 +191,7 @@
                 <xsd:element name="tarballImage" type="rpd:tarballImageType" />
                 <xsd:element name="updateIsoImage" type="rpd:updateIsoImageType" />
                 <xsd:element name="vhdImage" type="rpd:vhdImageType" />
+                <xsd:element name="virtualIronImage" type="rpd:virtualIronImageType" />
                 <xsd:element name="vmwareImage" type="rpd:vmwareImageType" />
                 <xsd:element name="vmwareEsxImage" type="rpd:vmwareEsxImageType" />
                 <xsd:element name="xenOvaImage" type="rpd:xenOvaImageType" />
