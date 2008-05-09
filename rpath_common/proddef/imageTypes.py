@@ -76,7 +76,7 @@ class ImageType_AMI(ImageType_Base):
         'freespace'                 : (int, ),
     })
 
-class ImageType_AppplianceIso(ImageType_Base):
+class ImageType_ApplianceIso(ImageType_Base):
     tag = "applianceIsoImage"
     _attributes = ImageType_Base._attributes.copy()
     _attributes.update({
