@@ -26,6 +26,10 @@ __all__ = [ 'MissingInformationError',
 
 import StringIO
 
+from conary import changelog
+from conary import errors as conaryErrors
+from conary.conaryclient import filetypes
+
 from rpath_common.xmllib import api1 as xmllib
 from rpath_common.proddef import _xmlConstants
 from rpath_common.proddef import imageTypes
@@ -45,6 +49,15 @@ class StageNotFoundError(ProductDefinitionError):
 
 class UnsupportedImageType(ProductDefinitionError):
     "Raised when an unsupported image type was passed"
+
+class ProductDefinitionTroveNotFound(ProductDefinitionError):
+    """
+    Raised when the trove containing the product definition file could not
+    be found in the repository
+    """
+
+class ProductDefinitionFileNotFound(ProductDefinitionError):
+    "Raised when the product definition file was not found in the repository"
 #}
 
 class ProductDefinition(object):
@@ -68,6 +81,22 @@ class ProductDefinition(object):
 
     _imageTypeDispatcher = xmllib.NodeDispatcher({})
     _imageTypeDispatcher.registerClasses(imageTypes, imageTypes.ImageType_Base)
+
+    _troveName = 'product-definition'
+    _troveFileName = 'product-definition.xml'
+
+    _recipe = """
+#
+# Copyright (c) 2008 rPath, Inc.
+#
+
+class Recipe_@NAME@(PackageRecipe):
+    name = "@NAME@"
+    version = "@VERSION@"
+
+    def setup(r):
+        pass
+"""
 
     def __init__(self, fromStream = None):
         """
@@ -98,8 +127,10 @@ class ProductDefinition(object):
         self.productDescription = getattr(xmlObj, 'productDescription', None)
         self.productShortname = getattr(xmlObj, 'productShortname', None)
         self.productVersion = getattr(xmlObj, 'productVersion', None)
-        self.productVersionDescription = getattr(xmlObj, 'productVersionDescription', None)
-        self.conaryRepositoryHostname = getattr(xmlObj, 'conaryRepositoryHostname', None)
+        self.productVersionDescription = getattr(xmlObj,
+            'productVersionDescription', None)
+        self.conaryRepositoryHostname = getattr(xmlObj,
+            'conaryRepositoryHostname', None)
         self.conaryNamespace = getattr(xmlObj, 'conaryNamespace', None)
         self.imageGroup = getattr(xmlObj, 'imageGroup', None)
         self.baseFlavor = getattr(xmlObj, 'baseFlavor', None)
@@ -133,6 +164,16 @@ class ProductDefinition(object):
             attrs, nameSpaces, self)
         binder = xmllib.DataBinder()
         stream.write(binder.toXml(serObj))
+
+    def saveToRepository(self, client, message = None):
+        label = self._getProductDefinitionLabel()
+        return self._saveToRepository(client, label, message = message)
+
+    def loadFromRepository(self, client):
+        label = self._getProductDefinitionLabel()
+        stream = self._getStreamFromRepository(client, label)
+        stream.seek(0)
+        self.parseStream(stream)
 
     def getProductName(self):
         """
@@ -308,6 +349,23 @@ class ProductDefinition(object):
         """
         return self.upstreamSources
 
+    def _getProductDefinitionLabel(self):
+        """
+        Private method that returns the product definition's label
+        @return: a Conary label string
+        @rtype: C{str}
+        @raises MissingInformationError: if there isn't enough information
+            in the product definition to generate the label
+        """
+        hostname = self.getConaryRepositoryHostname()
+        shortname = self.getProductShortname()
+        namespace = self.getConaryNamespace()
+        version = self.getProductVersion()
+
+        if not (hostname and shortname and namespace and version):
+            raise MissingInformationError
+        return "%s@%s:%s-%s" % (hostname, namespace, shortname, version)
+
     def _getLabelForStage(self, stageObj):
         """
         Private method that works similarly to L{getLabelForStage},
@@ -317,16 +375,9 @@ class ProductDefinition(object):
         @raises MissingInformationError: if there isn't enough information
             in the product definition to generate the label
         """
-        hostname = self.getConaryRepositoryHostname()
-        shortname = self.getProductShortname()
-        namespace = self.getConaryNamespace()
-        version = self.getProductVersion()
+        prefix = self._getProductDefinitionLabel()
         labelSuffix = stageObj.labelSuffix or '' # this can be blank
-
-        if not (hostname and shortname and namespace and version):
-            raise MissingInformationError
-        return "%s@%s:%s-%s%s" % (hostname, namespace, shortname, version,
-                labelSuffix)
+        return prefix + labelSuffix
 
     def getLabelForStage(self, stageName):
         """
@@ -451,6 +502,61 @@ class ProductDefinition(object):
         self.imageGroup = None
         self.upstreamSources = _UpstreamSources()
         self.buildDefinition = _BuildDefinition()
+
+    def _saveToRepository(self, conaryClient, label, message = None):
+        version = '0.1'
+
+        if message is None:
+            message = "Automatic checkin\n"
+
+        recipe = self._recipe.replace('@NAME@', self._troveName)
+        recipe = recipe.replace('@VERSION@', version)
+
+        stream = StringIO.StringIO()
+        self.serialize(stream)
+        pathDict = {
+            "%s.recipe" % self._troveName : filetypes.RegularFile(
+                contents = self._recipe),
+            self._troveFileName : filetypes.RegularFile(
+                contents = stream.getvalue()),
+        }
+        cLog = changelog.ChangeLog(name = conaryClient.cfg.name,
+                                   contact = conaryClient.cfg.contact,
+                                   message = message)
+        troveName = '%s:source' % self._troveName
+        cs = conaryClient.createSourceTrove(troveName, label, version,
+            pathDict, cLog)
+
+        repos = conaryClient.getRepos()
+        repos.commitChangeSet(cs)
+
+    def _getStreamFromRepository(self, conaryClient, label):
+        repos = conaryClient.getRepos()
+        troveName = '%s:source' % self._troveName
+        troveSpec = (troveName, label, None)
+        try:
+            troves = repos.findTroves(None, [ troveSpec ])
+        except conaryErrors.TroveNotFound:
+            raise ProductDefinitionTroveNotFound("%s=%s" % (troveName, label))
+        nvfs = troves[troveSpec]
+        if not nvfs:
+            raise ProductDefinitionTroveNotFound("%s=%s" % (troveName, label))
+        trvCsSpec = (nvfs[0][0], (None, None), (nvfs[0][1], nvfs[0][2]), True)
+        cs = conaryClient.createChangeSet([ trvCsSpec ], withFiles = True,
+                                          withFileContents = True)
+        for thawTrvCs in cs.iterNewTroveList():
+            paths = [ x for x in thawTrvCs.getNewFileList()
+                      if x[1] == self._troveFileName ]
+            if not paths:
+                continue
+            # Fetch file from changeset
+            fileSpecs = [ (fId, fVer) for (_, _, fId, fVer) in paths ]
+            fileContents = repos.getFileContents(fileSpecs)
+            return fileContents[0].get()
+
+        # Couldn't find the file we expected; die
+        raise ProductDefinitionFileNotFound("%s=%s" % (troveName, label))
+
 
 #{ Objects for the representation of ProductDefinition fields
 
