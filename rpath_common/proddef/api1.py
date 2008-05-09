@@ -308,9 +308,29 @@ class ProductDefinition(object):
         """
         return self.upstreamSources
 
+    def _getLabelForStage(self, stageObj):
+        """
+        Private method that works similarly to L{getLabelForStage},
+        but works on a given C{_Stage} object.
+        @return: a Conary label string where for the given stage object
+        @rtype: C{str}
+        @raises MissingInformationError: if there isn't enough information
+            in the product definition to generate the label
+        """
+        hostname = self.getConaryRepositoryHostname()
+        shortname = self.getProductShortname()
+        namespace = self.getConaryNamespace()
+        version = self.getProductVersion()
+        labelSuffix = stageObj.labelSuffix or '' # this can be blank
+
+        if not (hostname and shortname and namespace and version):
+            raise MissingInformationError
+        return "%s@%s:%s-%s%s" % (hostname, namespace, shortname, version,
+                labelSuffix)
+
     def getLabelForStage(self, stageName):
         """
-        Synthesize the label for a particular stage based upon 
+        Synthesize the label for a particular stage based upon
         the existing product information. Raises an exception
         if there isn't enough information in the product definition
         object to create the label.
@@ -320,17 +340,7 @@ class ProductDefinition(object):
         @raises MissingInformationError: if there isn't enough information
             in the product definition to generate the label
         """
-        stage = self.getStage(stageName)
-        hostname = self.getConaryRepositoryHostname()
-        shortname = self.getProductShortname()
-        namespace = self.getConaryNamespace()
-        version = self.getProductVersion()
-        labelSuffix = stage.labelSuffix or '' # this can be blank
-
-        if not (hostname and shortname and namespace and version):
-            raise MissingInformationError
-        return "%s@%s:%s-%s%s" % (hostname, namespace, shortname, version,
-                labelSuffix)
+        return self._getLabelForStage(self.getStage(stageName))
 
     def getDefaultLabel(self):
         """
@@ -338,14 +348,22 @@ class ProductDefinition(object):
         @return: a label string representing the default label for this
             product definition
         @rtype: C{str}
+        @raises StageNotFoundError: if no such stage exists
         @raises MissingInformationError: if there isn't enough information
             in the object to generate the default label
         """
-        # TODO: Currently, this is the development stage's label.
+        # TODO: Currently, this is the development stage's label,
+        #       i.e. the one with suffix '-devel'.
+        #
         #       Eventually the XML schema will explicitly define the
         #       default label, either via a 'default' attribute on
         #       the stage or via the stage's order.
-        return self.getLabelForStage('devel')
+        ret = None
+        stages = self.getStages()
+        for stage in stages:
+            if stage.labelSuffix == '-devel':
+                return self._getLabelForStage(stage)
+        raise StageNotFoundError
 
     def addUpstreamSource(self, troveName = None, label = None):
         """
