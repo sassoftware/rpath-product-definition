@@ -18,7 +18,10 @@ All interfaces in this modules that do not start with a C{_}
 character are public interfaces.
 """
 
-__all__ = [ 'ProductDefinition', 'ProductDefinitionError',
+__all__ = [ 'MissingInformationError',
+            'ProductDefinition',
+            'ProductDefinitionError',
+            'StageNotFoundError',
             'UnsupportedImageType' ]
 
 import StringIO
@@ -30,6 +33,15 @@ from rpath_common.proddef import imageTypes
 #{ Exception classes
 class ProductDefinitionError(Exception):
     "Base class for product definition exceptions"
+
+class MissingInformationError(ProductDefinitionError):
+    """
+    Raised when attempting to synthesize a label when there isn't enough
+    information to generate it.
+    """
+
+class StageNotFoundError(ProductDefinitionError):
+    " Raised when no such stage exists. "
 
 class UnsupportedImageType(ProductDefinitionError):
     "Raised when an unsupported image type was passed"
@@ -82,6 +94,13 @@ class ProductDefinition(object):
         binder = xmllib.DataBinder()
         binder.registerType(_ProductDefinition, 'productDefinition')
         xmlObj = binder.parseFile(stream)
+        self.productName = getattr(xmlObj, 'productName', None)
+        self.productDescription = getattr(xmlObj, 'productDescription', None)
+        self.productShortname = getattr(xmlObj, 'productShortname', None)
+        self.productVersion = getattr(xmlObj, 'productVersion', None)
+        self.productVersionDescription = getattr(xmlObj, 'productVersionDescription', None)
+        self.conaryRepositoryHostname = getattr(xmlObj, 'conaryRepositoryHostname', None)
+        self.conaryNamespace = getattr(xmlObj, 'conaryNamespace', None)
         self.imageGroup = getattr(xmlObj, 'imageGroup', None)
         self.baseFlavor = getattr(xmlObj, 'baseFlavor', None)
         self.stages.extend(getattr(xmlObj, 'stages', []))
@@ -114,6 +133,111 @@ class ProductDefinition(object):
             attrs, nameSpaces, self)
         binder = xmllib.DataBinder()
         stream.write(binder.toXml(serObj))
+
+    def getProductName(self):
+        """
+        @return: the product name
+        @rtype: C{str}
+        """
+        return self.productName
+
+    def setProductName(self, productName):
+        """
+        Set the product name
+        @param productName: the product name
+        @type productName: C{str}
+        """
+        self.productName = productName
+
+    def getProductDescription(self):
+        """
+        @return: the product description
+        @rtype: C{str}
+        """
+        return self.productDescription
+
+    def setProductDescription(self, productDescription):
+        """
+        Set the product description
+        @param productDescription: the product description
+        @type productDescription: C{str}
+        """
+        self.productDescription = productDescription
+
+    def getProductShortname(self):
+        """
+        @return: the product shortname
+        @rtype: C{str}
+        """
+        return self.productShortname
+
+    def setProductShortname(self, productShortname):
+        """
+        @param productShortname: the product's shortname
+        @type productShortname: C{str}
+        """
+        self.productShortname = productShortname
+
+    def getProductVersion(self):
+        """
+        @return: the product version
+        @rtype: C{str}
+        """
+        return self.productVersion
+
+    def setProductVersion(self, productVersion):
+        """
+        Set the product version
+        @param productVersion: the product version
+        @type productVersion: C{str}
+        """
+        self.productVersion = productVersion
+
+    def getProductVersionDescription(self):
+        """
+        @return: the product version description
+        @rtype: C{str}
+        """
+        return self.productVersionDescription
+
+    def setProductVersionDescription(self, productVersionDescription):
+        """
+        Set the product version description
+        @param productVersionDescription: the product version description
+        @type productVersionDescription: C{str}
+        """
+        self.productVersionDescription = productVersionDescription
+
+    def getConaryRepositoryHostname(self):
+        """
+        @return: the Conary repository's hostname (e.g. conary.example.com)
+        @rtype: C{str}
+        """
+        return self.conaryRepositoryHostname
+
+    def setConaryRepositoryHostname(self, conaryRepositoryHostname):
+        """
+        Set the Conary repository hostname
+        @param conaryRepositoryHostname: the fully-qualified hostname for
+           the repository
+        @type conaryRepositoryHostname: C{str}
+        """
+        self.conaryRepositoryHostname = conaryRepositoryHostname
+
+    def getConaryNamespace(self):
+        """
+        @return: the Conary namespace to use for this product
+        @rtype: C{str}
+        """
+        return self.conaryNamespace
+
+    def setConaryNamespace(self, conaryNamespace):
+        """
+        Set the Conary namespace
+        @param conaryNamespace: the Conary namespace
+        @type conaryNamespace: C{str}
+        """
+        self.conaryNamespace = conaryNamespace
 
     def getImageGroup(self):
         """
@@ -152,15 +276,29 @@ class ProductDefinition(object):
         """
         return self.stages
 
-    def addStage(self, name = None, label = None):
+    def getStage(self, stageName):
+        """
+        Returns a C{_Stage} object for the given stageName.
+        @return: the C{_Stage} object for stageName
+        @rtype: C{_Stage} or C{None} if not found
+        @raises StageNotFoundError: if no such stage exists
+        """
+        ret = None
+        stages = self.getStages()
+        for stage in stages:
+            if stage.name == stageName:
+                return stage
+        raise StageNotFoundError
+
+    def addStage(self, name = None, labelSuffix = None):
         """
         Add a stage.
         @param name: the stage's name
         @type name: C{str} or C{None}
-        @param label: Label for the stage
-        @type label: C{str} or C{None}
+        @param labelSuffix: Label suffix (e.g. '-devel') for the stage
+        @type labelSuffix: C{str} or C{None}
         """
-        obj = _Stage(name = name, label = label)
+        obj = _Stage(name = name, labelSuffix = labelSuffix)
         self.stages.append(obj)
 
     def getUpstreamSources(self):
@@ -169,6 +307,45 @@ class ProductDefinition(object):
         @rtype: C{list} of C{_UpstreamSource} objects
         """
         return self.upstreamSources
+
+    def getLabelForStage(self, stageName):
+        """
+        Synthesize the label for a particular stage based upon 
+        the existing product information. Raises an exception
+        if there isn't enough information in the product definition
+        object to create the label.
+        @return: a Conary label string where for the given stage
+        @rtype: C{str}
+        @raises StageNotFoundError: if no such stage exists
+        @raises MissingInformationError: if there isn't enough information
+            in the product definition to generate the label
+        """
+        stage = self.getStage(stageName)
+        hostname = self.getConaryRepositoryHostname()
+        shortname = self.getProductShortname()
+        namespace = self.getConaryNamespace()
+        version = self.getProductVersion()
+        labelSuffix = stage.labelSuffix or '' # this can be blank
+
+        if not (hostname and shortname and namespace and version):
+            raise MissingInformationError
+        return "%s@%s:%s-%s%s" % (hostname, namespace, shortname, version,
+                labelSuffix)
+
+    def getDefaultLabel(self):
+        """
+        Return the default label for commits.
+        @return: a label string representing the default label for this
+            product definition
+        @rtype: C{str}
+        @raises MissingInformationError: if there isn't enough information
+            in the object to generate the default label
+        """
+        # TODO: Currently, this is the development stage's label.
+        #       Eventually the XML schema will explicitly define the
+        #       default label, either via a 'default' attribute on
+        #       the stage or via the stage's order.
+        return self.getLabelForStage('devel')
 
     def addUpstreamSource(self, troveName = None, label = None):
         """
@@ -246,6 +423,13 @@ class ProductDefinition(object):
     def _initFields(self):
         self.baseFlavor = None
         self.stages = _Stages()
+        self.productName = None
+        self.productShortname = None
+        self.productDescription = None
+        self.productVersion = None
+        self.productVersionDescription = None
+        self.conaryRepositoryHostname = None
+        self.conaryNamespace = None
         self.imageGroup = None
         self.upstreamSources = _UpstreamSources()
         self.buildDefinition = _BuildDefinition()
@@ -268,13 +452,13 @@ class _BuildDefinition(xmllib.SerializableList):
 # pylint: disable-msg=R0903
 # Too few public methods (1/2): this is an interface
 class _Stage(xmllib.SlotBasedSerializableObject):
-    __slots__ = [ 'name', 'label' ]
+    __slots__ = [ 'name', 'labelSuffix' ]
     tag = "stage"
 
-    def __init__(self, name = None, label = None):
+    def __init__(self, name = None, labelSuffix = None):
         xmllib.SlotBasedSerializableObject.__init__(self)
         self.name = name
-        self.label = label
+        self.labelSuffix = labelSuffix
 
 class _UpstreamSource(xmllib.SlotBasedSerializableObject):
     __slots__ = [ 'troveName', 'label' ]
@@ -330,6 +514,34 @@ class _ProductDefinition(xmllib.BaseNode):
     def addChild(self, childNode):
         chName = childNode.getAbsoluteName()
 
+        if chName == self._makeAbsoluteName('productName'):
+            self.productName = childNode.getText()
+            return
+
+        if chName == self._makeAbsoluteName('productShortname'):
+            self.productShortname = childNode.getText()
+            return
+
+        if chName == self._makeAbsoluteName('productDescription'):
+            self.productDescription = childNode.getText()
+            return
+
+        if chName == self._makeAbsoluteName('productVersion'):
+            self.productVersion = childNode.getText()
+            return
+
+        if chName == self._makeAbsoluteName('productVersionDescription'):
+            self.productVersionDescription = childNode.getText()
+            return
+
+        if chName == self._makeAbsoluteName('conaryRepositoryHostname'):
+            self.conaryRepositoryHostname = childNode.getText()
+            return
+
+        if chName == self._makeAbsoluteName('conaryNamespace'):
+            self.conaryNamespace = childNode.getText()
+            return
+
         if chName == self._makeAbsoluteName('imageGroup'):
             self.imageGroup = childNode.getText()
             return
@@ -361,7 +573,7 @@ class _ProductDefinition(xmllib.BaseNode):
         for node in stagesNodes:
             # XXX getAttribute should be getAbsoluteAttribute
             pyObj = _Stage(name = node.getAttribute('name'),
-                           label = node.getAttribute('label'))
+                           labelSuffix = node.getAttribute('labelSuffix'))
             stages.append(pyObj)
 
     def _addUpstreamSources(self, upstreamSources):
@@ -409,6 +621,46 @@ class _ProductDefinitionSerialization(xmllib.BaseNode):
         self.upstreamSources = prodDef.getUpstreamSources()
         self.buildDefinition = prodDef.getBuildDefinitions()
 
+        self.productName = xmllib.StringNode(name = 'productName')
+        productName = prodDef.getProductName()
+        if productName:
+            self.productName.characters(productName)
+
+        self.productShortname = \
+                xmllib.StringNode(name = 'productShortname')
+        productShortname = prodDef.getProductShortname()
+        if productShortname:
+            self.productShortname.characters(productShortname)
+
+        self.productDescription = \
+                xmllib.StringNode(name = 'productDescription')
+        productDescription = prodDef.getProductDescription()
+        if productDescription:
+            self.productDescription.characters(productDescription)
+
+        self.productVersion = \
+                xmllib.StringNode(name = 'productVersion')
+        productVersion  = prodDef.getProductVersion()
+        if productVersion:
+            self.productVersion.characters(productVersion)
+
+        self.productVersionDescription = \
+                xmllib.StringNode(name = 'productVersionDescription')
+        productVersionDescription = prodDef.getProductVersionDescription()
+        if productVersionDescription:
+            self.productVersionDescription.characters(productVersionDescription)
+
+        self.conaryRepositoryHostname = \
+                xmllib.StringNode(name = 'conaryRepositoryHostname')
+        conaryRepositoryHostname = prodDef.getConaryRepositoryHostname()
+        if conaryRepositoryHostname:
+            self.conaryRepositoryHostname.characters(conaryRepositoryHostname)
+
+        self.conaryNamespace = xmllib.StringNode(name = 'conaryNamespace')
+        conaryNamespace = prodDef.getConaryNamespace()
+        if conaryNamespace:
+            self.conaryNamespace.characters(conaryNamespace)
+
         self.imageGroup = xmllib.StringNode(name = 'imageGroup')
         imageGroup = prodDef.getImageGroup()
         if imageGroup:
@@ -418,7 +670,14 @@ class _ProductDefinitionSerialization(xmllib.BaseNode):
         self.baseFlavor.characters(prodDef.getBaseFlavor())
 
     def iterChildren(self):
-        return [ self.imageGroup,
+        return [ self.productName,
+                 self.productShortname,
+                 self.productDescription,
+                 self.productVersion,
+                 self.productVersionDescription,
+                 self.conaryRepositoryHostname,
+                 self.conaryNamespace,
+                 self.imageGroup,
                  self.baseFlavor,
                  self.stages,
                  self.upstreamSources,

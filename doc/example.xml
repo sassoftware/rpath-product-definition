@@ -3,8 +3,23 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
   xsi:schemaLocation="http://www.rpath.com/permanent/pd.xsd pd.xsd"
   version="1.0">
+  <productName>My Awesome Appliance</productName>
+  <productShortname>awesome</productShortname>
+  <productDescription>
+      This here is my awesome appliance.
+      Is it not nifty?
+      Worship the appliance.
+  </productDescription>
+  <productVersion>1.0</productVersion>
+  <productVersionDescription>
+      Version 1.0 features "stability" and "usefulness", which is a 
+      vast improvement over our pre-release code.
+  </productVersionDescription>
+  <conaryRepository name="default">product.example.com</conaryRepository>
+  <conaryNamespace>exm</conaryNamespace>
+  <imageGroup>group-awesome-dist</imageGroup>
   <baseFlavor>
-  	 ~MySQL-python.threadsafe, ~X, ~!alternatives, !bootstrap, 
+     ~MySQL-python.threadsafe, ~X, ~!alternatives, !bootstrap, 
      ~builddocs, ~buildtests, !cross, ~desktop, ~!dietlibc, ~!dom0, ~!domU, 
      ~emacs, ~gcj, ~gnome, ~grub.static, ~gtk, ~ipv6, ~kde, ~!kernel.debug, 
      ~kernel.debugdata, ~!kernel.numa, ~kernel.smp, ~krb, ~ldap, ~nptl, 
@@ -14,9 +29,9 @@
      ~!xen, ~!xfce, ~!xorg-x11.xprint
   </baseFlavor>
   <stages>
-    <stage name="devel" label="product.example.com@exm:product-1-devel" />
-    <stage name="qa" label="product.example.com@exm:product-1-qa" />
-    <stage name="release" label="product.example.com@exm:product-1" />
+    <stage name="devel" labelSuffix="-devel" />
+    <stage name="qa" labelSuffix="-qa" />
+    <stage name="release" labelSuffix="" />
   </stages>
   <upstreamSources>
     <upstreamSource troveName="group-rap-standard" label="rap.rpath.com@rpath:linux-1" />
@@ -25,18 +40,35 @@
   <buildDefinition>
     <build name="x86 Installable ISO Build" baseFlavor="is: x86" >
       <installableIsoImage />
+      <stage ref="devel" />
+      <stage ref="qa" />
+      <stage ref="release" />
     </build>
     <build name="x86-64 Installable ISO Build" baseFlavor="is: x86 x86_64" >
       <installableIsoImage />
+      <stage ref="devel" />
+      <stage ref="qa" />
+      <stage ref="release" />
     </build>
     <build name="x86 Citrix Xenserver Virtual Appliance" baseFlavor="~xen, ~domU is: x86" >
-      <rawFsImage/>
+      <xenOvaImage />
+      <stage ref="devel" />
+      <stage ref="qa" />
+      <stage ref="release" />
     </build>
     <build name="Another Xen build" baseFlavor="~xen, ~domU is: x86 x86_64">
       <rawHdImage autoResolve="true" baseFileName="/poo/foo/moo"/>
+      <stage ref="devel" />
+      <stage ref="qa" />
+      <stage ref="release" />
     </build>
     <build name="VMWare build" baseFlavor="~vmware is: x86 x86_64">
       <vmwareImage baseFileName="foobar" autoResolve="true" /> 
+      <stage ref="devel" />
+      <stage ref="qa" />
+    </build>
+    <build name="Totally VMware optional build from a different group" imageGroup="group-foo-dist" baseFlavor="~vmware is: x86 x86_64">
+      <vmwareImage /> 
     </build>
   </buildDefinition>
 </productDefinition>

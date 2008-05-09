@@ -33,8 +33,8 @@
     </xsd:simpleType>
 
     <xsd:complexType name="stageType">
-        <xsd:attribute name="name" type="xsd:string" />
-        <xsd:attribute name="label" type="xsd:string" />
+        <xsd:attribute name="name" type="xsd:string" use="required" />
+        <xsd:attribute name="labelSuffix" type="xsd:string" use="required" />
     </xsd:complexType>
 
     <xsd:complexType name="stageListType">
@@ -194,6 +194,13 @@
     <xsd:element name="productDefinition">
         <xsd:complexType>
             <xsd:sequence>
+                <xsd:element name="productName" type="xsd:string" />
+                <xsd:element name="productShortname" type="xsd:string" />
+                <xsd:element name="productDescription" type="xsd:string" />
+                <xsd:element name="productVersion" type="xsd:string" />
+                <xsd:element name="productVersionDescription" type="xsd:string" />
+                <xsd:element name="conaryRepositoryHostname" type="xsd:string" />
+                <xsd:element name="conaryNamespace" type="xsd:string" />
                 <xsd:element name="imageGroup" type="rpd:troveSpecType" />
                 <xsd:element name="baseFlavor" type="rpd:flavorStringType" />
                 <xsd:element name="stages" type="rpd:stageListType" />

@@ -16,6 +16,7 @@ Example code for interacting with rPath product definition xml files.
 """
 
 from rpath_common.proddef import api1 as proddef
+import sys
 
 # This is an example of how this module would be used to generate the XML
 # for the proddef source trove.
@@ -31,38 +32,70 @@ baseFlavor = """
     ~sqlite.threadsafe, ssl, ~tcl, tcpwrappers, ~tk, ~uClibc, !vmware,
     ~!xen, ~!xfce, ~!xorg-x11.xprint
     """
-stages = [dict(name='devel',
-               label='product.example.com@exm:product-1-devel'),
-          dict(name='qa',
-               label='product.example.com@exm:product-1-qa'),
-          dict(name='release',
-               label='product.example.com@exm:product-1')]
+productDescription = """
+      This here is my awesome appliance.
+      Is it not nifty?
+      Worship the appliance.
+"""
 
+productVersionDescription = """
+      Version 1.0 features "stability" and "usefulness", which is a 
+      vast improvement over our pre-release code.
+"""
 
-upstreamSources = [dict(troveName='group-rap-standard', 
-                        label='rap.rpath.com@rpath:linux-1'),
-                   dict(troveName='group-postgres', 
-                        label='products.rpath.com@rpath:postgres-8.2')]
+prodDef = proddef.ProductDefinition()
+prodDef.setProductName("My Awesome Appliance")
+prodDef.setProductShortname("awesome")
+prodDef.setProductDescription(productDescription)
+prodDef.setProductVersion("1.0")
+prodDef.setProductVersionDescription(productVersionDescription)
+prodDef.setConaryRepositoryHostname("product.example.com")
+prodDef.setConaryNamespace("exm")
+prodDef.setImageGroup("group-awesome-dist")
+prodDef.setBaseFlavor(baseFlavor)
+prodDef.addStage(name='devel', labelSuffix='-devel')
+prodDef.addStage(name='qa', labelSuffix='-qa')
+prodDef.addStage(name='release', labelSuffix='')
 
-buildDefinition = [dict(baseFlavor='is: x86',
-                        installableIsoImage=dict()),
-                   dict(baseFlavor='is: x86_64',
-                        installableIsoImage=dict()),
-                   dict(baseFlavor='~xen, ~domU is: x86',
-                        rawFsImage=dict()),
-                   dict(baseFlavor='~xen, ~domU is: x86 x86_64',
-                        rawHdImage=dict(autoResolve=True,
-                                        baseFileName='/proc/foo/moo')
-                       ),
-                   dict(baseFlavor='~vmware is: x86 x86_64',
-                        vmwareImage=dict(baseFileName='foobar',
-                                         autoResolve=True)
-                       )
-                  ]
+prodDef.addUpstreamSource(troveName='group-rap-standard',
+                        label='rap.rpath.com@rpath:linux-1')
+prodDef.addUpstreamSource(troveName='group-postgres',
+                        label='products.rpath.com@rpath:postgres-8.2')
 
-prodDef = ProductDefinition(dict(baseFlavor=baseFlavor,
-                                 stages=stages,
-                                 upstreamSources=upstreamSources,
-                                 buildDefinition=buildDefinition))
+prodDef.addBuildDefinition(name='x86 Installable ISO Build',
+                        baseFlavor='is: x86',
+                        imageType=prodDef.imageType('installableIsoImage'),
+                        stages = ['devel', 'qa', 'release'])
 
-print prodDef.toXml()
+prodDef.addBuildDefinition(name='x86-64 Installable ISO Build',
+                        baseFlavor='is: x86 x86_64',
+                        imageType=prodDef.imageType('installableIsoImage'),
+                        stages = ['devel', 'qa', 'release'])
+
+prodDef.addBuildDefinition(name='x86 Citrix Xenserver Virtual Appliance',
+                        baseFlavor='~xen, ~domU is: x86',
+                        imageType=prodDef.imageType('xenOvaImage'),
+                        stages = ['devel', 'qa', 'release'])
+
+prodDef.addBuildDefinition(name='Another Xen Build',
+                        baseFlavor='~xen, ~domU is: x86',
+                        imageType=prodDef.imageType('rawHdImage',
+                            dict(autoResolve="true",
+                            baseFileName="/poo/moo/foo")),
+                        stages = ['devel', 'qa', 'release'])
+
+prodDef.addBuildDefinition(name='VMWare build',
+                        baseFlavor='~vmware is: x86 x86_64',
+                        imageType=prodDef.imageType('vmwareImage',
+                            dict(autoResolve="true",
+                            baseFileName="foobar")),
+                        stages = ['devel', 'qa'])
+
+prodDef.addBuildDefinition(name='Totally VMware optional build from a different group',
+                        baseFlavor='~vmware is: x86 x86_64',
+                        imageGroup='group-foo-dist',
+                        imageType=prodDef.imageType('vmwareImage'))
+
+prodDef.serialize(sys.stdout)
+sys.stdout.flush()
+sys.exit(0)
