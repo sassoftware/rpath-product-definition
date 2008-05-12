@@ -166,10 +166,28 @@ class Recipe_@NAME@(PackageRecipe):
         stream.write(binder.toXml(serObj))
 
     def saveToRepository(self, client, message = None):
+        """
+        Save a C{ProductDefinition} object to a Conary repository.
+        @param client: A Conary client object
+        @type client: C{conaryclient.ConaryClient}
+        @param message: An optional commit message
+        @type message: C{str}
+        """
         label = self._getProductDefinitionLabel()
         return self._saveToRepository(client, label, message = message)
 
     def loadFromRepository(self, client):
+        """
+        Load a C{ProductDefinition} object to a Conary repository.
+        Prior to calling this method, the C{ProductDefinition} object should
+        be initialized by calling C{setProductShortname},
+        C{setProductVersion}, C{setConaryRepositoryHostname} and
+        C{setConaryNamespace}.
+        @param client: A Conary client object
+        @type client: C{conaryclient.ConaryClient}
+        @param message: An optional commit message
+        @type message: C{str}
+        """
         label = self._getProductDefinitionLabel()
         stream = self._getStreamFromRepository(client, label)
         stream.seek(0)
@@ -349,36 +367,6 @@ class Recipe_@NAME@(PackageRecipe):
         """
         return self.upstreamSources
 
-    def _getProductDefinitionLabel(self):
-        """
-        Private method that returns the product definition's label
-        @return: a Conary label string
-        @rtype: C{str}
-        @raises MissingInformationError: if there isn't enough information
-            in the product definition to generate the label
-        """
-        hostname = self.getConaryRepositoryHostname()
-        shortname = self.getProductShortname()
-        namespace = self.getConaryNamespace()
-        version = self.getProductVersion()
-
-        if not (hostname and shortname and namespace and version):
-            raise MissingInformationError
-        return "%s@%s:%s-%s" % (hostname, namespace, shortname, version)
-
-    def _getLabelForStage(self, stageObj):
-        """
-        Private method that works similarly to L{getLabelForStage},
-        but works on a given C{_Stage} object.
-        @return: a Conary label string where for the given stage object
-        @rtype: C{str}
-        @raises MissingInformationError: if there isn't enough information
-            in the product definition to generate the label
-        """
-        prefix = self._getProductDefinitionLabel()
-        labelSuffix = stageObj.labelSuffix or '' # this can be blank
-        return prefix + labelSuffix
-
     def getLabelForStage(self, stageName):
         """
         Synthesize the label for a particular stage based upon
@@ -489,6 +477,37 @@ class Recipe_@NAME@(PackageRecipe):
                 ret.append(build)
         return ret
 
+    #{ Internal methods
+    def _getProductDefinitionLabel(self):
+        """
+        Private method that returns the product definition's label
+        @return: a Conary label string
+        @rtype: C{str}
+        @raises MissingInformationError: if there isn't enough information
+            in the product definition to generate the label
+        """
+        hostname = self.getConaryRepositoryHostname()
+        shortname = self.getProductShortname()
+        namespace = self.getConaryNamespace()
+        version = self.getProductVersion()
+
+        if not (hostname and shortname and namespace and version):
+            raise MissingInformationError
+        return "%s@%s:%s-%s" % (hostname, namespace, shortname, version)
+
+    def _getLabelForStage(self, stageObj):
+        """
+        Private method that works similarly to L{getLabelForStage},
+        but works on a given C{_Stage} object.
+        @return: a Conary label string where for the given stage object
+        @rtype: C{str}
+        @raises MissingInformationError: if there isn't enough information
+            in the product definition to generate the label
+        """
+        prefix = self._getProductDefinitionLabel()
+        labelSuffix = stageObj.labelSuffix or '' # this can be blank
+        return prefix + labelSuffix
+
     def _initFields(self):
         self.baseFlavor = None
         self.stages = _Stages()
@@ -556,6 +575,7 @@ class Recipe_@NAME@(PackageRecipe):
 
         # Couldn't find the file we expected; die
         raise ProductDefinitionFileNotFound("%s=%s" % (troveName, label))
+    #}
 
 
 #{ Objects for the representation of ProductDefinition fields
