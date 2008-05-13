@@ -22,7 +22,11 @@ __all__ = [ 'MissingInformationError',
             'ProductDefinition',
             'ProductDefinitionError',
             'StageNotFoundError',
-            'UnsupportedImageType' ]
+            'UnsupportedImageType',
+            'ProductDefinitionTroveNotFound',
+            'ProductDefinitionFileNotFound',
+            'RepositoryError',
+            ]
 
 import StringIO
 
@@ -58,6 +62,10 @@ class ProductDefinitionTroveNotFound(ProductDefinitionError):
 
 class ProductDefinitionFileNotFound(ProductDefinitionError):
     "Raised when the product definition file was not found in the repository"
+
+class RepositoryError(ProductDefinitionError):
+    "Generic error raised when a repository error was caught"
+
 #}
 
 class ProductDefinition(object):
@@ -187,6 +195,9 @@ class Recipe_@NAME@(PackageRecipe):
         @type client: C{conaryclient.ConaryClient}
         @param message: An optional commit message
         @type message: C{str}
+        @raises C{RepositoryError}:
+        @raises C{ProductDefinitionTroveNotFound}:
+        @raises C{ProductDefinitionFileNotFound}:
         """
         label = self._getProductDefinitionLabel()
         stream = self._getStreamFromRepository(client, label)
@@ -418,7 +429,7 @@ class Recipe_@NAME@(PackageRecipe):
     def getBuildDefinitions(self):
         """
         @return: The build definitions from this product definition
-        @rtype: C{list} of C{_Build} objects
+        @rtype: C{list} of C{Build} objects
         """
         return self.buildDefinition
 
@@ -441,9 +452,10 @@ class Recipe_@NAME@(PackageRecipe):
         @type imageGroup: C{str}
         subclass.
         """
-        obj = _Build(name = name, baseFlavor = baseFlavor,
+        obj = Build(name = name, baseFlavor = baseFlavor,
                      imageType = imageType, stages = stages,
-                     imageGroup = imageGroup)
+                     imageGroup = imageGroup,
+                     parentImageGroup = self.imageGroup)
         self.buildDefinition.append(obj)
 
     @classmethod
@@ -469,7 +481,7 @@ class Recipe_@NAME@(PackageRecipe):
         @param stageName: stage name
         @type stageName: C{str}
         @return: A list of build definitions for the stage.
-        @rtype: C{list} of C{_Build} objects
+        @rtype: C{list} of C{Build} objects
         """
         ret = []
         for build in self.getBuildDefinitions():
@@ -557,6 +569,8 @@ class Recipe_@NAME@(PackageRecipe):
             troves = repos.findTroves(None, [ troveSpec ])
         except conaryErrors.TroveNotFound:
             raise ProductDefinitionTroveNotFound("%s=%s" % (troveName, label))
+        except conaryErrors.RepositoryError, e:
+            raise RepositoryError(str(e))
         nvfs = troves[troveSpec]
         if not nvfs:
             raise ProductDefinitionTroveNotFound("%s=%s" % (troveName, label))
@@ -613,18 +627,38 @@ class _UpstreamSource(xmllib.SlotBasedSerializableObject):
         self.troveName = troveName
         self.label = label
 
-class _Build(xmllib.SerializableObject):
-    __slots__ = [ 'name', 'baseFlavor', 'imageType', 'stages', 'imageGroup' ]
+class Build(xmllib.SerializableObject):
+    __slots__ = [ 'name', 'baseFlavor', 'imageType', 'stages', 'imageGroup',
+                  'parentImageGroup', ]
     tag = "build"
 
     def __init__(self, name = None, baseFlavor = None,
-                 imageType = None, stages = None, imageGroup = None):
+                 imageType = None, stages = None, imageGroup = None,
+                 parentImageGroup = None):
         xmllib.SlotBasedSerializableObject.__init__(self)
         self.name = name
         self.baseFlavor = baseFlavor
         self.imageType = imageType
         self.stages = stages or []
         self.imageGroup = imageGroup
+        self.parentImageGroup = parentImageGroup
+
+    def getBuildImageGroup(self):
+        if self.imageGroup is None:
+            return self.parentImageGroup
+        return self.imageGroup
+
+    def getBuildImageType(self):
+        return self.imageType
+
+    def getBuildStages(self):
+        return list(self.stages)
+
+    def getBuildName(self):
+        return self.name
+
+    def getBuildBaseFlavor(self):
+        return self.baseFlavor
 
     def _getName(self):
         return self.tag
@@ -748,13 +782,14 @@ class _ProductDefinition(xmllib.BaseNode):
                 imageGroup = imageGroup[0].getText()
             else:
                 imageGroup = None
-            pyobj = _Build(
+            pyobj = Build(
                 name = node.getAttribute('name'),
                 baseFlavor = node.getAttribute('baseFlavor'),
                 imageType = imgType,
                 stages = [ x.getAttribute('ref')
                            for x in node.getChildren('stage') ],
                 imageGroup = imageGroup,
+                parentImageGroup = self.imageGroup,
                 )
             builds.append(pyobj)
 
