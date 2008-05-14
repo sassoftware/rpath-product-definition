@@ -32,6 +32,7 @@ import StringIO
 
 from conary import changelog
 from conary import errors as conaryErrors
+from conary import versions as conaryVersions
 from conary.conaryclient import filetypes
 
 from rpath_common.xmllib import api1 as xmllib
@@ -423,6 +424,9 @@ class Recipe_@NAME@(PackageRecipe):
         @param label: Label for the upstream source
         @type label: C{str} or C{None}
         """
+        if label is not None:
+            if isinstance(label, conaryVersions.Label):
+                label = str(label)
         obj = _UpstreamSource(troveName = troveName, label = label)
         self.upstreamSources.append(obj)
 
