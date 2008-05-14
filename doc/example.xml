@@ -34,6 +34,9 @@
     <upstreamSource troveName="group-rap-standard" label="rap.rpath.com@rpath:linux-1"/>
     <upstreamSource troveName="group-postgres" label="products.rpath.com@rpath:postgres-8.2"/>
   </upstreamSources>
+  <factorySources>
+    <factorySource troveName="group-factories" label="products.rpath.com@rpath:factories-1"/>
+  </factorySources>
   <buildDefinition>
     <build baseFlavor="is: x86" name="x86 Installable ISO Build">
       <installableIsoImage/>

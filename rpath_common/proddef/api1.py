@@ -145,6 +145,7 @@ class Recipe_@NAME@(PackageRecipe):
         self.baseFlavor = getattr(xmlObj, 'baseFlavor', None)
         self.stages.extend(getattr(xmlObj, 'stages', []))
         self.upstreamSources.extend(getattr(xmlObj, 'upstreamSources', []))
+        self.factorySources.extend(getattr(xmlObj, 'factorySources', []))
         self.buildDefinition.extend(getattr(xmlObj, 'buildDefinition', []))
 
         ver = xmlObj.getAttribute('version')
@@ -379,6 +380,14 @@ class Recipe_@NAME@(PackageRecipe):
         """
         return self.upstreamSources
 
+    def getFactorySources(self):
+        """
+        @return: the factory sources from this product definition
+        @rtype: C{list} of C{_FactorySource} objects
+        """
+        return self.factorySources
+
+
     def getLabelForStage(self, stageName):
         """
         Synthesize the label for a particular stage based upon
@@ -424,11 +433,25 @@ class Recipe_@NAME@(PackageRecipe):
         @param label: Label for the upstream source
         @type label: C{str} or C{None}
         """
+        self._addSource(troveName, label, _UpstreamSource, self.upstreamSources)
+
+    def addFactorySource(self, troveName = None, label = None):
+        """
+        Add a factory source.
+        @param troveName: the trove name for the factory source.
+        @type name: C{str} or C{None}
+        @param label: Label for the factory source
+        @type label: C{str} or C{None}
+        """
+        self._addSource(troveName, label, _FactorySource, self.factorySources)
+
+    def _addSource(self, troveName, label, cls, intList):
+        "Internal function for adding a Source"
         if label is not None:
             if isinstance(label, conaryVersions.Label):
                 label = str(label)
-        obj = _UpstreamSource(troveName = troveName, label = label)
-        self.upstreamSources.append(obj)
+        obj = cls(troveName = troveName, label = label)
+        intList.append(obj)
 
     def getBuildDefinitions(self):
         """
@@ -536,6 +559,7 @@ class Recipe_@NAME@(PackageRecipe):
         self.conaryNamespace = None
         self.imageGroup = None
         self.upstreamSources = _UpstreamSources()
+        self.factorySources = _FactorySources()
         self.buildDefinition = _BuildDefinition()
 
     def _saveToRepository(self, conaryClient, label, message = None):
@@ -608,6 +632,12 @@ class _UpstreamSources(xmllib.SerializableList):
 
 # pylint: disable-msg=R0903
 # Too few public methods (1/2): this is an interface
+class _FactorySources(xmllib.SerializableList):
+    tag = "factorySources"
+
+
+# pylint: disable-msg=R0903
+# Too few public methods (1/2): this is an interface
 class _BuildDefinition(xmllib.SerializableList):
     tag = "buildDefinition"
 
@@ -630,6 +660,9 @@ class _UpstreamSource(xmllib.SlotBasedSerializableObject):
         xmllib.SlotBasedSerializableObject.__init__(self)
         self.troveName = troveName
         self.label = label
+
+class _FactorySource(_UpstreamSource):
+    tag = "factorySource"
 
 class Build(xmllib.SerializableObject):
     __slots__ = [ 'name', 'baseFlavor', 'imageType', 'stages', 'imageGroup',
@@ -742,6 +775,11 @@ class _ProductDefinition(xmllib.BaseNode):
             self._addUpstreamSources(children)
             return
 
+        if chName == self._makeAbsoluteName('factorySources'):
+            children = childNode.getChildren('factorySource')
+            self._addFactorySources(children)
+            return
+
         if chName == self._makeAbsoluteName('buildDefinition'):
             children = childNode.getChildren('build')
             self._addBuildDefinition(children)
@@ -765,6 +803,15 @@ class _ProductDefinition(xmllib.BaseNode):
                 troveName = node.getAttribute('troveName'),
                 label = node.getAttribute('label'))
             sources.append(pyObj)
+
+    def _addFactorySources(self, factorySources):
+        sources = self.factorySources = []
+        for node in factorySources:
+            pyObj = _FactorySource(
+                troveName = node.getAttribute('troveName'),
+                label = node.getAttribute('label'))
+            sources.append(pyObj)
+
 
     def _addBuildDefinition(self, buildNodes):
         dispatcher = xmllib.NodeDispatcher(self._nsMap)
@@ -802,6 +849,7 @@ class _ProductDefinitionSerialization(xmllib.BaseNode):
         xmllib.BaseNode.__init__(self, attrs, namespaces, name = name)
         self.stages = prodDef.getStages()
         self.upstreamSources = prodDef.getUpstreamSources()
+        self.factorySources = prodDef.getFactorySources()
         self.buildDefinition = prodDef.getBuildDefinitions()
 
         self.productName = xmllib.StringNode(name = 'productName')
@@ -853,7 +901,7 @@ class _ProductDefinitionSerialization(xmllib.BaseNode):
         self.baseFlavor.characters(prodDef.getBaseFlavor())
 
     def iterChildren(self):
-        return [ self.productName,
+        ret =  [ self.productName,
                  self.productShortname,
                  self.productDescription,
                  self.productVersion,
@@ -863,8 +911,11 @@ class _ProductDefinitionSerialization(xmllib.BaseNode):
                  self.imageGroup,
                  self.baseFlavor,
                  self.stages,
-                 self.upstreamSources,
-                 self.buildDefinition ]
+                 self.upstreamSources, ]
+        if len(self.factorySources):
+            ret.append(self.factorySources)
+        ret.append(self.buildDefinition)
+        return ret
 
 class _ImageTypeFakeNode(object):
     """Internal class for emulating the interface expected by the node
