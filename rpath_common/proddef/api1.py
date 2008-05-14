@@ -76,17 +76,18 @@ class ProductDefinition(object):
     @type version: C{str}
     @cvar defaultNamespace:
     @type defaultNamespace: C{str}
-    @cvar xmlSchemaNamespace:
-    @type xmlSchemaNamespace: C{str}
     @cvar xmlSchemaLocation:
     @type xmlSchemaLocation: C{str}
     @cvar _imageTypeDispatcher: an object factory for imageType objects
     @type _imageTypeDispatcher: C{xmllib.NodeDispatcher}
+    @cvar schemaDir: Directory where schema definitions are stored
+    @type schemaDir: C{str}
     """
     version = '1.0'
     defaultNamespace = _xmlConstants.defaultNamespaceList[0]
-    xmlSchemaNamespace = _xmlConstants.xmlSchemaNamespace
     xmlSchemaLocation = _xmlConstants.xmlSchemaLocation
+
+    schemaDir = "/usr/share/rpath_common"
 
     _imageTypeDispatcher = xmllib.NodeDispatcher({})
     _imageTypeDispatcher.registerClasses(imageTypes, imageTypes.ImageType_Base)
@@ -107,12 +108,16 @@ class Recipe_@NAME@(PackageRecipe):
         pass
 """
 
-    def __init__(self, fromStream = None):
+    def __init__(self, fromStream = None, validate = False, schemaDir = None):
         """
         Initialize a ProductDefinition object, getting data from the optional
         XML stream.
         @param fromStream: An optional XML string or file
         @type fromStream: C{str} or C{file}
+        @param validate: Validate before parsing (off by default)
+        @type validate: C{bool}
+        @param schemaDir: A directory where schema files are stored
+        @type schemaDir: C{str}
         """
 
         self._initFields()
@@ -120,18 +125,24 @@ class Recipe_@NAME@(PackageRecipe):
         if fromStream:
             if isinstance(fromStream, (str, unicode)):
                 fromStream = StringIO.StringIO(fromStream)
-            self.parseStream(fromStream)
+            self.parseStream(fromStream, validate = validate,
+                             schemaDir = schemaDir)
 
-    def parseStream(self, stream):
+    def parseStream(self, stream, validate = False, schemaDir = None):
         """
         Initialize the current object from an XML stream.
         @param stream: An XML stream
         @type stream: C{file}
+        @param validate: Validate before parsing (off by default)
+        @type validate: C{bool}
+        @param schemaDir: A directory where schema files are stored
+        @type schemaDir: C{str}
         """
         self._initFields()
         binder = xmllib.DataBinder()
         binder.registerType(_ProductDefinition, 'productDefinition')
-        xmlObj = binder.parseFile(stream)
+        xmlObj = binder.parseFile(stream, validate = validate,
+                                  schemaDir = schemaDir or self.schemaDir)
         self.productName = getattr(xmlObj, 'productName', None)
         self.productDescription = getattr(xmlObj, 'productDescription', None)
         self.productShortname = getattr(xmlObj, 'productShortname', None)
@@ -166,7 +177,7 @@ class Recipe_@NAME@(PackageRecipe):
         """
         attrs = {'version' : self.version,
                  'xmlns' : self.defaultNamespace,
-                 'xmlns:xsi' : self.xmlSchemaNamespace,
+                 'xmlns:xsi' : xmllib.DataBinder.xmlSchemaNamespace,
                  "xsi:schemaLocation" : self.xmlSchemaLocation,
         }
         nameSpaces = {}
