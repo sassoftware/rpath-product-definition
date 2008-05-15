@@ -543,7 +543,7 @@ class Recipe_@NAME@(PackageRecipe):
 
         if not (hostname and shortname and namespace and version):
             raise MissingInformationError
-        return "%s@%s:%s-%s" % (hostname, namespace, shortname, version)
+        return str("%s@%s:%s-%s" % (hostname, namespace, shortname, version))
 
     def _getLabelForStage(self, stageObj):
         """
@@ -556,7 +556,7 @@ class Recipe_@NAME@(PackageRecipe):
         """
         prefix = self._getProductDefinitionLabel()
         labelSuffix = stageObj.labelSuffix or '' # this can be blank
-        return prefix + labelSuffix
+        return str(prefix + labelSuffix)
 
     def _initFields(self):
         self.baseFlavor = None
