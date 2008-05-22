@@ -586,7 +586,7 @@ class Recipe_@NAME@(PackageRecipe):
         self.serialize(stream)
         pathDict = {
             "%s.recipe" % self._troveName : filetypes.RegularFile(
-                contents = self._recipe),
+                contents = recipe),
             self._troveFileName : filetypes.RegularFile(
                 contents = stream.getvalue()),
         }
