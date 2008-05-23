@@ -199,7 +199,7 @@ class Recipe_@NAME@(PackageRecipe):
 
     def loadFromRepository(self, client):
         """
-        Load a C{ProductDefinition} object to a Conary repository.
+        Load a C{ProductDefinition} object from a Conary repository.
         Prior to calling this method, the C{ProductDefinition} object should
         be initialized by calling C{setProductShortname},
         C{setProductVersion}, C{setConaryRepositoryHostname} and
