@@ -544,6 +544,15 @@ class Recipe_@NAME@(PackageRecipe):
             raise MissingInformationError
         return str("%s@%s:%s-%s" % (hostname, namespace, shortname, version))
 
+    @classmethod
+    def getTroveName(cls):
+        """
+        @return: The name of the trove containing the product definition XML
+        file.
+        @rtype: C{str}
+        """
+        return cls._troveName
+
     #{ Internal methods
     def _getLabelForStage(self, stageObj):
         """
