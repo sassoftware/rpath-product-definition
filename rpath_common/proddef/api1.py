@@ -194,7 +194,7 @@ class Recipe_@NAME@(PackageRecipe):
         @param message: An optional commit message
         @type message: C{str}
         """
-        label = self._getProductDefinitionLabel()
+        label = self.getProductDefinitionLabel()
         return self._saveToRepository(client, label, message = message)
 
     def loadFromRepository(self, client):
@@ -212,7 +212,7 @@ class Recipe_@NAME@(PackageRecipe):
         @raises C{ProductDefinitionTroveNotFound}:
         @raises C{ProductDefinitionFileNotFound}:
         """
-        label = self._getProductDefinitionLabel()
+        label = self.getProductDefinitionLabel()
         stream = self._getStreamFromRepository(client, label)
         stream.seek(0)
         self.parseStream(stream)
@@ -527,10 +527,9 @@ class Recipe_@NAME@(PackageRecipe):
                 ret.append(build)
         return ret
 
-    #{ Internal methods
-    def _getProductDefinitionLabel(self):
+    def getProductDefinitionLabel(self):
         """
-        Private method that returns the product definition's label
+        Method that returns the product definition's label
         @return: a Conary label string
         @rtype: C{str}
         @raises MissingInformationError: if there isn't enough information
@@ -545,6 +544,7 @@ class Recipe_@NAME@(PackageRecipe):
             raise MissingInformationError
         return str("%s@%s:%s-%s" % (hostname, namespace, shortname, version))
 
+    #{ Internal methods
     def _getLabelForStage(self, stageObj):
         """
         Private method that works similarly to L{getLabelForStage},
@@ -554,7 +554,7 @@ class Recipe_@NAME@(PackageRecipe):
         @raises MissingInformationError: if there isn't enough information
             in the product definition to generate the label
         """
-        prefix = self._getProductDefinitionLabel()
+        prefix = self.getProductDefinitionLabel()
         labelSuffix = stageObj.labelSuffix or '' # this can be blank
         return str(prefix + labelSuffix)
 
