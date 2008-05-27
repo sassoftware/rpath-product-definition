@@ -619,9 +619,11 @@ class Recipe_@NAME@(PackageRecipe):
             raise ProductDefinitionTroveNotFound("%s=%s" % (troveName, label))
         except conaryErrors.RepositoryError, e:
             raise RepositoryError(str(e))
+        # At this point, troveSpec is in troves and its value should not be
+        # the empty list.
         nvfs = troves[troveSpec]
-        if not nvfs:
-            raise ProductDefinitionTroveNotFound("%s=%s" % (troveName, label))
+        #if not nvfs:
+        #    raise ProductDefinitionTroveNotFound("%s=%s" % (troveName, label))
         trvCsSpec = (nvfs[0][0], (None, None), (nvfs[0][1], nvfs[0][2]), True)
         cs = conaryClient.createChangeSet([ trvCsSpec ], withFiles = True,
                                           withFileContents = True)
@@ -840,12 +842,16 @@ class _ProductDefinition(xmllib.BaseNode):
         builds = self.buildDefinition = []
         for node in buildNodes:
             imgType = None
+            subNode = None
             for subNode in node.iterChildren():
                 if not isinstance(subNode, xmllib.BaseNode):
                     continue
                 imgType = dispatcher.dispatch(subNode)
                 if imgType is not None:
                     break
+            if subNode is None:
+                # Build node had no children
+                continue
             if imgType is None:
                 raise UnsupportedImageType(subNode.getName())
             imageGroup = node.getChildren('imageGroup')
