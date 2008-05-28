@@ -600,9 +600,9 @@ class ProductDefinitionRecipe(PackageRecipe):
         self.serialize(stream)
         pathDict = {
             "%s.recipe" % self._troveName : filetypes.RegularFile(
-                contents = recipe),
+                contents = recipe, config=True),
             self._troveFileName : filetypes.RegularFile(
-                contents = stream.getvalue()),
+                contents = stream.getvalue(), config=True),
         }
         cLog = changelog.ChangeLog(name = conaryClient.cfg.name,
                                    contact = conaryClient.cfg.contact,
