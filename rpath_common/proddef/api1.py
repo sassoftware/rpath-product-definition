@@ -95,18 +95,23 @@ class ProductDefinition(object):
     _troveName = 'product-definition'
     _troveFileName = 'product-definition.xml'
 
-    _recipe = """
+    _recipe = '''
 #
 # Copyright (c) 2008 rPath, Inc.
 #
 
-class Recipe_@NAME@(PackageRecipe):
+class ProductDefinitionRecipe(PackageRecipe):
     name = "@NAME@"
     version = "@VERSION@"
 
     def setup(r):
-        pass
-"""
+        """
+        This recipe is a stub created to allow users to manually
+        check in changes to the product definition XML.
+
+        No other recipe actions need to be added beyond this point.
+        """
+'''
 
     def __init__(self, fromStream = None, validate = False, schemaDir = None):
         """
