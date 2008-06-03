@@ -143,6 +143,22 @@ class ProductDefinitionRecipe(PackageRecipe):
             prodDefLabel = None
         return "<Product Definition: %s=%s>" % (troveName, prodDefLabel)
 
+    def __eq__(self, obj):
+        for key, val in self.__dict__.iteritems():
+            val2 = obj.__getattribute__(key)
+            if val != val2:
+                return False
+        return True
+
+    def __ne__(self, obj):
+        return not self.__eq__(obj)
+
+    def copy(self):
+        outStr = StringIO.StringIO()
+        self.serialize(outStr)
+        inStr = StringIO.StringIO(outStr.getvalue())
+        return ProductDefinition(inStr)
+
     def parseStream(self, stream, validate = False, schemaDir = None):
         """
         Initialize the current object from an XML stream.
@@ -747,6 +763,15 @@ class Build(xmllib.SerializableObject):
         self.stages = stages or []
         self.imageGroup = imageGroup
         self.parentImageGroup = parentImageGroup
+
+    def __eq__(self, build):
+        for key in self.__slots__:
+            if self.__getattribute__(key) != build.__getattribute__(key):
+                return False
+        return True
+
+    def __ne__(self, build):
+        return not self.__eq__(build)
 
     def getBuildImageGroup(self):
         if self.imageGroup is None:

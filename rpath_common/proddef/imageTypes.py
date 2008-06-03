@@ -51,6 +51,12 @@ class ImageType_Base(xmllib.SerializableObject):
                 val = int(val)
             flds[attrName] = val
 
+    def __eq__(self, obj):
+        return True
+
+    def __ne__(self, obj):
+        return not self.__eq__(obj)
+
     @classmethod
     def getTag(kls):
         return kls.tag
