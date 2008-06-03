@@ -389,12 +389,28 @@ class ProductDefinitionRecipe(PackageRecipe):
         obj = _Stage(name = name, labelSuffix = labelSuffix)
         self.stages.append(obj)
 
+    def clearStages(self):
+        """
+        Delete all stages.
+        @return: None
+        @rtype None
+        """
+        self.stages = _Stages()
+
     def getUpstreamSources(self):
         """
         @return: the upstream sources from this product definition
         @rtype: C{list} of C{_UpstreamSource} objects
         """
         return self.upstreamSources
+
+    def clearUpstreamSources(self):
+        """
+        Delete all upstreamSources.
+        @return: None
+        @rtype None
+        """
+        self.upstreamSources = _UpstreamSources()
 
     def getFactorySources(self):
         """
@@ -403,6 +419,13 @@ class ProductDefinitionRecipe(PackageRecipe):
         """
         return self.factorySources
 
+    def clearFactorySources(self):
+        """
+        Delete all factorySources.
+        @return: None
+        @rtype None
+        """
+        self.factorySources = _FactorySources()
 
     def getLabelForStage(self, stageName):
         """
@@ -500,6 +523,14 @@ class ProductDefinitionRecipe(PackageRecipe):
                      imageGroup = imageGroup,
                      parentImageGroup = self.imageGroup)
         self.buildDefinition.append(obj)
+
+    def clearBuildDefinition(self):
+        """
+        Delete all buildDefinition.
+        @return: None
+        @rtype None
+        """
+        self.buildDefinition = _BuildDefinition()
 
     @classmethod
     def imageType(cls, name, fields = None):
@@ -816,7 +847,7 @@ class _ProductDefinition(xmllib.BaseNode):
         return "{%s}%s" % (self.defaultNamespace, name)
 
     def _addStages(self, stagesNodes):
-        stages = self.stages = []
+        stages = self.stages = _Stages()
         for node in stagesNodes:
             # XXX getAttribute should be getAbsoluteAttribute
             pyObj = _Stage(name = node.getAttribute('name'),
@@ -824,7 +855,7 @@ class _ProductDefinition(xmllib.BaseNode):
             stages.append(pyObj)
 
     def _addUpstreamSources(self, upstreamSources):
-        sources = self.upstreamSources = []
+        sources = self.upstreamSources = _UpstreamSources()
         for node in upstreamSources:
             pyObj = _UpstreamSource(
                 troveName = node.getAttribute('troveName'),
@@ -832,7 +863,7 @@ class _ProductDefinition(xmllib.BaseNode):
             sources.append(pyObj)
 
     def _addFactorySources(self, factorySources):
-        sources = self.factorySources = []
+        sources = self.factorySources = _FactorySources()
         for node in factorySources:
             pyObj = _FactorySource(
                 troveName = node.getAttribute('troveName'),
@@ -844,7 +875,7 @@ class _ProductDefinition(xmllib.BaseNode):
         dispatcher = xmllib.NodeDispatcher(self._nsMap)
         dispatcher.registerClasses(imageTypes, imageTypes.ImageType_Base)
 
-        builds = self.buildDefinition = []
+        builds = self.buildDefinition = _BuildDefinition()
         for node in buildNodes:
             imgType = None
             subNode = None
