@@ -133,6 +133,16 @@ class ProductDefinitionRecipe(PackageRecipe):
             self.parseStream(fromStream, validate = validate,
                              schemaDir = schemaDir)
 
+    def __str__(self):
+        troveName = self.getTroveName()
+        try:
+            prodDefLabel = self.getProductDefinitionLabel()
+        except MissingInformationError:
+            # This is probably the best we can do. we don't want to backtrace
+            # in this case.
+            prodDefLabel = None
+        return "<Product Definition: %s=%s>" % (troveName, prodDefLabel)
+
     def parseStream(self, stream, validate = False, schemaDir = None):
         """
         Initialize the current object from an XML stream.
