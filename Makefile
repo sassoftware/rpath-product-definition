@@ -43,7 +43,7 @@ archive:
 forcedist: archive
 
 tag:
-	hg tag -f rbuild-$(VERSION)
+	hg tag -f product-definition-$(VERSION)
 
 clean: clean-subdirs default-clean
 	@rm -rf $(DISTDIR).tar.bz2
