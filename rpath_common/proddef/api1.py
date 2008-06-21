@@ -831,8 +831,6 @@ class ProductDefinitionRecipe(PackageRecipe):
 
         # Factory sources defined in the product defintion take precedence
         fSources = self.getFactorySources()
-        if not fSources:
-            fSources = self.getPlatformFactorySources()
         for fsrc in fSources or []:
             nplat.addFactorySource(troveName = fsrc.troveName,
                                    label = fsrc.label)
@@ -862,8 +860,6 @@ class ProductDefinitionRecipe(PackageRecipe):
         # on creation.
 
         sPaths = self.getSearchPaths()
-        if not sPaths:
-            sPaths = self.getPlatformSearchPaths()
         for sp in sPaths or []:
             key = (sp.troveName, sp.label)
             if key not in sPathsSet:
@@ -888,7 +884,6 @@ class ProductDefinitionRecipe(PackageRecipe):
         nplat = self.toPlatformDefinition()
         nplat.loadFromRepository(client, label)
         nplat.snapshotVersions(client)
-        # XXX here we have to determine the real versions
         self._rebase(label, nplat, useLatest = None)
 
     def _rebase(self, label, nplat, useLatest = None):
