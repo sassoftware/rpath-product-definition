@@ -46,6 +46,7 @@
     <xsd:complexType name="searchPathType">
         <xsd:attribute name="troveName" type="xsd:string" />
         <xsd:attribute name="label" type="xsd:string" />
+        <xsd:attribute name="version" type="xsd:string" />
     </xsd:complexType>
 
     <xsd:complexType name="searchPathListType">

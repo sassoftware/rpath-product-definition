@@ -28,6 +28,7 @@ __all__ = [ 'MissingInformationError',
             'RepositoryError',
             ]
 
+import itertools
 import StringIO
 
 from conary import changelog
@@ -113,7 +114,7 @@ class BaseDefinition(object):
 
     def getSearchPaths(self):
         """
-        @return: the upstream sources from this product definition
+        @return: the search paths from this product definition
         @rtype: C{list} of C{_SearchPath} objects
         """
         return self.searchPaths
@@ -142,32 +143,36 @@ class BaseDefinition(object):
         """
         self.factorySources = _FactorySources()
 
-    def addSearchPath(self, troveName = None, label = None):
+    def addSearchPath(self, troveName = None, label = None, version = None):
         """
-        Add an upstream source.
-        @param troveName: the trove name for the upstream source.
+        Add an search path.
+        @param troveName: the trove name for the search path.
         @type name: C{str} or C{None}
-        @param label: Label for the upstream source
+        @param label: Label for the search path
         @type label: C{str} or C{None}
+        @param version: Version for the search path
+        @param version: C{str} or C{None}
         """
-        self._addSource(troveName, label, _SearchPath, self.searchPaths)
+        self._addSource(troveName, label, version, _SearchPath, self.searchPaths)
 
-    def addFactorySource(self, troveName = None, label = None):
+    def addFactorySource(self, troveName = None, label = None, version = None):
         """
         Add a factory source.
         @param troveName: the trove name for the factory source.
         @type name: C{str} or C{None}
         @param label: Label for the factory source
         @type label: C{str} or C{None}
+        @param version: Version for the factory source
+        @param version: C{str} or C{None}
         """
-        self._addSource(troveName, label, _FactorySource, self.factorySources)
+        self._addSource(troveName, label, version, _FactorySource, self.factorySources)
 
-    def _addSource(self, troveName, label, cls, intList):
+    def _addSource(self, troveName, label, version, cls, intList):
         "Internal function for adding a Source"
         if label is not None:
             if isinstance(label, conaryVersions.Label):
                 label = str(label)
-        obj = cls(troveName = troveName, label = label)
+        obj = cls(troveName = troveName, label = label, version = version)
         intList.append(obj)
 
 
@@ -622,7 +627,7 @@ class ProductDefinitionRecipe(PackageRecipe):
 
     def getPlatformSearchPaths(self):
         """
-        @return: the upstream sources from this product definition
+        @return: the search paths from this product definition
         @rtype: C{list} of C{_SearchPath} objects
         """
         if self.platform is None:
@@ -639,10 +644,21 @@ class ProductDefinitionRecipe(PackageRecipe):
             return
         self.platform.searchPaths = _SearchPaths()
 
-    def addPlatformSearchPath(self, troveName = None, label = None):
+    def addPlatformSearchPath(self, troveName = None, label = None,
+                              version = None):
+        """
+        Add an search path.
+        @param troveName: the trove name for the search path.
+        @type name: C{str} or C{None}
+        @param label: Label for the search path
+        @type label: C{str} or C{None}
+        @param version: Version for the search path
+        @param version: C{str} or C{None}
+        """
         if self.platform is None:
             self.platform = Platform()
-        self._addSource(troveName, label, _SearchPath, self.platform.searchPaths)
+        self._addSource(troveName, label, version, _SearchPath,
+                        self.platform.searchPaths)
 
     def getPlatformFactorySources(self):
         """
@@ -663,17 +679,21 @@ class ProductDefinitionRecipe(PackageRecipe):
             return
         self.platform.factorySources = _FactorySources()
 
-    def addPlatformFactorySource(self, troveName = None, label = None):
+    def addPlatformFactorySource(self, troveName = None, label = None,
+                                 version = None):
         """
         Add a factory source.
         @param troveName: the trove name for the factory source.
         @type name: C{str} or C{None}
         @param label: Label for the factory source
         @type label: C{str} or C{None}
+        @param version: Version for the factory source
+        @param version: C{str} or C{None}
         """
         if self.platform is None:
             self.platform = Platform()
-        self._addSource(troveName, label, _FactorySource, self.platform.factorySources)
+        self._addSource(troveName, label, version, _FactorySource,
+                        self.platform.factorySources)
 
     def getPlatformBaseFlavor(self):
         if self.platform is None:
@@ -814,6 +834,9 @@ class ProductDefinitionRecipe(PackageRecipe):
         # Now append the search paths from this object, if available, or from
         # the upstream platform, if available
 
+        # We are purposely dropping the versions from the platform definition
+        # on creation.
+
         sPaths = self.getSearchPaths()
         if not sPaths:
             sPaths = self.getPlatformSearchPaths()
@@ -840,6 +863,7 @@ class ProductDefinitionRecipe(PackageRecipe):
             raise Exception("XXX")
         nplat = self.toPlatformDefinition()
         nplat.loadFromRepository(client, label)
+        nplat.snapshotVersions(client)
         # XXX here we have to determine the real versions
         self._rebase(label, nplat, useLatest = None)
 
@@ -851,9 +875,13 @@ class ProductDefinitionRecipe(PackageRecipe):
         self.setPlatformSourceLabel(label)
         self.setPlatformUseLatest(useLatest)
         for sp in nplat.getSearchPaths():
-            self.addPlatformSearchPath(troveName=sp.troveName, label=sp.label)
+            self.addPlatformSearchPath(troveName=sp.troveName,
+                                       label=sp.label,
+                                       version=sp.version)
         for sp in nplat.getFactorySources():
-            self.addPlatformFactorySource(troveName=sp.troveName, label=sp.label)
+            self.addPlatformFactorySource(troveName=sp.troveName,
+                                          label=sp.label,
+                                          version=sp.version)
 
     def _initFields(self):
         self.baseFlavor = None
@@ -974,6 +1002,33 @@ class ProductDefinitionRecipe(PackageRecipe):
         stream.seek(0)
         self.parseStream(stream)
 
+    def snapshotVersions(self, conaryClient):
+        """
+        For each search path or factory source from this platform definition,
+        query the repositories for the latest versions and record them.
+        @param conaryClient: A Conary client object
+        @type conaryClient: C{conaryclient.ConaryClient}
+        """
+        repos = conaryClient.getRepos()
+        troveSpecs = set()
+        # XXX We are ignoring the flavors for now.
+        for sp in itertools.chain(self.getSearchPaths(),
+                                  self.getFactorySources()):
+            key = (sp.troveName, sp.label, None)
+            troveSpecs.add(key)
+        troveSpecs = sorted(troveSpecs)
+        try:
+            troves = repos.findTroves(None, troveSpecs, allowMissing = True)
+        except conaryErrors.RepositoryError, e:
+            raise RepositoryError(str(e))
+
+        for sp in itertools.chain(self.getSearchPaths(),
+                                  self.getFactorySources()):
+            key = (sp.troveName, sp.label, None)
+            if key not in troves:
+                raise ProductDefinitionTroveNotFound("%s=%s" % (key[0], key[1]))
+            nvf = troves[key][0]
+            sp.version = str(nvf[1].trailingRevision())
 
 #{ Objects for the representation of ProductDefinition fields
 
@@ -1008,13 +1063,14 @@ class _Stage(xmllib.SlotBasedSerializableObject):
         self.labelSuffix = labelSuffix
 
 class _SearchPath(xmllib.SlotBasedSerializableObject):
-    __slots__ = [ 'troveName', 'label' ]
+    __slots__ = [ 'troveName', 'label', 'version' ]
     tag = "searchPath"
 
-    def __init__(self, troveName = None, label = None):
+    def __init__(self, troveName = None, label = None, version = None):
         xmllib.SlotBasedSerializableObject.__init__(self)
         self.troveName = troveName
         self.label = label
+        self.version = version
 
 class _FactorySource(_SearchPath):
     tag = "factorySource"
@@ -1097,7 +1153,8 @@ class BaseXmlNode(xmllib.BaseNode):
         for node in searchPaths:
             pyObj = _SearchPath(
                 troveName = node.getAttribute('troveName'),
-                label = node.getAttribute('label'))
+                label = node.getAttribute('label'),
+                version = node.getAttribute('version'))
             sources.append(pyObj)
         return sources
 
@@ -1106,7 +1163,8 @@ class BaseXmlNode(xmllib.BaseNode):
         for node in factorySources:
             pyObj = _FactorySource(
                 troveName = node.getAttribute('troveName'),
-                label = node.getAttribute('label'))
+                label = node.getAttribute('label'),
+                version = node.getAttribute('version'))
             sources.append(pyObj)
         return sources
 
