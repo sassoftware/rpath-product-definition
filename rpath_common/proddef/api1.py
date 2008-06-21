@@ -69,7 +69,167 @@ class RepositoryError(ProductDefinitionError):
 
 #}
 
-class ProductDefinition(object):
+class BaseDefinition(object):
+    version = '0.1'
+    defaultNamespace = _xmlConstants.defaultNamespaceList[0]
+    xmlSchemaLocation = _xmlConstants.xmlSchemaLocation
+
+    schemaDir = "/usr/share/rpath_common"
+
+    def __init__(self, fromStream = None, validate = False, schemaDir = None):
+        """
+        Initialize a ProductDefinition object, getting data from the optional
+        XML stream.
+        @param fromStream: An optional XML string or file
+        @type fromStream: C{str} or C{file}
+        @param validate: Validate before parsing (off by default)
+        @type validate: C{bool}
+        @param schemaDir: A directory where schema files are stored
+        @type schemaDir: C{str}
+        """
+
+        self._initFields()
+
+        if fromStream:
+            if isinstance(fromStream, (str, unicode)):
+                fromStream = StringIO.StringIO(fromStream)
+            self.parseStream(fromStream, validate = validate,
+                             schemaDir = schemaDir)
+
+    def getBaseFlavor(self):
+        """
+        @return: the base flavor
+        @rtype: C{str}
+        """
+        return self.baseFlavor
+
+    def setBaseFlavor(self, baseFlavor):
+        """
+        Set the base flavor.
+        @param baseFlavor: the base flavor
+        @type baseFlavor: C{str}
+        """
+        self.baseFlavor = baseFlavor
+
+    def getSearchPaths(self):
+        """
+        @return: the upstream sources from this product definition
+        @rtype: C{list} of C{_SearchPath} objects
+        """
+        return self.searchPaths
+
+    def clearSearchPaths(self):
+        """
+        Delete all searchPaths.
+        @return: None
+        @rtype None
+        """
+        self.searchPaths = _SearchPaths()
+
+
+    def getFactorySources(self):
+        """
+        @return: the factory sources from this product definition
+        @rtype: C{list} of C{_FactorySource} objects
+        """
+        return self.factorySources
+
+    def clearFactorySources(self):
+        """
+        Delete all factorySources.
+        @return: None
+        @rtype None
+        """
+        self.factorySources = _FactorySources()
+
+    def addSearchPath(self, troveName = None, label = None):
+        """
+        Add an upstream source.
+        @param troveName: the trove name for the upstream source.
+        @type name: C{str} or C{None}
+        @param label: Label for the upstream source
+        @type label: C{str} or C{None}
+        """
+        self._addSource(troveName, label, _SearchPath, self.searchPaths)
+
+    def addFactorySource(self, troveName = None, label = None):
+        """
+        Add a factory source.
+        @param troveName: the trove name for the factory source.
+        @type name: C{str} or C{None}
+        @param label: Label for the factory source
+        @type label: C{str} or C{None}
+        """
+        self._addSource(troveName, label, _FactorySource, self.factorySources)
+
+    def _addSource(self, troveName, label, cls, intList):
+        "Internal function for adding a Source"
+        if label is not None:
+            if isinstance(label, conaryVersions.Label):
+                label = str(label)
+        obj = cls(troveName = troveName, label = label)
+        intList.append(obj)
+
+
+    def _saveToRepository(self, conaryClient, label, message = None):
+        version = '0.1'
+
+        if message is None:
+            message = "Automatic checkin\n"
+
+        recipe = self._recipe.replace('@NAME@', self._troveName)
+        recipe = recipe.replace('@VERSION@', version)
+
+        stream = StringIO.StringIO()
+        self.serialize(stream)
+        pathDict = {
+            "%s.recipe" % self._troveName : filetypes.RegularFile(
+                contents = recipe, config=True),
+            self._troveFileName : filetypes.RegularFile(
+                contents = stream.getvalue(), config=True),
+        }
+        cLog = changelog.ChangeLog(name = conaryClient.cfg.name,
+                                   contact = conaryClient.cfg.contact,
+                                   message = message)
+        troveName = '%s:source' % self._troveName
+        cs = conaryClient.createSourceTrove(troveName, label, version,
+            pathDict, cLog)
+
+        repos = conaryClient.getRepos()
+        repos.commitChangeSet(cs)
+
+    def _getStreamFromRepository(self, conaryClient, label):
+        repos = conaryClient.getRepos()
+        troveName = '%s:source' % self._troveName
+        troveSpec = (troveName, label, None)
+        try:
+            troves = repos.findTroves(None, [ troveSpec ])
+        except conaryErrors.TroveNotFound:
+            raise ProductDefinitionTroveNotFound("%s=%s" % (troveName, label))
+        except conaryErrors.RepositoryError, e:
+            raise RepositoryError(str(e))
+        # At this point, troveSpec is in troves and its value should not be
+        # the empty list.
+        nvfs = troves[troveSpec]
+        #if not nvfs:
+        #    raise ProductDefinitionTroveNotFound("%s=%s" % (troveName, label))
+        trvCsSpec = (nvfs[0][0], (None, None), (nvfs[0][1], nvfs[0][2]), True)
+        cs = conaryClient.createChangeSet([ trvCsSpec ], withFiles = True,
+                                          withFileContents = True)
+        for thawTrvCs in cs.iterNewTroveList():
+            paths = [ x for x in thawTrvCs.getNewFileList()
+                      if x[1] == self._troveFileName ]
+            if not paths:
+                continue
+            # Fetch file from changeset
+            fileSpecs = [ (fId, fVer) for (_, _, fId, fVer) in paths ]
+            fileContents = repos.getFileContents(fileSpecs)
+            return fileContents[0].get()
+
+        # Couldn't find the file we expected; die
+        raise ProductDefinitionFileNotFound("%s=%s" % (troveName, label))
+
+class ProductDefinition(BaseDefinition):
     """
     Represents the definition of a product.
     @cvar version:
@@ -83,12 +243,6 @@ class ProductDefinition(object):
     @cvar schemaDir: Directory where schema definitions are stored
     @type schemaDir: C{str}
     """
-    version = '0.1'
-    defaultNamespace = _xmlConstants.defaultNamespaceList[0]
-    xmlSchemaLocation = _xmlConstants.xmlSchemaLocation
-
-    schemaDir = "/usr/share/rpath_common"
-
     _imageTypeDispatcher = xmllib.NodeDispatcher({})
     _imageTypeDispatcher.registerClasses(imageTypes, imageTypes.ImageType_Base)
 
@@ -112,26 +266,6 @@ class ProductDefinitionRecipe(PackageRecipe):
         No other recipe actions need to be added beyond this point.
         """
 '''
-
-    def __init__(self, fromStream = None, validate = False, schemaDir = None):
-        """
-        Initialize a ProductDefinition object, getting data from the optional
-        XML stream.
-        @param fromStream: An optional XML string or file
-        @type fromStream: C{str} or C{file}
-        @param validate: Validate before parsing (off by default)
-        @type validate: C{bool}
-        @param schemaDir: A directory where schema files are stored
-        @type schemaDir: C{str}
-        """
-
-        self._initFields()
-
-        if fromStream:
-            if isinstance(fromStream, (str, unicode)):
-                fromStream = StringIO.StringIO(fromStream)
-            self.parseStream(fromStream, validate = validate,
-                             schemaDir = schemaDir)
 
     def __str__(self):
         troveName = self.getTroveName()
@@ -189,6 +323,7 @@ class ProductDefinitionRecipe(PackageRecipe):
         self.searchPaths.extend(getattr(xmlObj, 'searchPaths', []))
         self.factorySources.extend(getattr(xmlObj, 'factorySources', []))
         self.buildDefinition.extend(getattr(xmlObj, 'buildDefinition', []))
+        self.platform = getattr(xmlObj, 'platform', None)
 
         ver = xmlObj.getAttribute('version')
         if ver is not None and ver != self.version:
@@ -368,21 +503,6 @@ class ProductDefinitionRecipe(PackageRecipe):
         """
         self.imageGroup = imageGroup
 
-    def getBaseFlavor(self):
-        """
-        @return: the base flavor
-        @rtype: C{str}
-        """
-        return self.baseFlavor
-
-    def setBaseFlavor(self, baseFlavor):
-        """
-        Set the base flavor.
-        @param baseFlavor: the base flavor
-        @type baseFlavor: C{str}
-        """
-        self.baseFlavor = baseFlavor
-
     def getStages(self):
         """
         @return: the stages from this product definition
@@ -423,36 +543,6 @@ class ProductDefinitionRecipe(PackageRecipe):
         """
         self.stages = _Stages()
 
-    def getSearchPaths(self):
-        """
-        @return: the upstream sources from this product definition
-        @rtype: C{list} of C{_SearchPath} objects
-        """
-        return self.searchPaths
-
-    def clearSearchPaths(self):
-        """
-        Delete all searchPaths.
-        @return: None
-        @rtype None
-        """
-        self.searchPaths = _SearchPaths()
-
-    def getFactorySources(self):
-        """
-        @return: the factory sources from this product definition
-        @rtype: C{list} of C{_FactorySource} objects
-        """
-        return self.factorySources
-
-    def clearFactorySources(self):
-        """
-        Delete all factorySources.
-        @return: None
-        @rtype None
-        """
-        self.factorySources = _FactorySources()
-
     def getLabelForStage(self, stageName):
         """
         Synthesize the label for a particular stage based upon
@@ -489,34 +579,6 @@ class ProductDefinitionRecipe(PackageRecipe):
             if stage.labelSuffix == '-devel':
                 return self._getLabelForStage(stage)
         raise StageNotFoundError
-
-    def addSearchPath(self, troveName = None, label = None):
-        """
-        Add an upstream source.
-        @param troveName: the trove name for the upstream source.
-        @type name: C{str} or C{None}
-        @param label: Label for the upstream source
-        @type label: C{str} or C{None}
-        """
-        self._addSource(troveName, label, _SearchPath, self.searchPaths)
-
-    def addFactorySource(self, troveName = None, label = None):
-        """
-        Add a factory source.
-        @param troveName: the trove name for the factory source.
-        @type name: C{str} or C{None}
-        @param label: Label for the factory source
-        @type label: C{str} or C{None}
-        """
-        self._addSource(troveName, label, _FactorySource, self.factorySources)
-
-    def _addSource(self, troveName, label, cls, intList):
-        "Internal function for adding a Source"
-        if label is not None:
-            if isinstance(label, conaryVersions.Label):
-                label = str(label)
-        obj = cls(troveName = troveName, label = label)
-        intList.append(obj)
 
     def getBuildDefinitions(self):
         """
@@ -557,6 +619,92 @@ class ProductDefinitionRecipe(PackageRecipe):
         @rtype None
         """
         self.buildDefinition = _BuildDefinition()
+
+    def getPlatformSearchPaths(self):
+        """
+        @return: the upstream sources from this product definition
+        @rtype: C{list} of C{_SearchPath} objects
+        """
+        if self.platform is None:
+            return None
+        return self.platform.searchPaths
+
+    def clearPlatformSearchPaths(self):
+        """
+        Delete all searchPaths.
+        @return: None
+        @rtype None
+        """
+        if self.platform is None:
+            return
+        self.platform.searchPaths = _SearchPaths()
+
+    def addPlatformSearchPath(self, troveName = None, label = None):
+        if self.platform is None:
+            self.platform = Platform()
+        self._addSource(troveName, label, _SearchPath, self.platform.searchPaths)
+
+    def getPlatformFactorySources(self):
+        """
+        @return: the factory sources from this product definition
+        @rtype: C{list} of C{_FactorySource} objects
+        """
+        if self.platform is None:
+            return None
+        return self.platform.factorySources
+
+    def clearPlatformFactorySources(self):
+        """
+        Delete all factorySources.
+        @return: None
+        @rtype None
+        """
+        if self.platform is None:
+            return
+        self.platform.factorySources = _FactorySources()
+
+    def addPlatformFactorySource(self, troveName = None, label = None):
+        """
+        Add a factory source.
+        @param troveName: the trove name for the factory source.
+        @type name: C{str} or C{None}
+        @param label: Label for the factory source
+        @type label: C{str} or C{None}
+        """
+        if self.platform is None:
+            self.platform = Platform()
+        self._addSource(troveName, label, _FactorySource, self.platform.factorySources)
+
+    def getPlatformBaseFlavor(self):
+        if self.platform is None:
+            return None
+        return self.platform.baseFlavor
+
+    def setPlatformBaseFlavor(self, baseFlavor):
+        self._ensurePlatformExists()
+        self.platform.baseFlavor = baseFlavor
+
+    def getPlatformSourceLabel(self):
+        if self.platform is None:
+            return None
+        return self.platform.sourceLabel
+
+    def setPlatformSourceLabel(self, sourceLabel):
+        self._ensurePlatformExists()
+        self.platform.sourceLabel = sourceLabel
+
+    def getPlatformUseLatest(self):
+        if self.platform is None:
+            return None
+        return self.platform.useLatest
+
+    def setPlatformUseLatest(self, useLatest):
+        self._ensurePlatformExists()
+        self.platform.useLatest = useLatest
+
+    def _ensurePlatformExists(self):
+        if self.platform is None:
+            self.platform = PlatformDefinition()
 
     @classmethod
     def imageType(cls, name, fields = None):
@@ -629,6 +777,84 @@ class ProductDefinitionRecipe(PackageRecipe):
         labelSuffix = stageObj.labelSuffix or '' # this can be blank
         return str(prefix + labelSuffix)
 
+    def toPlatformDefinition(self):
+        "Create a PlatformDefinition object from this ProductDefinition"
+        nplat = PlatformDefinition()
+        baseFlavor = self.getBaseFlavor()
+        if baseFlavor is None:
+            baseFlavor = self.getPlatformBaseFlavor()
+        nplat.setBaseFlavor(baseFlavor)
+
+        # Factory sources defined in the product defintion take precedence
+        fSources = self.getFactorySources()
+        if not fSources:
+            fSources = self.getPlatformFactorySources()
+        for fsrc in fSources or []:
+            nplat.addFactorySource(troveName = fsrc.troveName,
+                                   label = fsrc.label)
+
+        # Build new search path
+        label = self.getProductDefinitionLabel()
+        sPathsList = []
+        sPathsSet = set()
+
+        # Iterate over all builds, and add the image group
+        for build in self.buildDefinition:
+            if not build.imageGroup:
+                continue
+            key = (build.imageGroup, label)
+            if key not in sPathsSet:
+                sPathsList.append(key)
+                sPathsSet.add(key)
+        # Append the global image group
+        key = (self.getImageGroup(), label)
+        if key not in sPathsSet:
+            sPathsList.append(key)
+            sPathsSet.add(key)
+        # Now append the search paths from this object, if available, or from
+        # the upstream platform, if available
+
+        sPaths = self.getSearchPaths()
+        if not sPaths:
+            sPaths = self.getPlatformSearchPaths()
+        for sp in sPaths or []:
+            key = (sp.troveName, sp.label)
+            if key not in sPathsSet:
+                sPathsList.append(key)
+                sPathsSet.add(key)
+
+        for troveName, label in sPathsList:
+            nplat.addSearchPath(troveName=troveName, label=label)
+
+        return nplat
+
+    def savePlatformToRepository(self, client, message = None):
+        nplat = self.toPlatformDefinition()
+        label = self.getProductDefinitionLabel()
+        nplat.saveToRepository(client, label, message = message)
+
+    def rebase(self, client, label = None, useLatest = None):
+        if label is None:
+            label = self.getPlatformSourceLabel()
+        if label is None:
+            raise Exception("XXX")
+        nplat = self.toPlatformDefinition()
+        nplat.loadFromRepository(client, label)
+        # XXX here we have to determine the real versions
+        self._rebase(label, nplat, useLatest = None)
+
+    def _rebase(self, label, nplat, useLatest = None):
+        # Create a new platform definition
+        self.platform = PlatformDefinition()
+        # Fill it in with fields from the upstream one
+        self.setPlatformBaseFlavor(nplat.getBaseFlavor())
+        self.setPlatformSourceLabel(label)
+        self.setPlatformUseLatest(useLatest)
+        for sp in nplat.getSearchPaths():
+            self.addPlatformSearchPath(troveName=sp.troveName, label=sp.label)
+        for sp in nplat.getFactorySources():
+            self.addPlatformFactorySource(troveName=sp.troveName, label=sp.label)
+
     def _initFields(self):
         self.baseFlavor = None
         self.stages = _Stages()
@@ -643,65 +869,110 @@ class ProductDefinitionRecipe(PackageRecipe):
         self.searchPaths = _SearchPaths()
         self.factorySources = _FactorySources()
         self.buildDefinition = _BuildDefinition()
+        self.platform = None
 
-    def _saveToRepository(self, conaryClient, label, message = None):
-        version = '0.1'
-
-        if message is None:
-            message = "Automatic checkin\n"
-
-        recipe = self._recipe.replace('@NAME@', self._troveName)
-        recipe = recipe.replace('@VERSION@', version)
-
-        stream = StringIO.StringIO()
-        self.serialize(stream)
-        pathDict = {
-            "%s.recipe" % self._troveName : filetypes.RegularFile(
-                contents = recipe, config=True),
-            self._troveFileName : filetypes.RegularFile(
-                contents = stream.getvalue(), config=True),
-        }
-        cLog = changelog.ChangeLog(name = conaryClient.cfg.name,
-                                   contact = conaryClient.cfg.contact,
-                                   message = message)
-        troveName = '%s:source' % self._troveName
-        cs = conaryClient.createSourceTrove(troveName, label, version,
-            pathDict, cLog)
-
-        repos = conaryClient.getRepos()
-        repos.commitChangeSet(cs)
-
-    def _getStreamFromRepository(self, conaryClient, label):
-        repos = conaryClient.getRepos()
-        troveName = '%s:source' % self._troveName
-        troveSpec = (troveName, label, None)
-        try:
-            troves = repos.findTroves(None, [ troveSpec ])
-        except conaryErrors.TroveNotFound:
-            raise ProductDefinitionTroveNotFound("%s=%s" % (troveName, label))
-        except conaryErrors.RepositoryError, e:
-            raise RepositoryError(str(e))
-        # At this point, troveSpec is in troves and its value should not be
-        # the empty list.
-        nvfs = troves[troveSpec]
-        #if not nvfs:
-        #    raise ProductDefinitionTroveNotFound("%s=%s" % (troveName, label))
-        trvCsSpec = (nvfs[0][0], (None, None), (nvfs[0][1], nvfs[0][2]), True)
-        cs = conaryClient.createChangeSet([ trvCsSpec ], withFiles = True,
-                                          withFileContents = True)
-        for thawTrvCs in cs.iterNewTroveList():
-            paths = [ x for x in thawTrvCs.getNewFileList()
-                      if x[1] == self._troveFileName ]
-            if not paths:
-                continue
-            # Fetch file from changeset
-            fileSpecs = [ (fId, fVer) for (_, _, fId, fVer) in paths ]
-            fileContents = repos.getFileContents(fileSpecs)
-            return fileContents[0].get()
-
-        # Couldn't find the file we expected; die
-        raise ProductDefinitionFileNotFound("%s=%s" % (troveName, label))
     #}
+
+
+class PlatformDefinition(BaseDefinition):
+    _troveName = 'platform-definition'
+    _troveFileName = 'platform-definition.xml'
+
+    _recipe = '''
+#
+# Copyright (c) 2008 rPath, Inc.
+#
+
+class ProductDefinitionRecipe(PackageRecipe):
+    name = "@NAME@"
+    version = "@VERSION@"
+
+    def setup(r):
+        """
+        This recipe is a stub created to allow users to manually
+        check in changes to the product definition XML.
+
+        No other recipe actions need to be added beyond this point.
+        """
+'''
+
+    def _initFields(self):
+        self.searchPaths = _SearchPaths()
+        self.factorySources = _FactorySources()
+        self.baseFlavor = None
+        self.useLatest = None
+        self.sourceLabel = None
+
+    def parseStream(self, stream, validate = False, schemaDir = None):
+        """
+        Initialize the current object from an XML stream.
+        @param stream: An XML stream
+        @type stream: C{file}
+        @param validate: Validate before parsing (off by default)
+        @type validate: C{bool}
+        @param schemaDir: A directory where schema files are stored
+        @type schemaDir: C{str}
+        """
+        self._initFields()
+        binder = xmllib.DataBinder()
+        binder.registerType(_PlatformDefinition, 'platformDefinition')
+        xmlObj = binder.parseFile(stream, validate = validate,
+                                  schemaDir = schemaDir or self.schemaDir)
+        self.baseFlavor = getattr(xmlObj.platform, 'baseFlavor', None)
+        self.sourceLabel = getattr(xmlObj.platform, 'sourceLabel', None)
+        self.useLatest = getattr(xmlObj.platform, 'useLatest', None)
+        self.searchPaths = getattr(xmlObj.platform, 'searchPaths', None)
+        self.factorySources = getattr(xmlObj.platform, 'factorySources', None)
+
+        for nsName, nsVal in xmlObj.iterNamespaces():
+            if nsName is None and nsVal != self.defaultNamespace:
+                self.defaultNamespace = nsVal
+                continue
+            # XXX We don't support changing the schema location for now
+
+    def serialize(self, stream):
+        """
+        Serialize the current object as an XML stream.
+        @param stream: stream to write the serialized object
+        @type stream: C{file}
+        """
+        attrs = {'version' : self.version,
+                 'xmlns' : self.defaultNamespace,
+                 'xmlns:xsi' : xmllib.DataBinder.xmlSchemaNamespace,
+                 "xsi:schemaLocation" : self.xmlSchemaLocation,
+        }
+        nameSpaces = {}
+        serObj = _PlatformSerialization(attrs, nameSpaces, self,
+            name="platformDefinition")
+        binder = xmllib.DataBinder()
+        stream.write(binder.toXml(serObj))
+
+    def saveToRepository(self, client, label, message = None):
+        """
+        Save a C{PlatformDefinition} object to a Conary repository.
+        @param client: A Conary client object
+        @type client: C{conaryclient.ConaryClient}
+        @param message: An optional commit message
+        @type message: C{str}
+        @param label: Label where the representation will be saved
+        @type label: C{str}
+        """
+        return self._saveToRepository(client, label, message = message)
+
+    def loadFromRepository(self, client, label):
+        """
+        Load a C{PlatformDefinition} object from a Conary repository.
+        @param client: A Conary client object
+        @type client: C{conaryclient.ConaryClient}
+        @param message: An optional commit message
+        @type message: C{str}
+        @raises C{RepositoryError}:
+        @raises C{ProductDefinitionTroveNotFound}:
+        @raises C{ProductDefinitionFileNotFound}:
+        """
+        stream = self._getStreamFromRepository(client, label)
+        stream.seek(0)
+        self.parseStream(stream)
 
 
 #{ Objects for the representation of ProductDefinition fields
@@ -812,12 +1083,54 @@ class Build(xmllib.SerializableObject):
 
 #}
 
-class _ProductDefinition(xmllib.BaseNode):
-
+class BaseXmlNode(xmllib.BaseNode):
     def __init__(self, attributes = None, nsMap = None, name = None):
         xmllib.BaseNode.__init__(self, attributes = attributes, nsMap = nsMap,
                                  name = name)
         self.defaultNamespace = self.getNamespaceMap().get(None)
+
+    def _makeAbsoluteName(self, name):
+        return "{%s}%s" % (self.defaultNamespace, name)
+
+    def _processSearchPaths(self, searchPaths):
+        sources = _SearchPaths()
+        for node in searchPaths:
+            pyObj = _SearchPath(
+                troveName = node.getAttribute('troveName'),
+                label = node.getAttribute('label'))
+            sources.append(pyObj)
+        return sources
+
+    def _processFactorySources(self, factorySources):
+        sources = _FactorySources()
+        for node in factorySources:
+            pyObj = _FactorySource(
+                troveName = node.getAttribute('troveName'),
+                label = node.getAttribute('label'))
+            sources.append(pyObj)
+        return sources
+
+    def _addPlatform(self, node):
+        self.platform = PlatformDefinition()
+        self.platform.sourceLabel = node.getAttribute('sourceLabel')
+        useLatest = node.getAttribute('useLatest')
+        if useLatest is not None:
+            useLatest = xmllib.BooleanNode.fromString(useLatest)
+        self.platform.useLatest = useLatest
+        listNode = node.getChildren('searchPaths')
+        if listNode:
+            self.platform.searchPaths = self._processSearchPaths(
+                listNode[0].getChildren('searchPath'))
+        listNode = node.getChildren('factorySources')
+        if listNode:
+            self.platform.factorySources = self._processFactorySources(
+                listNode[0].getChildren('factorySource'))
+        baseFlavorChildren = node.getChildren('baseFlavor')
+        if baseFlavorChildren:
+            self.platform.baseFlavor = baseFlavorChildren[0].getText()
+
+
+class _ProductDefinition(BaseXmlNode):
 
     def addChild(self, childNode):
         chName = childNode.getAbsoluteName()
@@ -878,8 +1191,9 @@ class _ProductDefinition(xmllib.BaseNode):
             self._addBuildDefinition(children)
             return
 
-    def _makeAbsoluteName(self, name):
-        return "{%s}%s" % (self.defaultNamespace, name)
+        if chName == self._makeAbsoluteName('platform'):
+            self._addPlatform(childNode)
+            return
 
     def _addStages(self, stagesNodes):
         stages = self.stages = _Stages()
@@ -890,20 +1204,10 @@ class _ProductDefinition(xmllib.BaseNode):
             stages.append(pyObj)
 
     def _addSearchPaths(self, searchPaths):
-        sources = self.searchPaths = _SearchPaths()
-        for node in searchPaths:
-            pyObj = _SearchPath(
-                troveName = node.getAttribute('troveName'),
-                label = node.getAttribute('label'))
-            sources.append(pyObj)
+        self.searchPaths = self._processSearchPaths(searchPaths)
 
     def _addFactorySources(self, factorySources):
-        sources = self.factorySources = _FactorySources()
-        for node in factorySources:
-            pyObj = _FactorySource(
-                troveName = node.getAttribute('troveName'),
-                label = node.getAttribute('label'))
-            sources.append(pyObj)
+        self.factorySources = self._processFactorySources(factorySources)
 
 
     def _addBuildDefinition(self, buildNodes):
@@ -941,6 +1245,30 @@ class _ProductDefinition(xmllib.BaseNode):
                 )
             builds.append(pyobj)
 
+class _PlatformDefinition(BaseXmlNode):
+    def finalize(self):
+        self._addPlatform(self)
+        return self
+
+class _PlatformSerialization(xmllib.BaseNode):
+    def __init__(self, attrs, namespaces, platform, name='platform'):
+        if platform.useLatest:
+            attrs['useLatest'] = True
+        if platform.sourceLabel:
+            attrs['sourceLabel'] = platform.sourceLabel
+        self.searchPaths = platform.searchPaths
+        self.factorySources = platform.factorySources
+        self.baseFlavor = xmllib.StringNode(name = 'baseFlavor').characters(platform.baseFlavor)
+        xmllib.BaseNode.__init__(self, attrs, namespaces, name=name)
+
+    def iterChildren(self):
+        ret = [self.baseFlavor]
+        if self.searchPaths:
+            ret.append(self.searchPaths)
+        if self.factorySources:
+            ret.append(self.factorySources)
+        return ret
+
 class _ProductDefinitionSerialization(xmllib.BaseNode):
     def __init__(self, name, attrs, namespaces, prodDef):
         xmllib.BaseNode.__init__(self, attrs, namespaces, name = name)
@@ -948,6 +1276,11 @@ class _ProductDefinitionSerialization(xmllib.BaseNode):
         self.searchPaths = prodDef.getSearchPaths()
         self.factorySources = prodDef.getFactorySources()
         self.buildDefinition = prodDef.getBuildDefinitions()
+        if prodDef.platform:
+            self.platform = _PlatformSerialization({}, namespaces,
+                prodDef.platform)
+        else:
+            self.platform = None
 
         self.productName = xmllib.StringNode(name = 'productName')
         productName = prodDef.getProductName()
@@ -1012,6 +1345,8 @@ class _ProductDefinitionSerialization(xmllib.BaseNode):
         if len(self.factorySources):
             ret.append(self.factorySources)
         ret.append(self.buildDefinition)
+        if self.platform:
+            ret.append(self.platform)
         return ret
 
 class _ImageTypeFakeNode(object):
