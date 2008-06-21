@@ -26,6 +26,7 @@ __all__ = [ 'MissingInformationError',
             'ProductDefinitionTroveNotFound',
             'ProductDefinitionFileNotFound',
             'RepositoryError',
+            'PlatformLabelMissingError'
             ]
 
 import itertools
@@ -67,6 +68,9 @@ class ProductDefinitionFileNotFound(ProductDefinitionError):
 
 class RepositoryError(ProductDefinitionError):
     "Generic error raised when a repository error was caught"
+
+class PlatformLabelMissingError(ProductDefinitionError):
+    "Raised when the platform label is missing, and a rebase was requested"
 
 #}
 
@@ -880,7 +884,7 @@ class ProductDefinitionRecipe(PackageRecipe):
         if label is None:
             label = self.getPlatformSourceLabel()
         if label is None:
-            raise Exception("XXX")
+            raise PlatformLabelMissingError()
         nplat = self.toPlatformDefinition()
         nplat.loadFromRepository(client, label)
         nplat.snapshotVersions(client)
