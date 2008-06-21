@@ -30,10 +30,10 @@
     <stage labelSuffix="-qa" name="qa"/>
     <stage labelSuffix="" name="release"/>
   </stages>
-  <upstreamSources>
-    <upstreamSource troveName="group-rap-standard" label="rap.rpath.com@rpath:linux-1"/>
-    <upstreamSource troveName="group-postgres" label="products.rpath.com@rpath:postgres-8.2"/>
-  </upstreamSources>
+  <searchPaths>
+    <searchPath troveName="group-rap-standard" label="rap.rpath.com@rpath:linux-1"/>
+    <searchPath troveName="group-postgres" label="products.rpath.com@rpath:postgres-8.2"/>
+  </searchPaths>
   <factorySources>
     <factorySource troveName="group-factories" label="products.rpath.com@rpath:factories-1"/>
   </factorySources>

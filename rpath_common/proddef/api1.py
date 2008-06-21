@@ -186,7 +186,7 @@ class ProductDefinitionRecipe(PackageRecipe):
         self.imageGroup = getattr(xmlObj, 'imageGroup', None)
         self.baseFlavor = getattr(xmlObj, 'baseFlavor', None)
         self.stages.extend(getattr(xmlObj, 'stages', []))
-        self.upstreamSources.extend(getattr(xmlObj, 'upstreamSources', []))
+        self.searchPaths.extend(getattr(xmlObj, 'searchPaths', []))
         self.factorySources.extend(getattr(xmlObj, 'factorySources', []))
         self.buildDefinition.extend(getattr(xmlObj, 'buildDefinition', []))
 
@@ -423,20 +423,20 @@ class ProductDefinitionRecipe(PackageRecipe):
         """
         self.stages = _Stages()
 
-    def getUpstreamSources(self):
+    def getSearchPaths(self):
         """
         @return: the upstream sources from this product definition
-        @rtype: C{list} of C{_UpstreamSource} objects
+        @rtype: C{list} of C{_SearchPath} objects
         """
-        return self.upstreamSources
+        return self.searchPaths
 
-    def clearUpstreamSources(self):
+    def clearSearchPaths(self):
         """
-        Delete all upstreamSources.
+        Delete all searchPaths.
         @return: None
         @rtype None
         """
-        self.upstreamSources = _UpstreamSources()
+        self.searchPaths = _SearchPaths()
 
     def getFactorySources(self):
         """
@@ -490,7 +490,7 @@ class ProductDefinitionRecipe(PackageRecipe):
                 return self._getLabelForStage(stage)
         raise StageNotFoundError
 
-    def addUpstreamSource(self, troveName = None, label = None):
+    def addSearchPath(self, troveName = None, label = None):
         """
         Add an upstream source.
         @param troveName: the trove name for the upstream source.
@@ -498,7 +498,7 @@ class ProductDefinitionRecipe(PackageRecipe):
         @param label: Label for the upstream source
         @type label: C{str} or C{None}
         """
-        self._addSource(troveName, label, _UpstreamSource, self.upstreamSources)
+        self._addSource(troveName, label, _SearchPath, self.searchPaths)
 
     def addFactorySource(self, troveName = None, label = None):
         """
@@ -640,7 +640,7 @@ class ProductDefinitionRecipe(PackageRecipe):
         self.conaryRepositoryHostname = None
         self.conaryNamespace = None
         self.imageGroup = None
-        self.upstreamSources = _UpstreamSources()
+        self.searchPaths = _SearchPaths()
         self.factorySources = _FactorySources()
         self.buildDefinition = _BuildDefinition()
 
@@ -711,8 +711,8 @@ class _Stages(xmllib.SerializableList):
 
 # pylint: disable-msg=R0903
 # Too few public methods (1/2): this is an interface
-class _UpstreamSources(xmllib.SerializableList):
-    tag = "upstreamSources"
+class _SearchPaths(xmllib.SerializableList):
+    tag = "searchPaths"
 
 # pylint: disable-msg=R0903
 # Too few public methods (1/2): this is an interface
@@ -736,16 +736,16 @@ class _Stage(xmllib.SlotBasedSerializableObject):
         self.name = name
         self.labelSuffix = labelSuffix
 
-class _UpstreamSource(xmllib.SlotBasedSerializableObject):
+class _SearchPath(xmllib.SlotBasedSerializableObject):
     __slots__ = [ 'troveName', 'label' ]
-    tag = "upstreamSource"
+    tag = "searchPath"
 
     def __init__(self, troveName = None, label = None):
         xmllib.SlotBasedSerializableObject.__init__(self)
         self.troveName = troveName
         self.label = label
 
-class _FactorySource(_UpstreamSource):
+class _FactorySource(_SearchPath):
     tag = "factorySource"
 
 class Build(xmllib.SerializableObject):
@@ -863,9 +863,9 @@ class _ProductDefinition(xmllib.BaseNode):
             self._addStages(children)
             return
 
-        if chName == self._makeAbsoluteName('upstreamSources'):
-            children = childNode.getChildren('upstreamSource')
-            self._addUpstreamSources(children)
+        if chName == self._makeAbsoluteName('searchPaths'):
+            children = childNode.getChildren('searchPath')
+            self._addSearchPaths(children)
             return
 
         if chName == self._makeAbsoluteName('factorySources'):
@@ -889,10 +889,10 @@ class _ProductDefinition(xmllib.BaseNode):
                            labelSuffix = node.getAttribute('labelSuffix'))
             stages.append(pyObj)
 
-    def _addUpstreamSources(self, upstreamSources):
-        sources = self.upstreamSources = _UpstreamSources()
-        for node in upstreamSources:
-            pyObj = _UpstreamSource(
+    def _addSearchPaths(self, searchPaths):
+        sources = self.searchPaths = _SearchPaths()
+        for node in searchPaths:
+            pyObj = _SearchPath(
                 troveName = node.getAttribute('troveName'),
                 label = node.getAttribute('label'))
             sources.append(pyObj)
@@ -945,7 +945,7 @@ class _ProductDefinitionSerialization(xmllib.BaseNode):
     def __init__(self, name, attrs, namespaces, prodDef):
         xmllib.BaseNode.__init__(self, attrs, namespaces, name = name)
         self.stages = prodDef.getStages()
-        self.upstreamSources = prodDef.getUpstreamSources()
+        self.searchPaths = prodDef.getSearchPaths()
         self.factorySources = prodDef.getFactorySources()
         self.buildDefinition = prodDef.getBuildDefinitions()
 
@@ -1008,7 +1008,7 @@ class _ProductDefinitionSerialization(xmllib.BaseNode):
                  self.imageGroup,
                  self.baseFlavor,
                  self.stages,
-                 self.upstreamSources, ]
+                 self.searchPaths, ]
         if len(self.factorySources):
             ret.append(self.factorySources)
         ret.append(self.buildDefinition)

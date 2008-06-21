@@ -57,9 +57,9 @@ prodDef.addStage(name='devel', labelSuffix='-devel')
 prodDef.addStage(name='qa', labelSuffix='-qa')
 prodDef.addStage(name='release', labelSuffix='')
 
-prodDef.addUpstreamSource(troveName='group-rap-standard',
+prodDef.addSearchPath(troveName='group-rap-standard',
                         label='rap.rpath.com@rpath:linux-1')
-prodDef.addUpstreamSource(troveName='group-postgres',
+prodDef.addSearchPath(troveName='group-postgres',
                         label='products.rpath.com@rpath:postgres-8.2')
 prodDef.addFactorySource(troveName='group-factories',
                         label='products.rpath.com@rpath:factories-1')
