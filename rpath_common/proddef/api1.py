@@ -127,7 +127,6 @@ class BaseDefinition(object):
         """
         self.searchPaths = _SearchPaths()
 
-
     def getFactorySources(self):
         """
         @return: the factory sources from this product definition
@@ -508,6 +507,15 @@ class ProductDefinitionRecipe(PackageRecipe):
         """
         self.imageGroup = imageGroup
 
+    def getBaseFlavor(self):
+        """
+        @return: the base flavor
+        @rtype: C{str}
+        """
+        if self.baseFlavor is not None:
+            return self.baseFlavor
+        return self.getPlatformBaseFlavor()
+
     def getStages(self):
         """
         @return: the stages from this product definition
@@ -585,6 +593,24 @@ class ProductDefinitionRecipe(PackageRecipe):
                 return self._getLabelForStage(stage)
         raise StageNotFoundError
 
+    def getSearchPaths(self):
+        """
+        @return: the search paths from this product definition
+        @rtype: C{list} of C{_SearchPath} objects
+        """
+        if self.searchPaths:
+            return self.searchPaths
+        return self.getPlatformSearchPaths()
+
+    def getFactorySources(self):
+        """
+        @return: the factory sources from this product definition
+        @rtype: C{list} of C{_FactorySource} objects
+        """
+        if self.factorySources:
+            return self.factorySources
+        return self.getPlatformFactorySources()
+
     def getBuildDefinitions(self):
         """
         @return: The build definitions from this product definition
@@ -631,7 +657,7 @@ class ProductDefinitionRecipe(PackageRecipe):
         @rtype: C{list} of C{_SearchPath} objects
         """
         if self.platform is None:
-            return None
+            return []
         return self.platform.searchPaths
 
     def clearPlatformSearchPaths(self):
@@ -656,7 +682,7 @@ class ProductDefinitionRecipe(PackageRecipe):
         @param version: C{str} or C{None}
         """
         if self.platform is None:
-            self.platform = Platform()
+            self.platform = PlatformDefinition()
         self._addSource(troveName, label, version, _SearchPath,
                         self.platform.searchPaths)
 
@@ -666,7 +692,7 @@ class ProductDefinitionRecipe(PackageRecipe):
         @rtype: C{list} of C{_FactorySource} objects
         """
         if self.platform is None:
-            return None
+            return []
         return self.platform.factorySources
 
     def clearPlatformFactorySources(self):
@@ -691,7 +717,7 @@ class ProductDefinitionRecipe(PackageRecipe):
         @param version: C{str} or C{None}
         """
         if self.platform is None:
-            self.platform = Platform()
+            self.platform = PlatformDefinition()
         self._addSource(troveName, label, version, _FactorySource,
                         self.platform.factorySources)
 
@@ -801,8 +827,6 @@ class ProductDefinitionRecipe(PackageRecipe):
         "Create a PlatformDefinition object from this ProductDefinition"
         nplat = PlatformDefinition()
         baseFlavor = self.getBaseFlavor()
-        if baseFlavor is None:
-            baseFlavor = self.getPlatformBaseFlavor()
         nplat.setBaseFlavor(baseFlavor)
 
         # Factory sources defined in the product defintion take precedence
@@ -1267,7 +1291,6 @@ class _ProductDefinition(BaseXmlNode):
     def _addFactorySources(self, factorySources):
         self.factorySources = self._processFactorySources(factorySources)
 
-
     def _addBuildDefinition(self, buildNodes):
         dispatcher = xmllib.NodeDispatcher(self._nsMap)
         dispatcher.registerClasses(imageTypes, imageTypes.ImageType_Base)
@@ -1331,8 +1354,8 @@ class _ProductDefinitionSerialization(xmllib.BaseNode):
     def __init__(self, name, attrs, namespaces, prodDef):
         xmllib.BaseNode.__init__(self, attrs, namespaces, name = name)
         self.stages = prodDef.getStages()
-        self.searchPaths = prodDef.getSearchPaths()
-        self.factorySources = prodDef.getFactorySources()
+        self.searchPaths = prodDef.searchPaths
+        self.factorySources = prodDef.factorySources
         self.buildDefinition = prodDef.getBuildDefinitions()
         if prodDef.platform:
             self.platform = _PlatformSerialization({}, namespaces,
@@ -1386,7 +1409,7 @@ class _ProductDefinitionSerialization(xmllib.BaseNode):
             self.imageGroup.characters(imageGroup)
 
         self.baseFlavor = xmllib.StringNode(name = 'baseFlavor')
-        self.baseFlavor.characters(prodDef.getBaseFlavor())
+        self.baseFlavor.characters(prodDef.baseFlavor)
 
     def iterChildren(self):
         ret =  [ self.productName,
