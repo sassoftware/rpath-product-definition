@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsd:schema targetNamespace="http://www.rpath.com/permanent/rpd-1.0.xsd"
+<xsd:schema targetNamespace="http://www.rpath.com/permanent/rpd-0.1.xsd"
         elementFormDefault="qualified"
         attributeFormDefault="unqualified"
         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-        xmlns:rpd="http://www.rpath.com/permanent/rpd-1.0.xsd"
-        xmlns="http://www.rpath.com/permanent/rpd-1.0.xsd">
+        xmlns:rpd="http://www.rpath.com/permanent/rpd-0.1.xsd"
+        xmlns="http://www.rpath.com/permanent/rpd-0.1.xsd">
 
     <xsd:attributeGroup name="common">
        <xsd:attribute name="name" type="xsd:string" />

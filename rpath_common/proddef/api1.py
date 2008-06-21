@@ -83,7 +83,7 @@ class ProductDefinition(object):
     @cvar schemaDir: Directory where schema definitions are stored
     @type schemaDir: C{str}
     """
-    version = '1.0'
+    version = '0.1'
     defaultNamespace = _xmlConstants.defaultNamespaceList[0]
     xmlSchemaLocation = _xmlConstants.xmlSchemaLocation
 
