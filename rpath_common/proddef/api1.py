@@ -35,7 +35,7 @@ import StringIO
 from conary import changelog
 from conary import errors as conaryErrors
 from conary import versions as conaryVersions
-from conary.conaryclient import filetypes
+from conary.conaryclient import filetypes, cmdline
 
 from rpath_common.xmllib import api1 as xmllib
 from rpath_common.proddef import _xmlConstants
@@ -882,7 +882,12 @@ class ProductDefinitionRecipe(PackageRecipe):
 
     def rebase(self, client, label = None, useLatest = None):
         if label is None:
-            label = self.getPlatformSourceTrove()
+            troveSpec = self.getPlatformSourceTrove()
+            if troveSpec:
+                tn, tv, tf = cmdline.parseTroveSpec(troveSpec)
+                label = tv
+            else:
+                label = None
         if label is None:
             raise PlatformLabelMissingError()
         nplat = self.toPlatformDefinition()
@@ -895,7 +900,7 @@ class ProductDefinitionRecipe(PackageRecipe):
         self.platform = PlatformDefinition()
         # Fill it in with fields from the upstream one
         self.setPlatformBaseFlavor(nplat.getBaseFlavor())
-        self.setPlatformSourceTrove(label)
+        self.setPlatformSourceTrove("%s=%s" % (nplat._troveName, label))
         self.setPlatformUseLatest(useLatest)
         for sp in nplat.getSearchPaths():
             self.addPlatformSearchPath(troveName=sp.troveName,
