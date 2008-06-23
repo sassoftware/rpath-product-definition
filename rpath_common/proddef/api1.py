@@ -939,7 +939,7 @@ class PlatformDefinition(BaseDefinition):
 # Copyright (c) 2008 rPath, Inc.
 #
 
-class ProductDefinitionRecipe(PackageRecipe):
+class PlatformDefinitionRecipe(PackageRecipe):
     name = "@NAME@"
     version = "@VERSION@"
 
