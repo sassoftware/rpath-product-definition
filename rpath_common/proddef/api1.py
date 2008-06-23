@@ -36,6 +36,7 @@ from conary import changelog
 from conary import errors as conaryErrors
 from conary import versions as conaryVersions
 from conary.conaryclient import filetypes, cmdline
+from conary.deps import deps as conaryDeps
 
 from rpath_common.xmllib import api1 as xmllib
 from rpath_common.proddef import _xmlConstants
@@ -516,9 +517,15 @@ class ProductDefinitionRecipe(PackageRecipe):
         @return: the base flavor
         @rtype: C{str}
         """
+        flv = conaryDeps.parseFlavor('')
         if self.baseFlavor is not None:
-            return self.baseFlavor
-        return self.getPlatformBaseFlavor()
+            nflv = conaryDeps.parseFlavor(self.baseFlavor)
+            flv.union(nflv)
+        platFlv = self.getPlatformBaseFlavor()
+        if platFlv is not None:
+            nflv = conaryDeps.parseFlavor(platFlv)
+            flv.union(nflv)
+        return str(flv)
 
     def getStages(self):
         """
