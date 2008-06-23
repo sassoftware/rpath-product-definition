@@ -734,14 +734,14 @@ class ProductDefinitionRecipe(PackageRecipe):
         self._ensurePlatformExists()
         self.platform.baseFlavor = baseFlavor
 
-    def getPlatformSourceLabel(self):
+    def getPlatformSourceTrove(self):
         if self.platform is None:
             return None
-        return self.platform.sourceLabel
+        return self.platform.sourceTrove
 
-    def setPlatformSourceLabel(self, sourceLabel):
+    def setPlatformSourceTrove(self, sourceTrove):
         self._ensurePlatformExists()
-        self.platform.sourceLabel = sourceLabel
+        self.platform.sourceTrove = sourceTrove
 
     def getPlatformUseLatest(self):
         if self.platform is None:
@@ -882,7 +882,7 @@ class ProductDefinitionRecipe(PackageRecipe):
 
     def rebase(self, client, label = None, useLatest = None):
         if label is None:
-            label = self.getPlatformSourceLabel()
+            label = self.getPlatformSourceTrove()
         if label is None:
             raise PlatformLabelMissingError()
         nplat = self.toPlatformDefinition()
@@ -895,7 +895,7 @@ class ProductDefinitionRecipe(PackageRecipe):
         self.platform = PlatformDefinition()
         # Fill it in with fields from the upstream one
         self.setPlatformBaseFlavor(nplat.getBaseFlavor())
-        self.setPlatformSourceLabel(label)
+        self.setPlatformSourceTrove(label)
         self.setPlatformUseLatest(useLatest)
         for sp in nplat.getSearchPaths():
             self.addPlatformSearchPath(troveName=sp.troveName,
@@ -952,7 +952,7 @@ class ProductDefinitionRecipe(PackageRecipe):
         self.factorySources = _FactorySources()
         self.baseFlavor = None
         self.useLatest = None
-        self.sourceLabel = None
+        self.sourceTrove = None
 
     def parseStream(self, stream, validate = False, schemaDir = None):
         """
@@ -970,7 +970,7 @@ class ProductDefinitionRecipe(PackageRecipe):
         xmlObj = binder.parseFile(stream, validate = validate,
                                   schemaDir = schemaDir or self.schemaDir)
         self.baseFlavor = getattr(xmlObj.platform, 'baseFlavor', None)
-        self.sourceLabel = getattr(xmlObj.platform, 'sourceLabel', None)
+        self.sourceTrove = getattr(xmlObj.platform, 'sourceTrove', None)
         self.useLatest = getattr(xmlObj.platform, 'useLatest', None)
         self.searchPaths = getattr(xmlObj.platform, 'searchPaths', None)
         self.factorySources = getattr(xmlObj.platform, 'factorySources', None)
@@ -1193,7 +1193,7 @@ class BaseXmlNode(xmllib.BaseNode):
 
     def _addPlatform(self, node):
         self.platform = PlatformDefinition()
-        self.platform.sourceLabel = node.getAttribute('sourceLabel')
+        self.platform.sourceTrove = node.getAttribute('sourceTrove')
         useLatest = node.getAttribute('useLatest')
         if useLatest is not None:
             useLatest = xmllib.BooleanNode.fromString(useLatest)
@@ -1334,8 +1334,8 @@ class _PlatformSerialization(xmllib.BaseNode):
     def __init__(self, attrs, namespaces, platform, name='platform'):
         if platform.useLatest:
             attrs['useLatest'] = True
-        if platform.sourceLabel:
-            attrs['sourceLabel'] = platform.sourceLabel
+        if platform.sourceTrove:
+            attrs['sourceTrove'] = platform.sourceTrove
         self.searchPaths = platform.searchPaths
         self.factorySources = platform.factorySources
         self.baseFlavor = xmllib.StringNode(name = 'baseFlavor').characters(platform.baseFlavor)
