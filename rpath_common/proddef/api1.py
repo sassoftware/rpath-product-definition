@@ -232,7 +232,7 @@ class BaseDefinition(object):
             # Fetch file from changeset
             fileSpecs = [ (fId, fVer) for (_, _, fId, fVer) in paths ]
             fileContents = repos.getFileContents(fileSpecs)
-            return fileContents[0].get()
+            return fileContents[0].get(), thawTrvCs.getNewNameVersionFlavor()
 
         # Couldn't find the file we expected; die
         raise ProductDefinitionFileNotFound("%s=%s" % (troveName, label))
@@ -387,7 +387,7 @@ class ProductDefinitionRecipe(PackageRecipe):
         @raises C{ProductDefinitionFileNotFound}:
         """
         label = self.getProductDefinitionLabel()
-        stream = self._getStreamFromRepository(client, label)
+        stream, nvf = self._getStreamFromRepository(client, label)
         stream.seek(0)
         self.parseStream(stream)
 
@@ -900,7 +900,7 @@ class ProductDefinitionRecipe(PackageRecipe):
         self.platform = PlatformDefinition()
         # Fill it in with fields from the upstream one
         self.setPlatformBaseFlavor(nplat.getBaseFlavor())
-        self.setPlatformSourceTrove("%s=%s" % (nplat._troveName, label))
+        self.setPlatformSourceTrove(nplat.sourceTrove)
         self.setPlatformUseLatest(useLatest)
         for sp in nplat.getSearchPaths():
             self.addPlatformSearchPath(troveName=sp.troveName,
@@ -1026,9 +1026,11 @@ class ProductDefinitionRecipe(PackageRecipe):
         @raises C{ProductDefinitionTroveNotFound}:
         @raises C{ProductDefinitionFileNotFound}:
         """
-        stream = self._getStreamFromRepository(client, label)
+        stream, nvf = self._getStreamFromRepository(client, label)
         stream.seek(0)
         self.parseStream(stream)
+        # Set the source trove version we used
+        self.sourceTrove = "%s=%s" % (self._troveName, nvf[1])
 
     def snapshotVersions(self, conaryClient):
         """
@@ -1337,10 +1339,12 @@ class _PlatformDefinition(BaseXmlNode):
 
 class _PlatformSerialization(xmllib.BaseNode):
     def __init__(self, attrs, namespaces, platform, name='platform'):
-        if platform.useLatest:
-            attrs['useLatest'] = True
-        if platform.sourceTrove:
-            attrs['sourceTrove'] = platform.sourceTrove
+        # Some attributes don't make sense for a productDefinition node
+        if name == 'platform':
+            if platform.useLatest:
+                attrs['useLatest'] = True
+            if platform.sourceTrove:
+                attrs['sourceTrove'] = platform.sourceTrove
         self.searchPaths = platform.searchPaths
         self.factorySources = platform.factorySources
         self.baseFlavor = xmllib.StringNode(name = 'baseFlavor').characters(platform.baseFlavor)
