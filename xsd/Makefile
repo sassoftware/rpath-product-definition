@@ -12,12 +12,13 @@
 # full details.
 #
 
-dist_files = Makefile rpd-0.1.xsd
+dist_files = Makefile $(SCHEMA_FILES)
+SCHEMA_FILES = rpd-1.0.xsd rpd-1.1.xsd
 
 all: default-all
 
 install: all default-install $(DESTDIR)$(datadir)/rpath_common
-	install rpd-0.1.xsd $(DESTDIR)$(datadir)/rpath_common/rpd-0.1.xsd
+	install $(SCHEMA_FILES) $(DESTDIR)$(datadir)/rpath_common/
 
 $(DESTDIR)$(datadir)/rpath_common:
 	install -d -m755 $@

@@ -75,7 +75,7 @@ class PlatformLabelMissingError(ProductDefinitionError):
 #}
 
 class BaseDefinition(object):
-    version = '0.1'
+    version = '1.1'
     defaultNamespace = _xmlConstants.defaultNamespaceList[0]
     xmlSchemaLocation = _xmlConstants.xmlSchemaLocation
 
@@ -180,7 +180,7 @@ class BaseDefinition(object):
 
 
     def _saveToRepository(self, conaryClient, label, message = None):
-        version = '0.1'
+        version = '1.1'
 
         if message is None:
             message = "Automatic checkin\n"

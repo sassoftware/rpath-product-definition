@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema targetNamespace="http://www.rpath.com/permanent/rpd-1.1.xsd"
+        elementFormDefault="qualified"
+        attributeFormDefault="unqualified"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:rpd="http://www.rpath.com/permanent/rpd-1.1.xsd"
+        xmlns="http://www.rpath.com/permanent/rpd-1.1.xsd">
+
+    <xsd:attributeGroup name="common">
+       <xsd:attribute name="name" type="xsd:string" />
+       <xsd:attribute name="autoResolve" type="xsd:boolean" />
+       <xsd:attribute name="baseFileName" type="xsd:string" />
+       <xsd:attribute name="installLabelPath" type="xsd:string" />
+    </xsd:attributeGroup>
+
+    <xsd:attributeGroup name="specialIsoTroves">
+        <xsd:attribute name="mediaTemplateTrove" type="rpd:troveSpecType" />
+        <xsd:attribute name="anacondaCustomTrove" type="rpd:troveSpecType" />
+        <xsd:attribute name="anacondaTemplatesTrove" type="rpd:troveSpecType" />
+    </xsd:attributeGroup>
+
+    <xsd:simpleType name="troveSpecType">
+        <xsd:restriction base="xsd:string"></xsd:restriction>
+        <!-- TODO: make a proper xsd:restriction here to validate troveSpecs -->
+    </xsd:simpleType>
+
+    <xsd:simpleType name="flavorStringType">
+        <xsd:restriction base="xsd:string">
+            <!-- TODO: make a proper xsd:restriction here to validate flavor xsd:strings -->
+            <!-- this regexp comes from conary.deps.deps.flavorRegexpStr, and it barfs inside of Eclipse (sgp) -->
+            <!-- <pattern value="^(use:)? *(?:((?:!|~!)?(?:~?!?(?:[0-9A-Za-z_-]+))(?:\\.(?:[0-9A-Za-z_-]+))? *(?:, *(?:!|~!)?(?:~?!?(?:[0-9A-Za-z_-]+))(?:\\.(?:[0-9A-Za-z_-]+))?)*)?)? *(?:(is:) *(?: *(?:((?:[0-9A-Za-z_-]+))(?:\\(( *(?:~?!?(?:[0-9A-Za-z_-]+))(?: *, *(?:~?!?(?:[0-9A-Za-z_-]+)))*)\\))?)?(?:((?:  * *(?:((?:[0-9A-Za-z_-]+))(?:\\(( *(?:~?!?(?:[0-9A-Za-z_-]+))(?: *, *(?:~?!?(?:[0-9A-Za-z_-]+)))*)\\))?)?)*))?))? *(?:(target:) *(?: *(?:((?:[0-9A-Za-z_-]+))(?:\\(( *(?:~?!?(?:[0-9A-Za-z_-]+))(?: *, *(?:~?!?(?:[0-9A-Za-z_-]+)))*)\\))?)?(?:((?:  * *(?:((?:[0-9A-Za-z_-]+))(?:\\(( *(?:~?!?(?:[0-9A-Za-z_-]+))(?: *, *(?:~?!?(?:[0-9A-Za-z_-]+)))*)\\))?)?)*))?))?$" /> -->
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:complexType name="stageType">
+        <xsd:attribute name="name" type="xsd:string" use="required" />
+        <xsd:attribute name="labelSuffix" type="xsd:string" use="required" />
+    </xsd:complexType>
+
+    <xsd:complexType name="stageListType">
+        <xsd:sequence>
+            <xsd:element name="stage" type="stageType" minOccurs="1" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="searchPathType">
+        <xsd:attribute name="troveName" type="xsd:string" />
+        <xsd:attribute name="label" type="xsd:string" />
+        <xsd:attribute name="version" type="xsd:string" />
+    </xsd:complexType>
+
+    <xsd:complexType name="searchPathListType">
+        <xsd:sequence>
+            <xsd:element name="searchPath" type="searchPathType" minOccurs="1" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="factorySourceListType">
+        <xsd:sequence>
+            <xsd:element name="factorySource" type="searchPathType" minOccurs="1" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+
+    <xsd:complexType name="amiImageType">
+        <xsd:attributeGroup ref="common" />
+        <xsd:attribute name="amiHugeDiskMountpoint" type="xsd:string" />
+        <xsd:attribute name="freespace" type="xsd:nonNegativeInteger" />
+    </xsd:complexType>
+
+    <xsd:complexType name="applianceIsoImageType">
+        <xsd:attributeGroup ref="common" />
+        <xsd:attribute name="maxIsoSize" type="xsd:positiveInteger" />
+        <xsd:attribute name="bugsUrl" type="xsd:string" />
+        <xsd:attribute name="showMediaCheck" type="xsd:boolean" />
+        <xsd:attribute name="betaNag" type="xsd:boolean" />
+        <xsd:attributeGroup ref="specialIsoTroves" />
+    </xsd:complexType>
+
+    <xsd:complexType name="installableIsoImageType">
+        <xsd:attributeGroup ref="common" />
+        <xsd:attribute name="maxIsoSize" type="xsd:positiveInteger" />
+        <xsd:attribute name="bugsUrl" type="xsd:string" />
+        <xsd:attribute name="showMediaCheck" type="xsd:boolean" />
+        <xsd:attribute name="betaNag" type="xsd:boolean" />
+        <xsd:attributeGroup ref="specialIsoTroves" />
+    </xsd:complexType>
+
+    <xsd:complexType name="liveIsoImageType">
+        <xsd:attributeGroup ref="common" />
+        <xsd:attribute name="unionfs" type="xsd:boolean" />
+        <xsd:attribute name="zisofs" type="xsd:boolean" />
+    </xsd:complexType>
+
+    <xsd:complexType name="netbootImageType">
+        <xsd:attributeGroup ref="common" />
+    </xsd:complexType>
+
+    <xsd:complexType name="rawFsImageType">
+        <xsd:attributeGroup ref="common" />
+        <xsd:attribute name="swapSize" type="xsd:nonNegativeInteger" />
+        <xsd:attribute name="freespace" type="xsd:nonNegativeInteger" />
+    </xsd:complexType>
+
+    <xsd:complexType name="rawHdImageType">
+        <xsd:attributeGroup ref="common" />
+        <xsd:attribute name="swapSize" type="xsd:nonNegativeInteger" />
+        <xsd:attribute name="freespace" type="xsd:nonNegativeInteger" />
+    </xsd:complexType>
+
+    <xsd:complexType name="tarballImageType">
+        <xsd:attributeGroup ref="common" />
+        <xsd:attribute name="swapSize" type="xsd:nonNegativeInteger" />
+    </xsd:complexType>
+
+    <xsd:complexType name="updateIsoImageType">
+        <xsd:attribute name="baseFileName" type="xsd:string" />
+        <xsd:attribute name="mediaTemplateTrove" type="xsd:string" />
+    </xsd:complexType>
+
+    <xsd:complexType name="vhdImageType">
+        <xsd:attributeGroup ref="common" />
+        <xsd:attribute name="swapSize" type="xsd:nonNegativeInteger" />
+        <xsd:attribute name="freespace" type="xsd:nonNegativeInteger" />
+        <xsd:attribute name="vhdDiskType">
+            <xsd:simpleType>
+                <xsd:restriction base="xsd:string">
+                    <xsd:enumeration value="fixed" />
+                    <xsd:enumeration value="dynamic" />
+                    <xsd:enumeration value="difference" />
+                </xsd:restriction>
+            </xsd:simpleType>
+        </xsd:attribute>
+    </xsd:complexType>
+
+    <xsd:complexType name="virtualIronImageType">
+        <xsd:attributeGroup ref="common" />
+        <xsd:attribute name="swapSize" type="xsd:nonNegativeInteger" />
+        <xsd:attribute name="freespace" type="xsd:nonNegativeInteger" />
+        <xsd:attribute name="vhdDiskType">
+            <xsd:simpleType>
+                <xsd:restriction base="xsd:string">
+                    <xsd:enumeration value="fixed" />
+                    <xsd:enumeration value="dynamic" />
+                    <xsd:enumeration value="difference" />
+                </xsd:restriction>
+            </xsd:simpleType>
+        </xsd:attribute>
+    </xsd:complexType>
+
+    <xsd:complexType name="vmwareEsxImageType">
+        <xsd:attributeGroup ref="common" />
+        <xsd:attribute name="swapSize" type="xsd:nonNegativeInteger" />
+        <xsd:attribute name="freespace" type="xsd:nonNegativeInteger" />
+        <xsd:attribute name="natNetworking" type="xsd:boolean" />
+        <xsd:attribute name="vmMemory" type="xsd:nonNegativeInteger" />
+    </xsd:complexType>
+
+    <xsd:complexType name="vmwareImageType">
+        <xsd:attributeGroup ref="common" />
+        <xsd:attribute name="swapSize" type="xsd:nonNegativeInteger" />
+        <xsd:attribute name="freespace" type="xsd:nonNegativeInteger" />
+        <xsd:attribute name="natNetworking" type="xsd:boolean" />
+            <xsd:attribute name="diskAdapter">
+                <xsd:simpleType>
+                    <xsd:restriction base="xsd:string">
+                        <xsd:enumeration value="ide" />
+                        <xsd:enumeration value="lsilogic" />
+                    </xsd:restriction>
+                </xsd:simpleType>
+            </xsd:attribute>
+        <xsd:attribute name="vmSnapshots" type="xsd:boolean" />
+        <xsd:attribute name="vmMemory" type="xsd:nonNegativeInteger" />
+    </xsd:complexType>
+
+    <xsd:complexType name="xenOvaImageType">
+        <xsd:attributeGroup ref="common" />
+        <xsd:attribute name="swapSize" type="xsd:nonNegativeInteger" />
+        <xsd:attribute name="freespace" type="xsd:nonNegativeInteger" />
+        <xsd:attribute name="vmMemory" type="xsd:nonNegativeInteger" />
+    </xsd:complexType>
+
+    <xsd:complexType name="buildDefinitionType">
+        <xsd:sequence>
+            <xsd:element name="build" type="rpd:buildType" minOccurs="1" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="buildType">
+        <xsd:sequence>
+            <xsd:choice>
+                <xsd:element name="amiImage" type="rpd:amiImageType" />
+                <xsd:element name="applianceIsoImage" type="rpd:applianceIsoImageType" />
+                <xsd:element name="installableIsoImage" type="rpd:installableIsoImageType" />
+                <xsd:element name="liveIsoImage" type="rpd:liveIsoImageType" />
+                <xsd:element name="netbootImage" type="rpd:netbootImageType" />
+                <xsd:element name="rawFsImage" type="rpd:rawFsImageType" />
+                <xsd:element name="rawHdImage" type="rpd:rawHdImageType" />
+                <xsd:element name="tarballImage" type="rpd:tarballImageType" />
+                <xsd:element name="updateIsoImage" type="rpd:updateIsoImageType" />
+                <xsd:element name="vhdImage" type="rpd:vhdImageType" />
+                <xsd:element name="virtualIronImage" type="rpd:virtualIronImageType" />
+                <xsd:element name="vmwareImage" type="rpd:vmwareImageType" />
+                <xsd:element name="vmwareEsxImage" type="rpd:vmwareEsxImageType" />
+                <xsd:element name="xenOvaImage" type="rpd:xenOvaImageType" />
+            </xsd:choice>
+            <xsd:element name="stage" minOccurs="0" maxOccurs="unbounded">
+                <xsd:complexType>
+                    <xsd:attribute name="ref" type="xsd:string" use="required"/>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="imageGroup" type="rpd:troveSpecType" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+        <xsd:attribute name="name" type="xsd:string" use="required" />
+        <xsd:attribute name="baseFlavor" type="rpd:flavorStringType" />
+    </xsd:complexType>
+
+    <xsd:complexType name="platformDefinitionType">
+      <xsd:sequence>
+        <xsd:element name="baseFlavor" type="rpd:flavorStringType"
+        minOccurs="0" maxOccurs="1" />
+        <xsd:element name="searchPaths" type="rpd:searchPathListType"
+            minOccurs="0" maxOccurs="1" />
+        <xsd:element name="factorySources" type="rpd:factorySourceListType"
+            minOccurs="0" maxOccurs="1" />
+      </xsd:sequence>
+      <xsd:attribute name="version" type="xsd:string" />
+    </xsd:complexType>
+
+    <xsd:complexType name="platformType">
+      <xsd:sequence>
+        <xsd:element name="baseFlavor" type="rpd:flavorStringType"
+        minOccurs="0" maxOccurs="1" />
+        <xsd:element name="searchPaths" type="rpd:searchPathListType"
+            minOccurs="0" maxOccurs="1" />
+        <xsd:element name="factorySources" type="rpd:factorySourceListType"
+            minOccurs="0" maxOccurs="1" />
+      </xsd:sequence>
+      <!-- Source of this platform. Will get filled in to a name-version trove
+      spec when the product definition is saved -->
+      <xsd:attribute name="source" type="xsd:string" />
+      <!-- If useLatest is "true", the upstream platform is copied verbatim
+      here, with no settling to a specific version. This essentially is a
+      cache of the upstream platform.
+      -->
+      <xsd:attribute name="useLatest" type="xsd:boolean" />
+    </xsd:complexType>
+
+
+    <!-- First top-level element we allow -->
+    <xsd:element name="productDefinition">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="productName" type="xsd:string" />
+                <xsd:element name="productShortname" type="xsd:string" />
+                <xsd:element name="productDescription" type="xsd:string" />
+                <xsd:element name="productVersion" type="xsd:string" />
+                <xsd:element name="productVersionDescription" type="xsd:string" />
+                <xsd:element name="conaryRepositoryHostname" type="xsd:string" />
+                <xsd:element name="conaryNamespace" type="xsd:string" />
+                <xsd:element name="imageGroup" type="rpd:troveSpecType" />
+                <xsd:element name="baseFlavor" type="rpd:flavorStringType" minOccurs="0" maxOccurs="1" />
+                <xsd:element name="stages" type="rpd:stageListType" />
+                <xsd:element name="searchPaths" type="rpd:searchPathListType" minOccurs="0" maxOccurs="1" />
+                <xsd:element name="factorySources" type="rpd:factorySourceListType" minOccurs="0" maxOccurs="1" />
+                <xsd:element name="buildDefinition" type="rpd:buildDefinitionType" />
+                <xsd:element name="platform" type="rpd:platformType" minOccurs="0" maxOccurs="1" />
+            </xsd:sequence>
+            <xsd:attribute name="version" type="xsd:string" />
+        </xsd:complexType>
+    </xsd:element>
+
+    <!-- Second top-level element we allow (although we do allow this as part
+    of a product definition -->
+    <xsd:element name="platformDefinition" type="rpd:platformDefinitionType" />
+
+</xsd:schema>

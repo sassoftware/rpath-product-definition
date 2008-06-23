@@ -23,6 +23,6 @@
 @type xmlSchemaLocaltion: C{str}
 """
 
-defaultNamespaceList = [ "http://www.rpath.com/permanent/rpd-0.1.xsd" ]
+defaultNamespaceList = [ "http://www.rpath.com/permanent/rpd-1.1.xsd" ]
 xmlSchemaNamespace = "http://www.w3.org/2001/XMLSchema-instance"
-xmlSchemaLocation = "http://www.rpath.com/permanent/rpd-0.1.xsd rpd-0.1.xsd"
+xmlSchemaLocation = "http://www.rpath.com/permanent/rpd-1.1.xsd rpd-1.1.xsd"

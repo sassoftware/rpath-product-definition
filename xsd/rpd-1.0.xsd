@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsd:schema targetNamespace="http://www.rpath.com/permanent/rpd-0.1.xsd"
+<xsd:schema targetNamespace="http://www.rpath.com/permanent/rpd-1.0.xsd"
         elementFormDefault="qualified"
         attributeFormDefault="unqualified"
         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-        xmlns:rpd="http://www.rpath.com/permanent/rpd-0.1.xsd"
-        xmlns="http://www.rpath.com/permanent/rpd-0.1.xsd">
+        xmlns:rpd="http://www.rpath.com/permanent/rpd-1.0.xsd"
+        xmlns="http://www.rpath.com/permanent/rpd-1.0.xsd">
 
     <xsd:attributeGroup name="common">
        <xsd:attribute name="name" type="xsd:string" />
@@ -43,21 +43,20 @@
         </xsd:sequence>
     </xsd:complexType>
 
-    <xsd:complexType name="searchPathType">
+    <xsd:complexType name="upstreamSourceType">
         <xsd:attribute name="troveName" type="xsd:string" />
         <xsd:attribute name="label" type="xsd:string" />
-        <xsd:attribute name="version" type="xsd:string" />
     </xsd:complexType>
 
-    <xsd:complexType name="searchPathListType">
+    <xsd:complexType name="upstreamSourceListType">
         <xsd:sequence>
-            <xsd:element name="searchPath" type="searchPathType" minOccurs="1" maxOccurs="unbounded" />
+            <xsd:element name="upstreamSource" type="upstreamSourceType" minOccurs="1" maxOccurs="unbounded" />
         </xsd:sequence>
     </xsd:complexType>
 
     <xsd:complexType name="factorySourceListType">
         <xsd:sequence>
-            <xsd:element name="factorySource" type="searchPathType" minOccurs="1" maxOccurs="unbounded" />
+            <xsd:element name="factorySource" type="upstreamSourceType" minOccurs="1" maxOccurs="unbounded" />
         </xsd:sequence>
     </xsd:complexType>
 
@@ -215,39 +214,6 @@
         <xsd:attribute name="baseFlavor" type="rpd:flavorStringType" />
     </xsd:complexType>
 
-    <xsd:complexType name="platformDefinitionType">
-      <xsd:sequence>
-        <xsd:element name="baseFlavor" type="rpd:flavorStringType"
-        minOccurs="0" maxOccurs="1" />
-        <xsd:element name="searchPaths" type="rpd:searchPathListType"
-            minOccurs="0" maxOccurs="1" />
-        <xsd:element name="factorySources" type="rpd:factorySourceListType"
-            minOccurs="0" maxOccurs="1" />
-      </xsd:sequence>
-      <xsd:attribute name="version" type="xsd:string" />
-    </xsd:complexType>
-
-    <xsd:complexType name="platformType">
-      <xsd:sequence>
-        <xsd:element name="baseFlavor" type="rpd:flavorStringType"
-        minOccurs="0" maxOccurs="1" />
-        <xsd:element name="searchPaths" type="rpd:searchPathListType"
-            minOccurs="0" maxOccurs="1" />
-        <xsd:element name="factorySources" type="rpd:factorySourceListType"
-            minOccurs="0" maxOccurs="1" />
-      </xsd:sequence>
-      <!-- Source of this platform. Will get filled in to a name-version trove
-      spec when the product definition is saved -->
-      <xsd:attribute name="source" type="xsd:string" />
-      <!-- If useLatest is "true", the upstream platform is copied verbatim
-      here, with no settling to a specific version. This essentially is a
-      cache of the upstream platform.
-      -->
-      <xsd:attribute name="useLatest" type="xsd:boolean" />
-    </xsd:complexType>
-
-
-    <!-- First top-level element we allow -->
     <xsd:element name="productDefinition">
         <xsd:complexType>
             <xsd:sequence>
@@ -259,19 +225,14 @@
                 <xsd:element name="conaryRepositoryHostname" type="xsd:string" />
                 <xsd:element name="conaryNamespace" type="xsd:string" />
                 <xsd:element name="imageGroup" type="rpd:troveSpecType" />
-                <xsd:element name="baseFlavor" type="rpd:flavorStringType" minOccurs="0" maxOccurs="1" />
+                <xsd:element name="baseFlavor" type="rpd:flavorStringType" />
                 <xsd:element name="stages" type="rpd:stageListType" />
-                <xsd:element name="searchPaths" type="rpd:searchPathListType" minOccurs="0" maxOccurs="1" />
+                <xsd:element name="upstreamSources" type="rpd:upstreamSourceListType" />
                 <xsd:element name="factorySources" type="rpd:factorySourceListType" minOccurs="0" maxOccurs="1" />
                 <xsd:element name="buildDefinition" type="rpd:buildDefinitionType" />
-                <xsd:element name="platform" type="rpd:platformType" minOccurs="0" maxOccurs="1" />
             </xsd:sequence>
             <xsd:attribute name="version" type="xsd:string" />
         </xsd:complexType>
     </xsd:element>
-
-    <!-- Second top-level element we allow (although we do allow this as part
-    of a product definition -->
-    <xsd:element name="platformDefinition" type="rpd:platformDefinitionType" />
 
 </xsd:schema>
