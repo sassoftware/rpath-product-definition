@@ -27,9 +27,9 @@ character are public interfaces.
 If the C{VERSION} starts with C{0.}, none of the included
 interfaces is stable and may change without warning.
 
-To use the latest version of the interface:
+To use the latest version of the interface::
     from rpath_common import proddef
-To use a specific API Version of the interface:
+To use a specific API Version of the interface::
     from rpath_common.proddef import api1 as proddef
 """
 

@@ -151,7 +151,7 @@ class BaseDefinition(object):
         """
         Add an search path.
         @param troveName: the trove name for the search path.
-        @type name: C{str} or C{None}
+        @type troveName: C{str} or C{None}
         @param label: Label for the search path
         @type label: C{str} or C{None}
         @param version: Version for the search path
@@ -163,7 +163,7 @@ class BaseDefinition(object):
         """
         Add a factory source.
         @param troveName: the trove name for the factory source.
-        @type name: C{str} or C{None}
+        @type troveName: C{str} or C{None}
         @param label: Label for the factory source
         @type label: C{str} or C{None}
         @param version: Version for the factory source
@@ -381,8 +381,6 @@ class ProductDefinitionRecipe(PackageRecipe):
         C{setConaryNamespace}.
         @param client: A Conary client object
         @type client: C{conaryclient.ConaryClient}
-        @param message: An optional commit message
-        @type message: C{str}
         @raises C{RepositoryError}:
         @raises C{ProductDefinitionTroveNotFound}:
         @raises C{ProductDefinitionFileNotFound}:
@@ -686,7 +684,7 @@ class ProductDefinitionRecipe(PackageRecipe):
         """
         Add an search path.
         @param troveName: the trove name for the search path.
-        @type name: C{str} or C{None}
+        @type troveName: C{str} or C{None}
         @param label: Label for the search path
         @type label: C{str} or C{None}
         @param version: Version for the search path
@@ -721,7 +719,7 @@ class ProductDefinitionRecipe(PackageRecipe):
         """
         Add a factory source.
         @param troveName: the trove name for the factory source.
-        @type name: C{str} or C{None}
+        @type troveName: C{str} or C{None}
         @param label: Label for the factory source
         @type label: C{str} or C{None}
         @param version: Version for the factory source
@@ -1027,8 +1025,6 @@ class PlatformDefinitionRecipe(PackageRecipe):
         Load a C{PlatformDefinition} object from a Conary repository.
         @param client: A Conary client object
         @type client: C{conaryclient.ConaryClient}
-        @param message: An optional commit message
-        @type message: C{str}
         @raises C{RepositoryError}:
         @raises C{ProductDefinitionTroveNotFound}:
         @raises C{ProductDefinitionFileNotFound}:

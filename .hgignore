@@ -5,6 +5,7 @@
 .*\.o$
 .*\.so$
 ^tmp/
+docs/developer/.*
 rpath_common/proddef/proddef_constants.pyc?$
 rpath_common/xmllib
 ^pylint/reports/
