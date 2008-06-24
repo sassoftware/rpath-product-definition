@@ -16,7 +16,7 @@ The rPath Product Definition API Constants definition
 
 The module data elements in this module are a private interface,
 available through the rpath_common.proddef module.
-@var _VERSION: rBuild version
+@var _VERSION: Product Definition version
 @type _VERSION: string
 """
 
