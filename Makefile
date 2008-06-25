@@ -17,7 +17,7 @@ all: default-subdirs default-all
 .PHONY: clean dist install html docs
 
 export TOPDIR = $(shell pwd)
-export DISTDIR = $(TOPDIR)/rpath-product-definition-$(VERSION)
+export DISTDIR = $(TOPDIR)/product-definition-$(VERSION)
 
 SUBDIRS=rpath_common xsd doc pylint
 
