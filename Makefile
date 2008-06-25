@@ -48,8 +48,10 @@ doc: html
 html: default-subdirs
 	scripts/generate_docs.sh
 
-tag:
+forcetag:
 	hg tag -f product-definition-$(VERSION)
+tag:
+	hg tag product-definition-$(VERSION)
 
 clean: clean-subdirs default-clean
 	@rm -rf $(DISTDIR).tar.bz2
