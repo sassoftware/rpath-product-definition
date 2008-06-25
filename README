@@ -19,4 +19,11 @@ that validates against schema version 2.0 should validate without
 changes against schema version 2.1 or 2.2.  Incompatible schema
 version changes will cause the major version to be incremented.
 The schema version is included in the filename: rpd-1.0.xsd
-implements version 1.0 of the schema.
+implements version 1.0 of the schema.  (From schema version 1.0
+to 1.1 there is a slight incompatibility; the schema version
+rules will not be strictly enforced until the software version
+reaches 1.0.)
+
+API documentation is available at
+http://cvs.rpath.com/product-definition-docs/ or by running "make
+html" and viewing docs/developer/index.html (requires epydoc).
