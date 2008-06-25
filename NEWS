@@ -1,4 +1,4 @@
-Changes in @NEW@:
+Changes in 0.1:
   o API Changes:
     * proddef.py moved into rpath_common module.
     * More consistent API function and method naming: elem_dict
