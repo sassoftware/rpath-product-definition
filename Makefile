@@ -40,7 +40,7 @@ dist:
 
 
 archive:
-	hg --config 'ui.archivemeta=False' archive --exclude .hgignore -t tbz2 $(DISTDIR).tar.bz2
+	hg archive --exclude .hgignore -t tbz2 $(DISTDIR).tar.bz2
 
 forcedist: archive
 
