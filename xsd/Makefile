@@ -13,7 +13,7 @@
 #
 
 dist_files = Makefile $(SCHEMA_FILES)
-SCHEMA_FILES = rpd-1.0.xsd rpd-1.1.xsd
+SCHEMA_FILES = $(wildcard *.xsd)
 
 all: default-all
 
@@ -22,6 +22,9 @@ install: all default-install $(DESTDIR)$(datadir)/rpath_common
 
 $(DESTDIR)$(datadir)/rpath_common:
 	install -d -m755 $@
+
+validate-schema:
+	xmllint -schema http://www.w3.org/2001/XMLSchema.xsd $(SCHEMA_FILES) > /dev/null
 
 dist: default-dist
 
