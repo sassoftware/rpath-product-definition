@@ -928,6 +928,12 @@ class ProductDefinitionRecipe(PackageRecipe):
         for troveName, label in sPathsList:
             nplat.addSearchPath(troveName=troveName, label=label)
 
+        for arch in self.getArchitectures():
+            nplat.addArchitecture(name = arch.name, flavor = arch.flavor)
+
+        for tmpl in self.getImageTemplates():
+            nplat.addImageTemplate(name = tmpl.name, flavor = tmpl.flavor)
+
         return nplat
 
     def savePlatformToRepository(self, client, message = None):
