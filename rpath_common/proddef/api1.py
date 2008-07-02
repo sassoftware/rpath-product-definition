@@ -26,11 +26,14 @@ __all__ = [ 'MissingInformationError',
             'ProductDefinitionTroveNotFound',
             'ProductDefinitionFileNotFound',
             'RepositoryError',
-            'PlatformLabelMissingError'
+            'PlatformLabelMissingError',
+            'ArchitectureNotFoundError',
+            'ImageTemplateNotFoundError',
             ]
 
 import itertools
 import StringIO
+import weakref
 
 from conary import changelog
 from conary import errors as conaryErrors
@@ -180,12 +183,16 @@ class BaseDefinition(object):
     def getArchitectures(self):
         return self.architectures
 
-    def getArchitecture(self, name):
-        ret = None
+    def hasArchitecture(self, name):
+        return name in [ x.name for x in self.getArchitectures() ]
+
+    def getArchitecture(self, name, default = -1):
         arches = self.getArchitectures()
         for arch in arches:
             if arch.name == name:
                 return arch
+        if default != -1:
+            return default
         raise ArchitectureNotFoundError(name)
 
     def addArchitecture(self, name, flavor):
@@ -198,12 +205,13 @@ class BaseDefinition(object):
     def getImageTemplates(self):
         return self.imageTemplates
 
-    def getImageTemplate(self, name):
-        ret = None
+    def getImageTemplate(self, name, default = -1):
         templates = self.getImageTemplates()
         for tmpl in templates:
             if tmpl.name == name:
                 return tmpl
+        if default != -1:
+            return default
         raise ImageTemplateNotFoundError(name)
 
     def addImageTemplate(self, name, flavor):
@@ -382,6 +390,9 @@ class ProductDefinitionRecipe(PackageRecipe):
         self.architectures.extend(getattr(xmlObj, 'architectures', []))
         self.imageTemplates.extend(getattr(xmlObj, 'imageTemplates', []))
         self.buildDefinition.extend(getattr(xmlObj, 'buildDefinition', []))
+        # Add (weak) reference to the product definition
+        for bd in self.buildDefinition:
+            bd.setProductDefinition(self)
         self.platform = getattr(xmlObj, 'platform', None)
 
         ver = xmlObj.getAttribute('version')
@@ -566,12 +577,12 @@ class ProductDefinitionRecipe(PackageRecipe):
         @rtype: C{str}
         """
         flv = conaryDeps.parseFlavor('')
-        if self.baseFlavor is not None:
-            nflv = conaryDeps.parseFlavor(self.baseFlavor)
-            flv.union(nflv)
         platFlv = self.getPlatformBaseFlavor()
         if platFlv is not None:
             nflv = conaryDeps.parseFlavor(platFlv)
+            flv.union(nflv)
+        if self.baseFlavor is not None:
+            nflv = conaryDeps.parseFlavor(self.baseFlavor)
             flv.union(nflv)
         return str(flv)
 
@@ -678,10 +689,14 @@ class ProductDefinitionRecipe(PackageRecipe):
         return self.buildDefinition
 
     def addBuildDefinition(self, name = None, baseFlavor = None,
-                           imageType = None, stages = None, imageGroup = None):
+                           imageType = None, stages = None, imageGroup = None,
+                           architectureRef = None, imageTemplateRef = None,
+                           flavor = None):
         """
         Add a build definition.
         Image types are specified by calling C{ProductDefinition.imageType}.
+        Note that the usage of baseFlavor is deprecated in favor of using
+        references to architectures and image templates.
         @param name: the name for the build definition
         @type name: C{str} or C{None}
         @param baseFlavor: the base flavor
@@ -694,12 +709,31 @@ class ProductDefinitionRecipe(PackageRecipe):
         @param imageGroup: An optional image group that will override the
         product definition's image group
         @type imageGroup: C{str}
-        subclass.
+        @param architectureRef: the name of an architecture to inherit flavors
+        from.
+        @type architectureRef: C{str}
+        @param imageTemplateRef: the name of an image template to inherit
+        flavors from.
+        @type imageTemplateRef: C{str}
+        @param flavor: additional flavors
+        @type flavor: C{str}
         """
+        if baseFlavor and (architectureRef or imageTemplateRef or flavor):
+            raise ProductDefinitionError("Both a base flavor and references used")
+        if architectureRef:
+            # Make sure we have the architecture
+            arch = self.getArchitecture(architectureRef)
+        if imageTemplateRef:
+            # Make sure we have the image template
+            arch = self.getImageTemplate(imageTemplateRef)
+
         obj = Build(name = name, baseFlavor = baseFlavor,
                      imageType = imageType, stages = stages,
                      imageGroup = imageGroup,
-                     parentImageGroup = self.imageGroup)
+                     parentImageGroup = self.imageGroup,
+                     architectureRef = architectureRef,
+                     imageTemplateRef = imageTemplateRef,
+                     flavor = flavor, proddef = self)
         self.buildDefinition.append(obj)
 
     def clearBuildDefinition(self):
@@ -806,6 +840,22 @@ class ProductDefinitionRecipe(PackageRecipe):
     def setPlatformUseLatest(self, useLatest):
         self._ensurePlatformExists()
         self.platform.useLatest = useLatest
+
+    def getPlatformArchitecture(self, name, default = -1):
+        pa = None
+        if self.platform:
+            pa = self.platform.getArchitecture(name, None)
+        if pa is not None or default != -1:
+            return pa
+        raise ArchitectureNotFoundError(name)
+
+    def getPlatformImageTemplate(self, name, default = -1):
+        pa = None
+        if self.platform:
+            pa = self.platform.getImageTemplate(name, None)
+        if pa is not None or default != -1:
+            return pa
+        raise ImageTemplateNotFoundError(name)
 
     def _ensurePlatformExists(self):
         if self.platform is None:
@@ -1191,12 +1241,14 @@ class _ImageTemplate(_Architecture):
 
 class Build(xmllib.SerializableObject):
     __slots__ = [ 'name', 'baseFlavor', 'imageType', 'stages', 'imageGroup',
-                  'parentImageGroup', ]
+                  'parentImageGroup', 'architectureRef', 'imageTemplateRef',
+                  'flavor', '_proddef']
     tag = "build"
 
     def __init__(self, name = None, baseFlavor = None,
                  imageType = None, stages = None, imageGroup = None,
-                 parentImageGroup = None):
+                 parentImageGroup = None, architectureRef = None,
+                 imageTemplateRef = None, flavor = None, proddef = None):
         xmllib.SlotBasedSerializableObject.__init__(self)
         self.name = name
         self.baseFlavor = baseFlavor
@@ -1204,9 +1256,17 @@ class Build(xmllib.SerializableObject):
         self.stages = stages or []
         self.imageGroup = imageGroup
         self.parentImageGroup = parentImageGroup
+        self.architectureRef = architectureRef
+        self.imageTemplateRef = imageTemplateRef
+        self.flavor = flavor
+        self._proddef = None
+        self.setProductDefinition(proddef)
 
     def __eq__(self, build):
         for key in self.__slots__:
+            if key == '_proddef':
+                # Ignore the weak ref
+                continue
             if self.__getattribute__(key) != build.__getattribute__(key):
                 return False
         return True
@@ -1229,7 +1289,49 @@ class Build(xmllib.SerializableObject):
         return self.name
 
     def getBuildBaseFlavor(self):
-        return self.baseFlavor
+        if self.baseFlavor is not None:
+            return self.baseFlavor
+
+        # Grab flavor from the referenced components
+        if self._proddef is None:
+            return ''
+        pd = self._proddef
+        if pd is not None:
+            pd = pd()
+        if pd is None:
+            return ''
+
+        # Grab base flavor from platform + product
+        flv = conaryDeps.parseFlavor(pd.getBaseFlavor())
+
+        try:
+            if self.architectureRef:
+                methods = [ pd.getPlatformArchitecture, pd.getArchitecture ]
+                for meth in methods:
+                    obj = meth(self.architectureRef, None)
+                    if obj is None:
+                        continue
+                    nflv = conaryDeps.parseFlavor(obj.flavor)
+                    flv.union(nflv)
+            if self.imageTemplateRef:
+                methods = [ pd.getImageTemplate, pd.getPlatformImageTemplate ]
+                for meth in methods:
+                    obj = meth(self.imageTemplateRef, None)
+                    if obj is None:
+                        continue
+                    nflv = conaryDeps.parseFlavor(obj.flavor)
+                    flv.union(nflv)
+            if self.flavor:
+                nflv = conaryDeps.parseFlavor(self.flavor)
+                flv.union(nflv)
+        except RuntimeError, e:
+            raise ProductDefinitionError(str(e))
+        return str(flv)
+
+    def setProductDefinition(self, proddef):
+        self._proddef = None
+        if proddef:
+            self._proddef = weakref.ref(proddef)
 
     def _getName(self):
         return self.tag
@@ -1250,6 +1352,11 @@ class Build(xmllib.SerializableObject):
             yield ('name', self.name)
         if self.baseFlavor is not None:
             yield ('baseFlavor', self.baseFlavor)
+        else:
+            for f in ['architectureRef', 'imageTemplateRef', 'flavor']:
+                attrVal = getattr(self, f)
+                if attrVal is not None:
+                    yield (f, attrVal)
 
 #}
 
@@ -1455,6 +1562,9 @@ class _ProductDefinition(BaseXmlNode):
                            for x in node.getChildren('stage') ],
                 imageGroup = imageGroup,
                 parentImageGroup = self.imageGroup,
+                architectureRef = node.getAttribute('architectureRef'),
+                imageTemplateRef = node.getAttribute('imageTemplateRef'),
+                flavor = node.getAttribute('flavor'),
                 )
             builds.append(pyobj)
 
