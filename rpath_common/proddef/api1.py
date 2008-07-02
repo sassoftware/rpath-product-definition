@@ -971,6 +971,12 @@ class ProductDefinitionRecipe(PackageRecipe):
             self.addPlatformFactorySource(troveName=sp.troveName,
                                           label=sp.label,
                                           version=sp.version)
+        for item in nplat.getArchitectures():
+            self.platform.addArchitecture(name = item.name,
+                                          flavor = item.flavor)
+        for item in nplat.getImageTemplates():
+            self.platform.addImageTemplate(name = item.name,
+                                           flavor = item.flavor)
 
     def _initFields(self):
         BaseDefinition._initFields(self)
