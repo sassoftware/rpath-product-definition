@@ -53,7 +53,13 @@ class MissingInformationError(ProductDefinitionError):
     """
 
 class StageNotFoundError(ProductDefinitionError):
-    " Raised when no such stage exists. "
+    "Raised when no such stage exists."
+
+class ArchitectureNotFoundError(ProductDefinitionError):
+    "Raised when no such architecture exists."
+
+class ImageTemplateNotFoundError(ProductDefinitionError):
+    "Raised when no such image template exists."
 
 class UnsupportedImageType(ProductDefinitionError):
     "Raised when an unsupported image type was passed"
@@ -76,7 +82,7 @@ class PlatformLabelMissingError(ProductDefinitionError):
 #}
 
 class BaseDefinition(object):
-    version = '1.1'
+    version = '1.2'
     defaultNamespace = _xmlConstants.defaultNamespaceList[0]
     xmlSchemaLocation = _xmlConstants.xmlSchemaLocation
 
@@ -171,6 +177,43 @@ class BaseDefinition(object):
         """
         self._addSource(troveName, label, version, _FactorySource, self.factorySources)
 
+    def getArchitectures(self):
+        return self.architectures
+
+    def getArchitecture(self, name):
+        ret = None
+        arches = self.getArchitectures()
+        for arch in arches:
+            if arch.name == name:
+                return arch
+        raise ArchitectureNotFoundError(name)
+
+    def addArchitecture(self, name, flavor):
+        obj = _Architecture(name = name, flavor = flavor)
+        self.architectures.append(obj)
+
+    def clearArchitectures(self):
+        self.architectures = _Architectures()
+
+    def getImageTemplates(self):
+        return self.imageTemplates
+
+    def getImageTemplate(self, name):
+        ret = None
+        templates = self.getImageTemplates()
+        for tmpl in templates:
+            if tmpl.name == name:
+                return tmpl
+        raise ImageTemplateNotFoundError(name)
+
+    def addImageTemplate(self, name, flavor):
+        obj = _ImageTemplate(name = name, flavor = flavor)
+        self.imageTemplates.append(obj)
+
+    def clearImageTemplates(self):
+        self.imageTemplates = _ImageTemplates()
+
+
     def _addSource(self, troveName, label, version, cls, intList):
         "Internal function for adding a Source"
         if label is not None:
@@ -181,13 +224,11 @@ class BaseDefinition(object):
 
 
     def _saveToRepository(self, conaryClient, label, message = None):
-        version = '1.1'
-
         if message is None:
             message = "Automatic checkin\n"
 
         recipe = self._recipe.replace('@NAME@', self._troveName)
-        recipe = recipe.replace('@VERSION@', version)
+        recipe = recipe.replace('@VERSION@', self.__class__.version)
 
         stream = StringIO.StringIO()
         self.serialize(stream)
@@ -201,8 +242,8 @@ class BaseDefinition(object):
                                    contact = conaryClient.cfg.contact,
                                    message = message)
         troveName = '%s:source' % self._troveName
-        cs = conaryClient.createSourceTrove(troveName, label, version,
-            pathDict, cLog)
+        cs = conaryClient.createSourceTrove(troveName, label,
+            self.__class__.version, pathDict, cLog)
 
         repos = conaryClient.getRepos()
         repos.commitChangeSet(cs)
@@ -237,6 +278,13 @@ class BaseDefinition(object):
 
         # Couldn't find the file we expected; die
         raise ProductDefinitionFileNotFound("%s=%s" % (troveName, label))
+
+    def _initFields(self):
+        self.baseFlavor = None
+        self.searchPaths = _SearchPaths()
+        self.factorySources = _FactorySources()
+        self.architectures = _Architectures()
+        self.imageTemplates = _ImageTemplates()
 
 class ProductDefinition(BaseDefinition):
     """
@@ -331,6 +379,8 @@ class ProductDefinitionRecipe(PackageRecipe):
         self.stages.extend(getattr(xmlObj, 'stages', []))
         self.searchPaths.extend(getattr(xmlObj, 'searchPaths', []))
         self.factorySources.extend(getattr(xmlObj, 'factorySources', []))
+        self.architectures.extend(getattr(xmlObj, 'architectures', []))
+        self.imageTemplates.extend(getattr(xmlObj, 'imageTemplates', []))
         self.buildDefinition.extend(getattr(xmlObj, 'buildDefinition', []))
         self.platform = getattr(xmlObj, 'platform', None)
 
@@ -544,7 +594,7 @@ class ProductDefinitionRecipe(PackageRecipe):
         for stage in stages:
             if stage.name == stageName:
                 return stage
-        raise StageNotFoundError
+        raise StageNotFoundError(stageName)
 
     def addStage(self, name = None, labelSuffix = None):
         """
@@ -917,7 +967,7 @@ class ProductDefinitionRecipe(PackageRecipe):
                                           version=sp.version)
 
     def _initFields(self):
-        self.baseFlavor = None
+        BaseDefinition._initFields(self)
         self.stages = _Stages()
         self.productName = None
         self.productShortname = None
@@ -927,8 +977,6 @@ class ProductDefinitionRecipe(PackageRecipe):
         self.conaryRepositoryHostname = None
         self.conaryNamespace = None
         self.imageGroup = None
-        self.searchPaths = _SearchPaths()
-        self.factorySources = _FactorySources()
         self.buildDefinition = _BuildDefinition()
         self.platform = None
 
@@ -958,9 +1006,7 @@ class PlatformDefinitionRecipe(PackageRecipe):
 '''
 
     def _initFields(self):
-        self.searchPaths = _SearchPaths()
-        self.factorySources = _FactorySources()
-        self.baseFlavor = None
+        BaseDefinition._initFields(self)
         self.useLatest = None
         self.sourceTrove = None
 
@@ -984,6 +1030,8 @@ class PlatformDefinitionRecipe(PackageRecipe):
         self.useLatest = getattr(xmlObj.platform, 'useLatest', None)
         self.searchPaths = getattr(xmlObj.platform, 'searchPaths', None)
         self.factorySources = getattr(xmlObj.platform, 'factorySources', None)
+        self.architectures = getattr(xmlObj.platform, 'architectures', None)
+        self.imageTemplates = getattr(xmlObj.platform, 'imageTemplates', None)
 
         for nsName, nsVal in xmlObj.iterNamespaces():
             if nsName is None and nsVal != self.defaultNamespace:
@@ -1078,6 +1126,15 @@ class _SearchPaths(xmllib.SerializableList):
 class _FactorySources(xmllib.SerializableList):
     tag = "factorySources"
 
+# pylint: disable-msg=R0903
+# Too few public methods (1/2): this is an interface
+class _Architectures(xmllib.SerializableList):
+    tag = "architectures"
+
+# pylint: disable-msg=R0903
+# Too few public methods (1/2): this is an interface
+class _ImageTemplates(xmllib.SerializableList):
+    tag = "imageTemplates"
 
 # pylint: disable-msg=R0903
 # Too few public methods (1/2): this is an interface
@@ -1107,6 +1164,18 @@ class _SearchPath(xmllib.SlotBasedSerializableObject):
 
 class _FactorySource(_SearchPath):
     tag = "factorySource"
+
+class _Architecture(xmllib.SlotBasedSerializableObject):
+    __slots__ = [ 'name', 'flavor' ]
+    tag = "architecture"
+
+    def __init__(self, name, flavor):
+        xmllib.SlotBasedSerializableObject.__init__(self)
+        self.name = name
+        self.flavor = flavor
+
+class _ImageTemplate(_Architecture):
+    tag = "imageTemplate"
 
 class Build(xmllib.SerializableObject):
     __slots__ = [ 'name', 'baseFlavor', 'imageType', 'stages', 'imageGroup',
@@ -1201,6 +1270,23 @@ class BaseXmlNode(xmllib.BaseNode):
             sources.append(pyObj)
         return sources
 
+    def _processArchitectures(self, architectures):
+        return self._processNFCollection(architectures,
+            _Architectures, _Architecture)
+
+    def _processImageTemplates(self, imageTemplates):
+        return self._processNFCollection(imageTemplates,
+            _ImageTemplates, _ImageTemplate)
+
+    def _processNFCollection(self, collection, ListClass, ItemClass):
+        collObj = ListClass()
+        for node in collection:
+            pyObj = ItemClass(
+                name = node.getAttribute('name'),
+                flavor = node.getAttribute('flavor'))
+            collObj.append(pyObj)
+        return collObj
+
     def _addPlatform(self, node):
         self.platform = PlatformDefinition()
         self.platform.sourceTrove = node.getAttribute('sourceTrove')
@@ -1216,6 +1302,14 @@ class BaseXmlNode(xmllib.BaseNode):
         if listNode:
             self.platform.factorySources = self._processFactorySources(
                 listNode[0].getChildren('factorySource'))
+        listNode = node.getChildren('architectures')
+        if listNode:
+            self.platform.architectures = self._processArchitectures(
+                listNode[0].getChildren('architecture'))
+        listNode = node.getChildren('imageTemplates')
+        if listNode:
+            self.platform.imageTemplates = self._processImageTemplates(
+                listNode[0].getChildren('imageTemplate'))
         baseFlavorChildren = node.getChildren('baseFlavor')
         if baseFlavorChildren:
             self.platform.baseFlavor = baseFlavorChildren[0].getText()
@@ -1277,6 +1371,17 @@ class _ProductDefinition(BaseXmlNode):
             self._addFactorySources(children)
             return
 
+        if chName == self._makeAbsoluteName('architectures'):
+            children = childNode.getChildren('architecture')
+            self._addArchitectures(children)
+            return
+
+        if chName == self._makeAbsoluteName('imageTemplates'):
+            children = childNode.getChildren('imageTemplate')
+            self._addImageTemplates(children)
+            return
+
+
         if chName == self._makeAbsoluteName('buildDefinition'):
             children = childNode.getChildren('build')
             self._addBuildDefinition(children)
@@ -1299,6 +1404,12 @@ class _ProductDefinition(BaseXmlNode):
 
     def _addFactorySources(self, factorySources):
         self.factorySources = self._processFactorySources(factorySources)
+
+    def _addArchitectures(self, architectures):
+        self.architectures = self._processArchitectures(architectures)
+
+    def _addImageTemplates(self, imageTemplates):
+        self.imageTemplates = self._processImageTemplates(imageTemplates)
 
     def _addBuildDefinition(self, buildNodes):
         dispatcher = xmllib.NodeDispatcher(self._nsMap)
@@ -1350,6 +1461,8 @@ class _PlatformSerialization(xmllib.BaseNode):
                 attrs['sourceTrove'] = platform.sourceTrove
         self.searchPaths = platform.searchPaths
         self.factorySources = platform.factorySources
+        self.architectures = platform.architectures
+        self.imageTemplates = platform.imageTemplates
         self.baseFlavor = xmllib.StringNode(name = 'baseFlavor').characters(platform.baseFlavor)
         xmllib.BaseNode.__init__(self, attrs, namespaces, name=name)
 
@@ -1359,6 +1472,10 @@ class _PlatformSerialization(xmllib.BaseNode):
             ret.append(self.searchPaths)
         if self.factorySources:
             ret.append(self.factorySources)
+        if self.architectures:
+            ret.append(self.architectures)
+        if self.imageTemplates:
+            ret.append(self.imageTemplates)
         return ret
 
 class _ProductDefinitionSerialization(xmllib.BaseNode):
@@ -1367,6 +1484,8 @@ class _ProductDefinitionSerialization(xmllib.BaseNode):
         self.stages = prodDef.getStages()
         self.searchPaths = prodDef.searchPaths
         self.factorySources = prodDef.factorySources
+        self.architectures = prodDef.architectures
+        self.imageTemplates = prodDef.imageTemplates
         self.buildDefinition = prodDef.getBuildDefinitions()
         if prodDef.platform:
             self.platform = _PlatformSerialization({}, namespaces,
@@ -1436,6 +1555,10 @@ class _ProductDefinitionSerialization(xmllib.BaseNode):
                  self.searchPaths, ]
         if len(self.factorySources):
             ret.append(self.factorySources)
+        if self.architectures:
+            ret.append(self.architectures)
+        if self.imageTemplates:
+            ret.append(self.imageTemplates)
         ret.append(self.buildDefinition)
         if self.platform:
             ret.append(self.platform)
