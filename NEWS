@@ -1,3 +1,13 @@
+Changes in @NEW@:
+  o API Changes:
+    * Richer flavor support: for both platform and product, there are
+      base flavor, image flavors, and architecture flavors that are
+      mixed together to discover flavors of groups to cook and images
+      to build. (RPCL-13)
+
+  o Schema Versions:
+    * 1.2: Initial support for richer flavors (RPCL-13)
+
 Changes in 0.1:
   o API Changes:
     * proddef.py moved into rpath_common module.
