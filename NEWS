@@ -4,9 +4,13 @@ Changes in @NEW@:
       base flavor, image flavors, and architecture flavors that are
       mixed together to discover flavors of groups to cook and images
       to build. (RPCL-13)
+    * When the default label prefix is not the label for a product,
+      a different label prefix ("baseLabel") can be provided.  Stage
+      suffixes will still be appended to this label. (RPCL-18)
 
   o Schema Versions:
     * 1.2: Initial support for richer flavors (RPCL-13)
+    * 1.3: Added baseLabel
 
 Changes in 0.1:
   o API Changes:

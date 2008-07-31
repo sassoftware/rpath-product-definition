@@ -85,7 +85,7 @@ class PlatformLabelMissingError(ProductDefinitionError):
 #}
 
 class BaseDefinition(object):
-    version = '1.2'
+    version = '1.3'
     defaultNamespace = _xmlConstants.defaultNamespaceList[0]
     xmlSchemaLocation = _xmlConstants.xmlSchemaLocation
 
@@ -383,6 +383,7 @@ class ProductDefinitionRecipe(PackageRecipe):
             'conaryRepositoryHostname', None)
         self.conaryNamespace = getattr(xmlObj, 'conaryNamespace', None)
         self.imageGroup = getattr(xmlObj, 'imageGroup', None)
+        self.baseLabel = getattr(xmlObj, 'baseLabel', None)
         self.baseFlavor = getattr(xmlObj, 'baseFlavor', None)
         self.stages.extend(getattr(xmlObj, 'stages', []))
         self.searchPaths.extend(getattr(xmlObj, 'searchPaths', []))
@@ -892,6 +893,12 @@ class ProductDefinitionRecipe(PackageRecipe):
                 ret.append(build)
         return ret
 
+    def setBaseLabel(self, label):
+        self.baseLabel = label
+
+    def getBaseLabel(self):
+        return self.baseLabel
+
     def getProductDefinitionLabel(self):
         """
         Method that returns the product definition's label
@@ -900,6 +907,9 @@ class ProductDefinitionRecipe(PackageRecipe):
         @raises MissingInformationError: if there isn't enough information
             in the product definition to generate the label
         """
+        if self.baseLabel is not None:
+            return self.baseLabel
+
         hostname = self.getConaryRepositoryHostname()
         shortname = self.getProductShortname()
         namespace = self.getConaryNamespace()
@@ -1039,6 +1049,7 @@ class ProductDefinitionRecipe(PackageRecipe):
         self.conaryRepositoryHostname = None
         self.conaryNamespace = None
         self.imageGroup = None
+        self.baseLabel = None
         self.buildDefinition = _BuildDefinition()
         self.platform = None
 
@@ -1248,7 +1259,8 @@ class Build(xmllib.SerializableObject):
     def __init__(self, name = None, baseFlavor = None,
                  imageType = None, stages = None, imageGroup = None,
                  parentImageGroup = None, architectureRef = None,
-                 imageTemplateRef = None, flavor = None, proddef = None):
+                 imageTemplateRef = None, flavor = None, proddef = None,
+                 baseLabel = None):
         xmllib.SlotBasedSerializableObject.__init__(self)
         self.name = name
         self.baseFlavor = baseFlavor
@@ -1471,6 +1483,10 @@ class _ProductDefinition(BaseXmlNode):
             self.imageGroup = childNode.getText()
             return
 
+        if chName == self._makeAbsoluteName('baseLabel'):
+            self.baseLabel = childNode.getText()
+            return
+
         if chName == self._makeAbsoluteName('baseFlavor'):
             self.baseFlavor = childNode.getText()
             return
@@ -1660,6 +1676,12 @@ class _ProductDefinitionSerialization(xmllib.BaseNode):
         if imageGroup:
             self.imageGroup.characters(imageGroup)
 
+        self.baseLabel = None
+        baseLabel = prodDef.getBaseLabel()
+        if baseLabel:
+            self.baseLabel = xmllib.StringNode(name = 'baseLabel')
+            self.baseLabel.characters(baseLabel)
+
         self.baseFlavor = xmllib.StringNode(name = 'baseFlavor')
         self.baseFlavor.characters(prodDef.baseFlavor)
 
@@ -1672,6 +1694,7 @@ class _ProductDefinitionSerialization(xmllib.BaseNode):
                  self.conaryRepositoryHostname,
                  self.conaryNamespace,
                  self.imageGroup,
+                 self.baseLabel,
                  self.baseFlavor,
                  self.stages,
                  self.searchPaths, ]
