@@ -1014,7 +1014,7 @@ class ProductDefinitionRecipe(PackageRecipe):
         nplat = self.toPlatformDefinition()
         nplat.loadFromRepository(client, label)
         nplat.snapshotVersions(client)
-        self._rebase(label, nplat, useLatest = None)
+        self._rebase(label, nplat, useLatest = useLatest)
 
     def _rebase(self, label, nplat, useLatest = None):
         # Create a new platform definition
