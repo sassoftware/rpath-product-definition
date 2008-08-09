@@ -220,6 +220,33 @@
         <xsd:attribute name="flavor" type="rpd:flavorStringType" />
     </xsd:complexType>
 
+    <xsd:complexType name="secondaryLabelsType">
+      <xsd:sequence>
+        <xsd:element name="secondaryLabel" minOccurs="1" maxOccurs="unbounded">
+          <xsd:complexType>
+            <xsd:simpleContent>
+              <xsd:extension base="xsd:string">
+                <xsd:attribute name="name" type="xsd:string" use="required" />
+              </xsd:extension>
+            </xsd:simpleContent>
+          </xsd:complexType>
+        </xsd:element>
+      </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="promoteMapsType">
+      <xsd:sequence>
+        <xsd:element name="promoteMap" type="rpd:promoteMapType" minOccurs="1" maxOccurs="unbounded" />
+      </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="promoteMapType">
+      <xsd:sequence>
+        <xsd:element name="from" type="xsd:string" minOccurs="1" maxOccurs="1" />
+        <xsd:element name="to" type="xsd:string" minOccurs="1" maxOccurs="1" />
+      </xsd:sequence>
+    </xsd:complexType>
+
     <xsd:complexType name="platformDefinitionType">
       <xsd:sequence>
         <xsd:element name="baseFlavor" type="rpd:flavorStringType"
@@ -298,6 +325,8 @@
                     minOccurs="0" maxOccurs="1" />
                 <xsd:element name="imageTemplates" type="rpd:imageTemplatesType"
                     minOccurs="0" maxOccurs="1" />
+                <xsd:element name="secondaryLabels" type="rpd:secondaryLabelsType" minOccurs="0" maxOccurs="1" />
+                <xsd:element name="promoteMaps" type="rpd:promoteMapsType" minOccurs="0" maxOccurs="1" />
                 <xsd:element name="buildDefinition" type="rpd:buildDefinitionType" />
                 <xsd:element name="platform" type="rpd:platformType" minOccurs="0" maxOccurs="1" />
             </xsd:sequence>

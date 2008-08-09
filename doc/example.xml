@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<productDefinition xmlns="http://www.rpath.com/permanent/rpd-0.1.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.rpath.com/permanent/rpd-0.1.xsd rpd-0.1.xsd" version="0.1">
+<productDefinition xmlns="http://www.rpath.com/permanent/rpd-1.3.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.rpath.com/permanent/rpd-1.3.xsd rpd-1.3.xsd" version="1.3">
   <productName>My Awesome Appliance</productName>
   <productShortname>awesome</productShortname>
   <productDescription>
@@ -37,6 +37,20 @@
   <factorySources>
     <factorySource troveName="group-factories" label="products.rpath.com@rpath:factories-1"/>
   </factorySources>
+  <secondaryLabels>
+    <secondaryLabel name="Xen">-xen</secondaryLabel>
+    <secondaryLabel name="VMware">my@label:vmware</secondaryLabel>
+  </secondaryLabels>
+  <promoteMaps>
+    <promoteMap>
+      <from>from@blah:1</from>
+      <to>to@blah:1</to>
+    </promoteMap>
+    <promoteMap>
+      <from>from@bar:2</from>
+      <to>to@blip:2</to>
+    </promoteMap>
+  </promoteMaps>
   <buildDefinition>
     <build baseFlavor="is: x86" name="x86 Installable ISO Build">
       <installableIsoImage/>

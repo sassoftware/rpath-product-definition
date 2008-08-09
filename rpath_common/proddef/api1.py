@@ -396,6 +396,9 @@ class ProductDefinitionRecipe(PackageRecipe):
             bd.setProductDefinition(self)
         self.platform = getattr(xmlObj, 'platform', None)
 
+        self.secondaryLabels = getattr(xmlObj, 'secondaryLabels', None)
+        self.promoteMaps = getattr(xmlObj, 'promoteMaps', None)
+
         ver = xmlObj.getAttribute('version')
         if ver is not None and ver != self.version:
             self.version = ver
@@ -664,6 +667,25 @@ class ProductDefinitionRecipe(PackageRecipe):
                 return self._getLabelForStage(stage)
         raise StageNotFoundError
 
+    def getSecondaryLabelsForStage(self, stageName):
+        stageObj = self.getStage(stageName)
+        if self.secondaryLabels is None:
+            return []
+        prefix = self.getProductDefinitionLabel()
+        labelSuffix = stageObj.labelSuffix or '' # this can be blank
+
+        ret = []
+        for sl in self.secondaryLabels:
+            name = sl.getName()
+            label = sl.getLabel()
+            if '@' in label:
+                # Just append the stage suffix
+                val = str(label + labelSuffix)
+            else:
+                val = str(prefix + label + labelSuffix)
+            ret.append((name, val))
+        return ret
+
     def getSearchPaths(self):
         """
         @return: the search paths from this product definition
@@ -857,6 +879,34 @@ class ProductDefinitionRecipe(PackageRecipe):
         if pa is not None or default != -1:
             return pa
         raise ImageTemplateNotFoundError(name)
+
+    def addSecondaryLabel(self, name, label):
+        if self.secondaryLabels is None:
+            self.secondaryLabels = _SecondaryLabels()
+        self.secondaryLabels.append(SecondaryLabel(name, label))
+        return self
+
+    def getSecondaryLabels(self):
+        if self.secondaryLabels is None:
+            return []
+        return self.secondaryLabels
+
+    def clearSecondaryLabels(self):
+        self.secondaryLabels = None
+
+    def addPromoteMap(self, fromLabel, toLabel):
+        if self.promoteMaps is None:
+            self.promoteMaps = _PromoteMaps()
+        self.promoteMaps.append(PromoteMap(fromLabel, toLabel))
+        return self
+
+    def getPromoteMaps(self):
+        if self.promoteMaps is None:
+            return []
+        return self.promoteMaps
+
+    def clearPromoteMaps(self):
+        self.promoteMaps = None
 
     def _ensurePlatformExists(self):
         if self.platform is None:
@@ -1052,6 +1102,8 @@ class ProductDefinitionRecipe(PackageRecipe):
         self.baseLabel = None
         self.buildDefinition = _BuildDefinition()
         self.platform = None
+        self.secondaryLabels = None
+        self.promoteMaps = None
 
     #}
 
@@ -1216,6 +1268,16 @@ class _BuildDefinition(xmllib.SerializableList):
 
 # pylint: disable-msg=R0903
 # Too few public methods (1/2): this is an interface
+class _SecondaryLabels(xmllib.SerializableList):
+    tag = "secondaryLabels"
+
+# pylint: disable-msg=R0903
+# Too few public methods (1/2): this is an interface
+class _PromoteMaps(xmllib.SerializableList):
+    tag = "promoteMaps"
+
+# pylint: disable-msg=R0903
+# Too few public methods (1/2): this is an interface
 class _Stage(xmllib.SlotBasedSerializableObject):
     __slots__ = [ 'name', 'labelSuffix' ]
     tag = "stage"
@@ -1372,6 +1434,59 @@ class Build(xmllib.SerializableObject):
 
 #}
 
+class _BaseSerializableObject(xmllib.SerializableObject):
+    def _getName(self):
+        return self.tag
+
+    def _getLocalNamespaces(self):
+        return {}
+
+    def _iterAttributes(self):
+        for attr in self._attributes:
+            value = getattr(self, attr)
+            if value is not None:
+                yield (attr, value)
+
+class SecondaryLabel(_BaseSerializableObject):
+    __slots__ = [ 'name', 'label' ]
+    _attributes = [ 'name' ]
+
+    tag = 'secondaryLabel'
+
+    def __init__(self, name, label):
+        self.name = name
+        self.label = label
+
+    def getName(self):
+        return self.name
+
+    def getLabel(self):
+        return self.label
+
+    def _iterChildren(self):
+        return [ self.label ]
+
+class PromoteMap(_BaseSerializableObject):
+    __slots__ = [ 'fromLabel', 'toLabel' ]
+    _attributes = []
+
+    tag = 'promoteMap'
+
+    def __init__(self, fromLabel, toLabel):
+        self.fromLabel = xmllib.StringNode(name = 'from').characters(
+            fromLabel)
+        self.toLabel = xmllib.StringNode(name = 'to').characters(
+            toLabel)
+
+    def getFromLabel(self):
+        return self.fromLabel.getText()
+
+    def getToLabel(self):
+        return self.toLabel.getText()
+
+    def _iterChildren(self):
+        return [ self.fromLabel, self.toLabel ]
+
 class BaseXmlNode(xmllib.BaseNode):
     def __init__(self, attributes = None, nsMap = None, name = None):
         xmllib.BaseNode.__init__(self, attributes = attributes, nsMap = nsMap,
@@ -1526,6 +1641,14 @@ class _ProductDefinition(BaseXmlNode):
             self._addPlatform(childNode)
             return
 
+        if chName == self._makeAbsoluteName('secondaryLabels'):
+            self._addSecondaryLabels(childNode)
+            return
+
+        if chName == self._makeAbsoluteName('promoteMaps'):
+            self._addPromoteMaps(childNode)
+            return
+
     def _addStages(self, stagesNodes):
         stages = self.stages = _Stages()
         for node in stagesNodes:
@@ -1583,6 +1706,21 @@ class _ProductDefinition(BaseXmlNode):
                 flavor = node.getAttribute('flavor'),
                 )
             builds.append(pyobj)
+
+    def _addSecondaryLabels(self, childNode):
+        self.secondaryLabels = _SecondaryLabels()
+        for node in childNode.getChildren('secondaryLabel'):
+            name = node.getAttribute('name')
+            label = node.getText()
+            self.secondaryLabels.append(SecondaryLabel(name, label))
+        return self
+
+    def _addPromoteMaps(self, childNode):
+        self.promoteMaps = _PromoteMaps()
+        for node in childNode.getChildren('promoteMap'):
+            fromLabel = node.getChildren('from')[0].getText()
+            toLabel = node.getChildren('to')[0].getText()
+            self.promoteMaps.append(PromoteMap(fromLabel, toLabel))
 
 class _PlatformDefinition(BaseXmlNode):
     def finalize(self):
@@ -1685,6 +1823,9 @@ class _ProductDefinitionSerialization(xmllib.BaseNode):
         self.baseFlavor = xmllib.StringNode(name = 'baseFlavor')
         self.baseFlavor.characters(prodDef.baseFlavor)
 
+        self.secondaryLabels = prodDef.getSecondaryLabels() or None
+        self.promoteMaps = prodDef.getPromoteMaps() or None
+
     def iterChildren(self):
         ret =  [ self.productName,
                  self.productShortname,
@@ -1704,6 +1845,10 @@ class _ProductDefinitionSerialization(xmllib.BaseNode):
             ret.append(self.architectures)
         if self.imageTemplates:
             ret.append(self.imageTemplates)
+        if self.secondaryLabels:
+            ret.append(self.secondaryLabels)
+        if self.promoteMaps:
+            ret.append(self.promoteMaps)
         ret.append(self.buildDefinition)
         if self.platform:
             ret.append(self.platform)

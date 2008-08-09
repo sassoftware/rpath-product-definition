@@ -98,6 +98,14 @@ prodDef.addBuildDefinition(name='Totally VMware optional build from a different 
                         imageGroup='group-foo-dist',
                         imageType=prodDef.imageType('vmwareImage'))
 
+# Don't use addSecondaryLabel unless you know what you're doing
+prodDef.addSecondaryLabel('Xen', '-xen')
+prodDef.addSecondaryLabel('VMware', 'my@label:vmware')
+
+# Don't use addPromoteMap unless you know what you're doing
+prodDef.addPromoteMap('from@blah:1', 'to@blah:1')
+prodDef.addPromoteMap('from@bar:2', 'to@blip:2')
+
 prodDef.serialize(sys.stdout)
 sys.stdout.flush()
 sys.exit(0)
