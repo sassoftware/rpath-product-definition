@@ -181,12 +181,30 @@ class BaseDefinition(object):
         self._addSource(troveName, label, version, _FactorySource, self.factorySources)
 
     def getArchitectures(self):
+        """
+        @return: all defined architectures
+        @rtype: C{list}
+        """
         return self.architectures
 
     def hasArchitecture(self, name):
+        """
+        @param name: architecture name
+        @type name: C{str}
+        @rtype: C{bool}
+        """
         return name in [ x.name for x in self.getArchitectures() ]
 
     def getArchitecture(self, name, default = -1):
+        """
+        @param name: architecture name
+        @type name: C{str}
+        @param default: if an architecture with this name is not found, return
+        this value. If not specified, C{ArchitectureNotFoundError} is raised.
+        @rtype: Architecture object
+        @raises C{ArchitectureNotFoundError}: if architecture is not found, and
+        no default was specified.
+        """
         arches = self.getArchitectures()
         for arch in arches:
             if arch.name == name:
@@ -196,16 +214,40 @@ class BaseDefinition(object):
         raise ArchitectureNotFoundError(name)
 
     def addArchitecture(self, name, flavor):
+        """
+        Add an architecture.
+        @param name: name of architecture to add
+        @type name: C{str}
+        @param flavor: flavor of architecture to add
+        @type flavor: C{str}
+        """
         obj = _Architecture(name = name, flavor = flavor)
         self.architectures.append(obj)
 
     def clearArchitectures(self):
+        """
+        Reset architectures.
+        """
         self.architectures = _Architectures()
 
     def getImageTemplates(self):
+        """
+        @return: all defined image templates
+        @rtype: C{list} of ImageTemplate objects
+        """
         return self.imageTemplates
 
     def getImageTemplate(self, name, default = -1):
+        """
+        @param name: image template name
+        @type name: C{str}
+        @param default: if an image template with this name is not found,
+            return this value. If not specified, C{ImageTemplateNotFoundError}
+            is raised.
+        @rtype: ImageTemplate object
+        @raises C{ImageTemplateNotFoundError}: if architecture is not found, and
+        no default was specified.
+        """
         templates = self.getImageTemplates()
         for tmpl in templates:
             if tmpl.name == name:
@@ -215,12 +257,21 @@ class BaseDefinition(object):
         raise ImageTemplateNotFoundError(name)
 
     def addImageTemplate(self, name, flavor):
+        """
+        Add an image template.
+        @param name: name of image template to add
+        @type name: C{str}
+        @param flavor: flavor of image template to add
+        @type flavor: C{str}
+        """
         obj = _ImageTemplate(name = name, flavor = flavor)
         self.imageTemplates.append(obj)
 
     def clearImageTemplates(self):
+        """
+        Reset image templates.
+        """
         self.imageTemplates = _ImageTemplates()
-
 
     def _addSource(self, troveName, label, version, cls, intList):
         "Internal function for adding a Source"
@@ -668,6 +719,12 @@ class ProductDefinitionRecipe(PackageRecipe):
         raise StageNotFoundError
 
     def getSecondaryLabelsForStage(self, stageName):
+        """
+        @param stageName: A stage name
+        @type stageName: C{str}
+        @return: all secondary labels for the specified stage.
+        @rtype: C{list} of (name, value) tuples
+        """
         stageObj = self.getStage(stageName)
         if self.secondaryLabels is None:
             return []
@@ -838,33 +895,71 @@ class ProductDefinitionRecipe(PackageRecipe):
                         self.platform.factorySources)
 
     def getPlatformBaseFlavor(self):
+        """
+        @return: the platform's base flavor
+        @rtype: C{str}
+        """
+
         if self.platform is None:
             return None
         return self.platform.baseFlavor
 
     def setPlatformBaseFlavor(self, baseFlavor):
+        """
+        Set the platform's base flavor.
+        @param baseFlavor: A flavor for the platform.
+        @type baseFlavor: C{str}
+        """
         self._ensurePlatformExists()
         self.platform.baseFlavor = baseFlavor
 
     def getPlatformSourceTrove(self):
+        """
+        @return: the source trove the for platform
+        @rtype: C{str}
+        """
         if self.platform is None:
             return None
         return self.platform.sourceTrove
 
     def setPlatformSourceTrove(self, sourceTrove):
+        """
+        Set the platform's source trove.
+        @param sourceTrove: the source trove name for the platform
+        @type sourceTrove: C{str}
+        """
         self._ensurePlatformExists()
         self.platform.sourceTrove = sourceTrove
 
     def getPlatformUseLatest(self):
+        """
+        @return: the platform's useLatest flag.
+        @rtype: C{bool} or None
+        """
         if self.platform is None:
             return None
         return self.platform.useLatest
 
     def setPlatformUseLatest(self, useLatest):
+        """
+        Set the platform's useLatest flag.
+        @param useLatest: value for useLatest flag
+        @type useLatest: C{bool}
+        """
         self._ensurePlatformExists()
         self.platform.useLatest = useLatest
 
     def getPlatformArchitecture(self, name, default = -1):
+        """
+        Retrieve the architecture with the specified name from the platform.
+        @param name: architecture name
+        @type name: C{str}
+        @param default: if an architecture with this name is not found, return
+        this value. If not specified, C{ArchitectureNotFoundError} is raised.
+        @rtype: Architecture object
+        @raises C{ArchitectureNotFoundError}: if architecture is not found, and
+        no default was specified.
+        """
         pa = None
         if self.platform:
             pa = self.platform.getArchitecture(name, None)
@@ -873,6 +968,17 @@ class ProductDefinitionRecipe(PackageRecipe):
         raise ArchitectureNotFoundError(name)
 
     def getPlatformImageTemplate(self, name, default = -1):
+        """
+        Retrieve the image template with the specified name from the platform.
+        @param name: image template name
+        @type name: C{str}
+        @param default: if an image template with this name is not found,
+            return this value. If not specified, C{ImageTemplateNotFoundError}
+            is raised.
+        @rtype: ImageTemplate object
+        @raises C{ImageTemplateNotFoundError}: if architecture is not found, and
+        no default was specified.
+        """
         pa = None
         if self.platform:
             pa = self.platform.getImageTemplate(name, None)
@@ -881,31 +987,59 @@ class ProductDefinitionRecipe(PackageRecipe):
         raise ImageTemplateNotFoundError(name)
 
     def addSecondaryLabel(self, name, label):
+        """
+        Add a secondary label to the product definition.
+        @param name: Name for the secondary label
+        @type name: C{str}
+        @param label: Lavel for the secondary label
+        @type label: C{str}
+        """
         if self.secondaryLabels is None:
             self.secondaryLabels = _SecondaryLabels()
         self.secondaryLabels.append(SecondaryLabel(name, label))
         return self
 
     def getSecondaryLabels(self):
+        """
+        @return: the seconary labels for this product definition.
+        @rtype: C{list}
+        """
         if self.secondaryLabels is None:
             return []
         return self.secondaryLabels
 
     def clearSecondaryLabels(self):
+        """
+        Reset secondary label list.
+        """
         self.secondaryLabels = None
 
     def addPromoteMap(self, fromLabel, toLabel):
+        """
+        Add a promote map.
+        @param fromLabel: Promote from this label.
+        @type fromLabel: C{str}
+        @param toLabel: Promote to this label.
+        @type toLabel: C{str}
+        """
         if self.promoteMaps is None:
             self.promoteMaps = _PromoteMaps()
         self.promoteMaps.append(PromoteMap(fromLabel, toLabel))
         return self
 
     def getPromoteMaps(self):
+        """
+        @return: all promote maps for this product definition.
+        @rtype: C{list} of C{PromoteMap} objects.
+        """
         if self.promoteMaps is None:
             return []
         return self.promoteMaps
 
     def clearPromoteMaps(self):
+        """
+        Reset promote maps.
+        """
         self.promoteMaps = None
 
     def _ensurePlatformExists(self):
@@ -944,9 +1078,18 @@ class ProductDefinitionRecipe(PackageRecipe):
         return ret
 
     def setBaseLabel(self, label):
+        """
+        Set the base label for this product definition.
+        @param label: Value for the base label.
+        @type label: C{str}
+        """
         self.baseLabel = label
 
     def getBaseLabel(self):
+        """
+        @return: the base label for this product definition.
+        @rtype: C{str}
+        """
         return self.baseLabel
 
     def getProductDefinitionLabel(self):
