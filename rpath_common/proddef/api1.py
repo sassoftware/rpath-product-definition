@@ -345,6 +345,11 @@ class BaseDefinition(object):
         self.architectures = _Architectures()
         self.imageTemplates = _ImageTemplates()
 
+    @classmethod
+    def _newNode(self, name, value):
+        node = xmllib.StringNode(name = name).characters(value)
+        return node
+
 class ProductDefinition(BaseDefinition):
     """
     Represents the definition of a product.
@@ -894,6 +899,24 @@ class ProductDefinitionRecipe(PackageRecipe):
         self._addSource(troveName, label, version, _FactorySource,
                         self.platform.factorySources)
 
+    def getPlatformName(self):
+        if self.platform is None:
+            return None
+        return self.platform.getPlatformName()
+
+    def setPlatformName(self, platformName):
+        self._ensurePlatformExists()
+        self.platform.setPlatformName(platformName)
+
+    def getPlatformVersionTrove(self):
+        if self.platform is None:
+            return None
+        return self.platform.getPlatformVersionTrove()
+
+    def setPlatformVersionTrove(self, troveSpec):
+        self._ensurePlatformExists()
+        self.platform.setPlatformVersionTrove(troveSpec)
+
     def getPlatformBaseFlavor(self):
         """
         @return: the platform's base flavor
@@ -1187,6 +1210,9 @@ class ProductDefinitionRecipe(PackageRecipe):
         for tmpl in self.getImageTemplates():
             nplat.addImageTemplate(name = tmpl.name, flavor = tmpl.flavor)
 
+        nplat.setPlatformName(self.getPlatformName())
+        nplat.setPlatformVersionTrove(self.getPlatformVersionTrove())
+
         return nplat
 
     def savePlatformToRepository(self, client, message = None):
@@ -1277,6 +1303,8 @@ class PlatformDefinitionRecipe(PackageRecipe):
         BaseDefinition._initFields(self)
         self.useLatest = None
         self.sourceTrove = None
+        self.platformName = None
+        self.platformVersionTrove = None
 
     def parseStream(self, stream, validate = False, schemaDir = None):
         """
@@ -1300,6 +1328,8 @@ class PlatformDefinitionRecipe(PackageRecipe):
         self.factorySources = getattr(xmlObj.platform, 'factorySources', None)
         self.architectures = getattr(xmlObj.platform, 'architectures', None)
         self.imageTemplates = getattr(xmlObj.platform, 'imageTemplates', None)
+        self.platformName = getattr(xmlObj.platform, 'platformName', None)
+        self.platformVersionTrove = getattr(xmlObj.platform, 'platformVersionTrove', None)
 
         for nsName, nsVal in xmlObj.iterNamespaces():
             if nsName is None and nsVal != self.defaultNamespace:
@@ -1378,6 +1408,29 @@ class PlatformDefinitionRecipe(PackageRecipe):
                 raise ProductDefinitionTroveNotFound("%s=%s" % (key[0], key[1]))
             nvf = troves[key][0]
             sp.version = str(nvf[1].trailingRevision())
+
+    def getPlatformName(self):
+        if self.platformName is None:
+            return None
+        return self.platformName.getText()
+
+    def setPlatformName(self, platformName):
+        if platformName is None:
+            self.platformName = None
+        else:
+            self.platformName = self._newNode('platformName', platformName)
+
+    def getPlatformVersionTrove(self):
+        if self.platformVersionTrove is None:
+            return None
+        return self.platformVersionTrove.getText()
+
+    def setPlatformVersionTrove(self, troveSpec):
+        if troveSpec is None:
+            self.platformVersionTrove = None
+        else:
+            self.platformVersionTrove = self._newNode('platformVersionTrove',
+            troveSpec)
 
 #{ Objects for the representation of ProductDefinition fields
 
@@ -1702,7 +1755,12 @@ class BaseXmlNode(xmllib.BaseNode):
         baseFlavorChildren = node.getChildren('baseFlavor')
         if baseFlavorChildren:
             self.platform.baseFlavor = baseFlavorChildren[0].getText()
-
+        chList = node.getChildren('platformName')
+        if chList:
+            self.platform.platformName = chList[0]
+        chList = node.getChildren('platformVersionTrove')
+        if chList:
+            self.platform.platformVersionTrove = chList[0]
 
 class _ProductDefinition(BaseXmlNode):
 
@@ -1883,10 +1941,17 @@ class _PlatformSerialization(xmllib.BaseNode):
         self.architectures = platform.architectures
         self.imageTemplates = platform.imageTemplates
         self.baseFlavor = xmllib.StringNode(name = 'baseFlavor').characters(platform.baseFlavor)
+        self.platformName = platform.platformName
+        self.platformVersionTrove = platform.platformVersionTrove
         xmllib.BaseNode.__init__(self, attrs, namespaces, name=name)
 
     def iterChildren(self):
-        ret = [self.baseFlavor]
+        ret = []
+        if self.platformName is not None:
+            ret.append(self.platformName)
+        if self.platformVersionTrove is not None:
+            ret.append(self.platformVersionTrove)
+        ret.append(self.baseFlavor)
         if self.searchPaths:
             ret.append(self.searchPaths)
         if self.factorySources:
