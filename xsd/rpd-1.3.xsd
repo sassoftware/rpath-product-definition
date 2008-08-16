@@ -43,9 +43,17 @@
         </xsd:sequence>
     </xsd:complexType>
 
-    <xsd:complexType name="searchPathType">
+    <xsd:attributeGroup name="attrGroupNameLabel">
         <xsd:attribute name="troveName" type="xsd:string" />
         <xsd:attribute name="label" type="xsd:string" />
+    </xsd:attributeGroup>
+
+    <xsd:complexType name="nameLabelType">
+        <xsd:attributeGroup ref="attrGroupNameLabel" />
+    </xsd:complexType>
+
+    <xsd:complexType name="searchPathType">
+        <xsd:attributeGroup ref="attrGroupNameLabel" />
         <xsd:attribute name="version" type="xsd:string" />
     </xsd:complexType>
 
@@ -60,6 +68,13 @@
             <xsd:element name="factorySource" type="searchPathType" minOccurs="1" maxOccurs="unbounded" />
         </xsd:sequence>
     </xsd:complexType>
+
+    <xsd:complexType name="autoLoadRecipesType">
+        <xsd:sequence>
+            <xsd:element name="autoLoadRecipe" type="nameLabelType" minOccurs="1" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>
+
 
 
     <xsd:complexType name="amiImageType">
@@ -259,6 +274,8 @@
             minOccurs="0" maxOccurs="1" />
         <xsd:element name="factorySources" type="rpd:factorySourceListType"
             minOccurs="0" maxOccurs="1" />
+        <xsd:element name="autoLoadRecipes" type="rpd:autoLoadRecipesType"
+            minOccurs="0" maxOccurs="1" />
         <xsd:element name="architectures" type="rpd:architecturesType"
             minOccurs="0" maxOccurs="1" />
         <xsd:element name="imageTemplates" type="rpd:imageTemplatesType"
@@ -270,14 +287,16 @@
     <xsd:complexType name="platformType">
       <xsd:sequence>
         <xsd:element name="platformName" type="xsd:string"
-        minOccurs="0" maxOccurs="1" />
+            minOccurs="0" maxOccurs="1" />
         <xsd:element name="platformVersionTrove" type="xsd:string"
-        minOccurs="0" maxOccurs="1" />
+            minOccurs="0" maxOccurs="1" />
         <xsd:element name="baseFlavor" type="rpd:flavorStringType"
-        minOccurs="0" maxOccurs="1" />
+            minOccurs="0" maxOccurs="1" />
         <xsd:element name="searchPaths" type="rpd:searchPathListType"
             minOccurs="0" maxOccurs="1" />
         <xsd:element name="factorySources" type="rpd:factorySourceListType"
+            minOccurs="0" maxOccurs="1" />
+        <xsd:element name="autoLoadRecipes" type="rpd:autoLoadRecipesType"
             minOccurs="0" maxOccurs="1" />
         <xsd:element name="architectures" type="rpd:architecturesType"
             minOccurs="0" maxOccurs="1" />

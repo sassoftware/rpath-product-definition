@@ -917,6 +917,20 @@ class ProductDefinitionRecipe(PackageRecipe):
         self._ensurePlatformExists()
         self.platform.setPlatformVersionTrove(troveSpec)
 
+    def getPlatformAutoLoadRecipes(self):
+        if self.platform is None:
+            return []
+        return self.platform.getAutoLoadRecipes()
+
+    def addPlatformAutoLoadRecipe(self, troveName, label):
+        self._ensurePlatformExists()
+        self.platform.addAutoLoadRecipe(troveName, label)
+
+    def clearPlatformAutoLoadRecipes(self):
+        if self.platform is None:
+            return
+        self.platform.clearPlatformSearchPaths()
+
     def getPlatformBaseFlavor(self):
         """
         @return: the platform's base flavor
@@ -1213,6 +1227,9 @@ class ProductDefinitionRecipe(PackageRecipe):
         nplat.setPlatformName(self.getPlatformName())
         nplat.setPlatformVersionTrove(self.getPlatformVersionTrove())
 
+        for alr in self.getPlatformAutoLoadRecipes():
+            nplat.addAutoLoadRecipe(alr.getTroveName(), alr.getLabel())
+
         return nplat
 
     def savePlatformToRepository(self, client, message = None):
@@ -1305,6 +1322,7 @@ class PlatformDefinitionRecipe(PackageRecipe):
         self.sourceTrove = None
         self.platformName = None
         self.platformVersionTrove = None
+        self.autoLoadRecipes = None
 
     def parseStream(self, stream, validate = False, schemaDir = None):
         """
@@ -1330,6 +1348,7 @@ class PlatformDefinitionRecipe(PackageRecipe):
         self.imageTemplates = getattr(xmlObj.platform, 'imageTemplates', None)
         self.platformName = getattr(xmlObj.platform, 'platformName', None)
         self.platformVersionTrove = getattr(xmlObj.platform, 'platformVersionTrove', None)
+        self.autoLoadRecipes = getattr(xmlObj.platform, 'autoLoadRecipes', None)
 
         for nsName, nsVal in xmlObj.iterNamespaces():
             if nsName is None and nsVal != self.defaultNamespace:
@@ -1432,6 +1451,20 @@ class PlatformDefinitionRecipe(PackageRecipe):
             self.platformVersionTrove = self._newNode('platformVersionTrove',
             troveSpec)
 
+    def clearAutoLoadRecipes(self):
+        self.autoLoadRecipes = None
+
+    def addAutoLoadRecipe(self, troveName = None, label = None):
+        if self.autoLoadRecipes is None:
+            self.autoLoadRecipes = _AutoLoadRecipes()
+        self.autoLoadRecipes.append(_AutoLoadRecipe(troveName, label))
+        return self
+
+    def getAutoLoadRecipes(self):
+        if self.autoLoadRecipes is None:
+            return []
+        return [ AutoLoadRecipe(x) for x in self.autoLoadRecipes ]
+
 #{ Objects for the representation of ProductDefinition fields
 
 class _Stages(xmllib.SerializableList):
@@ -1441,6 +1474,51 @@ class _Stages(xmllib.SerializableList):
 # Too few public methods (1/2): this is an interface
 class _SearchPaths(xmllib.SerializableList):
     tag = "searchPaths"
+
+class _SimpleElement(xmllib.SerializableObject):
+    _xmlTagName = None
+    def __init__(self, value, attributes = None):
+        self.value = value
+        self._attributes = attributes or {}
+    def _getName(self):
+        return self._xmlTagName
+    def _getLocalNamespaces(self):
+        return {}
+    def _iterAttributes(self):
+        return self._attributes.iteritems()
+    def _iterChildren(self):
+        if self.value is not None:
+            return [ self.value ]
+        return []
+
+# pylint: disable-msg=R0903
+# Too few public methods (1/2): this is an interface
+class _AutoLoadRecipes(xmllib.SerializableList):
+    tag = "autoLoadRecipes"
+
+class _AutoLoadRecipe(_SimpleElement):
+    _xmlTagName = 'autoLoadRecipe'
+    def __init__(self, troveName, label):
+        _SimpleElement.__init__(self, None,
+            dict(troveName = troveName, label = label))
+
+    def getTroveName(self):
+        return self._attributes.get('troveName')
+
+    def getLabel(self):
+        return self._attributes.get('label')
+
+class AutoLoadRecipe(object):
+    __slots__ = [ '_troveName', '_label' ]
+    def __init__(self, node):
+        self._troveName = node.getTroveName()
+        self._label = node.getLabel()
+
+    def getTroveName(self):
+        return self._troveName
+
+    def getLabel(self):
+        return self._label
 
 # pylint: disable-msg=R0903
 # Too few public methods (1/2): this is an interface
@@ -1761,6 +1839,14 @@ class BaseXmlNode(xmllib.BaseNode):
         chList = node.getChildren('platformVersionTrove')
         if chList:
             self.platform.platformVersionTrove = chList[0]
+        chList = node.getChildren('autoLoadRecipes')
+        if chList:
+            chList = chList[0].getChildren('autoLoadRecipe')
+            for child in chList:
+                troveName = child.getAttribute('troveName')
+                label = child.getAttribute('label')
+                self.platform.addAutoLoadRecipe(troveName, label)
+
 
 class _ProductDefinition(BaseXmlNode):
 
@@ -1943,6 +2029,7 @@ class _PlatformSerialization(xmllib.BaseNode):
         self.baseFlavor = xmllib.StringNode(name = 'baseFlavor').characters(platform.baseFlavor)
         self.platformName = platform.platformName
         self.platformVersionTrove = platform.platformVersionTrove
+        self.autoLoadRecipes = platform.autoLoadRecipes
         xmllib.BaseNode.__init__(self, attrs, namespaces, name=name)
 
     def iterChildren(self):
@@ -1956,6 +2043,8 @@ class _PlatformSerialization(xmllib.BaseNode):
             ret.append(self.searchPaths)
         if self.factorySources:
             ret.append(self.factorySources)
+        if self.autoLoadRecipes:
+            ret.append(self.autoLoadRecipes)
         if self.architectures:
             ret.append(self.architectures)
         if self.imageTemplates:
@@ -2045,8 +2134,9 @@ class _ProductDefinitionSerialization(xmllib.BaseNode):
                  self.imageGroup,
                  self.baseLabel,
                  self.baseFlavor,
-                 self.stages,
-                 self.searchPaths, ]
+                 self.stages, ]
+        if self.searchPaths:
+            ret.append(self.searchPaths)
         if len(self.factorySources):
             ret.append(self.factorySources)
         if self.architectures:
