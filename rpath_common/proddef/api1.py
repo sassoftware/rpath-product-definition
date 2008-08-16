@@ -900,36 +900,69 @@ class ProductDefinitionRecipe(PackageRecipe):
                         self.platform.factorySources)
 
     def getPlatformName(self):
+        """
+        @return: The platform name.
+        @rtype: C{str}
+        """
         if self.platform is None:
             return None
         return self.platform.getPlatformName()
 
     def setPlatformName(self, platformName):
+        """
+        Set the platform name.
+        @param platformName: The platform name.
+        @type platformName: C{str}
+        """
         self._ensurePlatformExists()
         self.platform.setPlatformName(platformName)
 
     def getPlatformVersionTrove(self):
+        """
+        @return: the platform version trove.
+        @rtype: C{str}
+        """
         if self.platform is None:
             return None
         return self.platform.getPlatformVersionTrove()
 
     def setPlatformVersionTrove(self, troveSpec):
+        """
+        Set the platform version trove.
+        @param troveSpec: The platfrm version trove
+        @type platformName: C{str}
+        """
         self._ensurePlatformExists()
         self.platform.setPlatformVersionTrove(troveSpec)
 
     def getPlatformAutoLoadRecipes(self):
+        """
+        @return: auto load recipes.
+        @rtype: C{list} of C{AutoLoadRecipe}
+        """
         if self.platform is None:
             return []
         return self.platform.getAutoLoadRecipes()
 
     def addPlatformAutoLoadRecipe(self, troveName, label):
+        """
+        Add an auto load recipe
+        @param troveName: Trove name
+        @type troveName: C{str}
+        @param label: Label for the trove
+        @type label: C{str}
+        """
         self._ensurePlatformExists()
         self.platform.addAutoLoadRecipe(troveName, label)
 
     def clearPlatformAutoLoadRecipes(self):
+        """
+        Clear the list of auto load recipes for the platform
+        """
         if self.platform is None:
             return
         self.platform.clearPlatformSearchPaths()
+        return self
 
     def getPlatformBaseFlavor(self):
         """
@@ -1429,22 +1462,40 @@ class PlatformDefinitionRecipe(PackageRecipe):
             sp.version = str(nvf[1].trailingRevision())
 
     def getPlatformName(self):
+        """
+        @return: The platform name.
+        @rtype: C{str}
+        """
         if self.platformName is None:
             return None
         return self.platformName.getText()
 
     def setPlatformName(self, platformName):
+        """
+        Set the platform name.
+        @param platformName: The platform name.
+        @type platformName: C{str}
+        """
         if platformName is None:
             self.platformName = None
         else:
             self.platformName = self._newNode('platformName', platformName)
 
     def getPlatformVersionTrove(self):
+        """
+        @return: the platform version trove.
+        @rtype: C{str}
+        """
         if self.platformVersionTrove is None:
             return None
         return self.platformVersionTrove.getText()
 
     def setPlatformVersionTrove(self, troveSpec):
+        """
+        Set the platform version trove.
+        @param troveSpec: The platfrm version trove
+        @type platformName: C{str}
+        """
         if troveSpec is None:
             self.platformVersionTrove = None
         else:
@@ -1452,15 +1503,29 @@ class PlatformDefinitionRecipe(PackageRecipe):
             troveSpec)
 
     def clearAutoLoadRecipes(self):
+        """
+        Clear the list of auto load recipes for the platform
+        """
         self.autoLoadRecipes = None
 
     def addAutoLoadRecipe(self, troveName = None, label = None):
+        """
+        Add an auto load recipe
+        @param troveName: Trove name
+        @type troveName: C{str}
+        @param label: Label for the trove
+        @type label: C{str}
+        """
         if self.autoLoadRecipes is None:
             self.autoLoadRecipes = _AutoLoadRecipes()
         self.autoLoadRecipes.append(_AutoLoadRecipe(troveName, label))
         return self
 
     def getAutoLoadRecipes(self):
+        """
+        @return: auto load recipes.
+        @rtype: C{list} of C{AutoLoadRecipe}
+        """
         if self.autoLoadRecipes is None:
             return []
         return [ AutoLoadRecipe(x) for x in self.autoLoadRecipes ]
@@ -1515,9 +1580,17 @@ class AutoLoadRecipe(object):
         self._label = node.getLabel()
 
     def getTroveName(self):
+        """
+        @return: the trove name for the auto load recipe
+        @rtype: C{str}
+        """
         return self._troveName
 
     def getLabel(self):
+        """
+        @return: the label for the auto load recipe
+        @rtype: C{str}
+        """
         return self._label
 
 # pylint: disable-msg=R0903
