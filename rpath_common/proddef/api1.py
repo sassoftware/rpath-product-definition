@@ -961,7 +961,7 @@ class ProductDefinitionRecipe(PackageRecipe):
         """
         if self.platform is None:
             return
-        self.platform.clearPlatformSearchPaths()
+        self.platform.clearAutoLoadRecipes()
         return self
 
     def getPlatformBaseFlavor(self):
@@ -1552,8 +1552,6 @@ class _SimpleElement(xmllib.SerializableObject):
     def _iterAttributes(self):
         return self._attributes.iteritems()
     def _iterChildren(self):
-        if self.value is not None:
-            return [ self.value ]
         return []
 
 # pylint: disable-msg=R0903
