@@ -29,14 +29,8 @@
     <stage labelSuffix="-devel" name="devel"/>
     <stage labelSuffix="-qa" name="qa">
       <promoteMaps>
-        <promoteMap>
-          <from>from1@label11:devel</from>
-          <to>to1@label12:qa</to>
-        </promoteMap>
-        <promoteMap>
-          <from>from2@label21:devel</from>
-          <to>to2@label22:qa</to>
-        </promoteMap>
+        <promoteMap name="from1@label11:devel" label="to1@label12:qa"/>
+        <promoteMap name="from2@label21:devel" label="to2@label22:qa"/>
       </promoteMaps>
     </stage>
     <stage labelSuffix="" name="release"/>
