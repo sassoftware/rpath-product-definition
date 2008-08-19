@@ -742,13 +742,47 @@ class ProductDefinitionRecipe(PackageRecipe):
         for sl in self.secondaryLabels:
             name = sl.getName()
             label = sl.getLabel()
-            if '@' in label:
-                # Just append the stage suffix
-                val = str(label + labelSuffix)
-            else:
-                val = str(prefix + label + labelSuffix)
-            ret.append((name, val))
+            fullLabel = self._getSecondaryLabel(label, labelSuffix)
+            ret.append((name, fullLabel))
         return ret
+
+    def getPromoteMapForStages(self, fromStage, toStage):
+        """
+        Construct a promote map from C{fromStage} to C{toStage}.
+        This will include the "simple" label, all secondary labels, and
+        all promote maps to C{toStage}.
+
+        @param fromStage: Name of stage to promote I{from}
+        @type  fromStage: C{str}
+        @param toStage: Name of stage to promote I{to}
+        @type  toStage: C{str}
+        @return: dictionary mapping labels on C{fromStage} to labels
+            on C{toStage}
+        @rtype: C{dict}
+        """
+        fromStageObj = self.getStage(fromStage)
+        toStageObj = self.getStage(toStage)
+
+        # Default mapping
+        fromTo = {self._getLabelForStage(fromStageObj):
+            self._getLabelForStage(toStageObj)}
+
+        # Secondary labels
+        if self.secondaryLabels is not None:
+            fromSuffix = fromStageObj.labelSuffix
+            toSuffix = toStageObj.labelSuffix
+            for secondaryLabel in self.secondaryLabels:
+                label = secondaryLabel.getLabel()
+                fromLabel = self._getSecondaryLabel(label, fromSuffix)
+                toLabel = self._getSecondaryLabel(label, toSuffix)
+                fromTo[fromLabel] = toLabel
+
+        # Promote maps
+        if toStageObj.promoteMaps is not None:
+            for map in toStageObj.promoteMaps:
+                fromTo[map.getFromLabel()] = map.getToLabel()
+
+        return fromTo
 
     def getSearchPaths(self):
         """
@@ -1063,7 +1097,7 @@ class ProductDefinitionRecipe(PackageRecipe):
         Add a secondary label to the product definition.
         @param name: Name for the secondary label
         @type name: C{str}
-        @param label: Lavel for the secondary label
+        @param label: Label for the secondary label
         @type label: C{str}
         """
         if self.secondaryLabels is None:
@@ -1281,6 +1315,27 @@ class ProductDefinitionRecipe(PackageRecipe):
             self.platform.addImageTemplate(name = item.name,
                                            flavor = item.flavor)
 
+    def _getSecondaryLabel(self, label, suffix):
+        """
+        Given a label from C{secondaryStages} and a C{suffix},
+        construct a complete "secondary" label.
+
+        @param label: Base label from C{secondaryStages} to use as
+            a prefix
+        @type  label: C{str}
+        @param suffix: Suffix to append to base label
+        @type  suffix: C{str}
+        @return: constructed secondary label
+        @rtype: C{str}
+        """
+        if '@' in label:
+            # Just append the stage suffix
+            return str(label + suffix)
+        else:
+            # Use the entire product label
+            prefix = self.getProductDefinitionLabel()
+            return str(prefix + label + suffix)
+
     def _initFields(self):
         BaseDefinition._initFields(self)
         self.stages = _Stages()
@@ -1296,7 +1351,6 @@ class ProductDefinitionRecipe(PackageRecipe):
         self.buildDefinition = _BuildDefinition()
         self.platform = None
         self.secondaryLabels = None
-        self.promoteMaps = None
 
     #}
 
