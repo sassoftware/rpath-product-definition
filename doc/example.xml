@@ -27,7 +27,18 @@
     </baseFlavor>
   <stages>
     <stage labelSuffix="-devel" name="devel"/>
-    <stage labelSuffix="-qa" name="qa"/>
+    <stage labelSuffix="-qa" name="qa">
+      <promoteMaps>
+        <promoteMap>
+          <from>from1@label11:devel</from>
+          <to>to1@label12:qa</to>
+        </promoteMap>
+        <promoteMap>
+          <from>from2@label21:devel</from>
+          <to>to2@label22:qa</to>
+        </promoteMap>
+      </promoteMaps>
+    </stage>
     <stage labelSuffix="" name="release"/>
   </stages>
   <searchPaths>
@@ -41,16 +52,6 @@
     <secondaryLabel name="Xen">-xen</secondaryLabel>
     <secondaryLabel name="VMware">my@label:vmware</secondaryLabel>
   </secondaryLabels>
-  <promoteMaps>
-    <promoteMap>
-      <from>from@blah:1</from>
-      <to>to@blah:1</to>
-    </promoteMap>
-    <promoteMap>
-      <from>from@bar:2</from>
-      <to>to@blip:2</to>
-    </promoteMap>
-  </promoteMaps>
   <buildDefinition>
     <build baseFlavor="is: x86" name="x86 Installable ISO Build">
       <installableIsoImage/>

@@ -33,8 +33,11 @@
     </xsd:simpleType>
 
     <xsd:complexType name="stageType">
-        <xsd:attribute name="name" type="xsd:string" use="required" />
-        <xsd:attribute name="labelSuffix" type="xsd:string" use="required" />
+      <xsd:sequence>
+        <xsd:element name="promoteMaps" type="rpd:promoteMapsType" minOccurs="0" maxOccurs="1" />
+      </xsd:sequence>
+      <xsd:attribute name="name" type="xsd:string" use="required" />
+      <xsd:attribute name="labelSuffix" type="xsd:string" use="required" />
     </xsd:complexType>
 
     <xsd:complexType name="stageListType">
@@ -353,7 +356,6 @@
                 <xsd:element name="imageTemplates" type="rpd:imageTemplatesType"
                     minOccurs="0" maxOccurs="1" />
                 <xsd:element name="secondaryLabels" type="rpd:secondaryLabelsType" minOccurs="0" maxOccurs="1" />
-                <xsd:element name="promoteMaps" type="rpd:promoteMapsType" minOccurs="0" maxOccurs="1" />
                 <xsd:element name="buildDefinition" type="rpd:buildDefinitionType" />
                 <xsd:element name="platform" type="rpd:platformType" minOccurs="0" maxOccurs="1" />
             </xsd:sequence>

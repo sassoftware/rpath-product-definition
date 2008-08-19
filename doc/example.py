@@ -54,7 +54,11 @@ prodDef.setConaryNamespace("exm")
 prodDef.setImageGroup("group-awesome-dist")
 prodDef.setBaseFlavor(baseFlavor)
 prodDef.addStage(name='devel', labelSuffix='-devel')
-prodDef.addStage(name='qa', labelSuffix='-qa')
+
+# Don't use addPromoteMap unless you know what you're doing
+prodDef.addStage(name='qa', labelSuffix='-qa',
+    promoteMaps = [('from1@label11:devel', 'to1@label12:qa'),
+                   ('from2@label21:devel', 'to2@label22:qa') ])
 prodDef.addStage(name='release', labelSuffix='')
 
 prodDef.addSearchPath(troveName='group-rap-standard',
@@ -101,10 +105,6 @@ prodDef.addBuildDefinition(name='Totally VMware optional build from a different 
 # Don't use addSecondaryLabel unless you know what you're doing
 prodDef.addSecondaryLabel('Xen', '-xen')
 prodDef.addSecondaryLabel('VMware', 'my@label:vmware')
-
-# Don't use addPromoteMap unless you know what you're doing
-prodDef.addPromoteMap('from@blah:1', 'to@blah:1')
-prodDef.addPromoteMap('from@bar:2', 'to@blip:2')
 
 prodDef.serialize(sys.stdout)
 sys.stdout.flush()
