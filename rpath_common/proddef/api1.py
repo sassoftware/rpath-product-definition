@@ -1287,7 +1287,9 @@ class ProductDefinitionRecipe(PackageRecipe):
             troveSpec = self.getPlatformSourceTrove()
             if troveSpec:
                 tn, tv, tf = cmdline.parseTroveSpec(troveSpec)
-                label = tv
+                if not tv.startswith('/'):
+                    tv = "/" + tv
+                label = str(conaryVersions.VersionFromString(tv).trailingLabel())
             else:
                 label = None
         if label is None:
