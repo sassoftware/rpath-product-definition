@@ -674,7 +674,7 @@ class ProductDefinitionRecipe(PackageRecipe):
         @param labelSuffix: Label suffix (e.g. '-devel') for the stage
         @type labelSuffix: C{str} or C{None}
         @param promoteMaps: list of promote maps for the stage
-        @type promoteMaps: C{list} of C{(fromLabel, toLabel)} tuples
+        @type promoteMaps: C{list} of C{(mapName, mapLabel)} tuples
         """
         obj = _Stage(name = name, labelSuffix = labelSuffix,
             promoteMaps = promoteMaps)
@@ -1664,8 +1664,8 @@ class _Stage(xmllib.SlotBasedSerializableObject):
             return
         self.promoteMaps = _PromoteMaps()
         for ent in promoteMaps:
-            fromLabel, toLabel = ent[:2]
-            self.promoteMaps.append(PromoteMap(fromLabel, toLabel))
+            mapName, mapLabel = ent[:2]
+            self.promoteMaps.append(PromoteMap(mapName, mapLabel))
 
     def getPromoteMaps(self):
         if self.promoteMaps is None:
@@ -1852,25 +1852,23 @@ class SecondaryLabel(_BaseSerializableObject):
         return [ self.label ]
 
 class PromoteMap(_BaseSerializableObject):
-    __slots__ = [ 'fromLabel', 'toLabel' ]
-    _attributes = []
+    __slots__ = [ 'name', 'label' ]
+    _attributes = __slots__
 
     tag = 'promoteMap'
 
-    def __init__(self, fromLabel, toLabel):
-        self.fromLabel = xmllib.StringNode(name = 'from').characters(
-            fromLabel)
-        self.toLabel = xmllib.StringNode(name = 'to').characters(
-            toLabel)
+    def __init__(self, mapName, mapLabel):
+        self.name = mapName
+        self.label = mapLabel
 
-    def getFromLabel(self):
-        return self.fromLabel.getText()
+    def getMapLabel(self):
+        return self.label
 
-    def getToLabel(self):
-        return self.toLabel.getText()
+    def getMapName(self):
+        return self.name
 
     def _iterChildren(self):
-        return [ self.fromLabel, self.toLabel ]
+        return []
 
 class BaseXmlNode(xmllib.BaseNode):
     def __init__(self, attributes = None, nsMap = None, name = None):
@@ -2062,9 +2060,9 @@ class _ProductDefinition(BaseXmlNode):
         if not nodeList:
             return
         for pmNode in nodeList[0].getChildren('promoteMap'):
-            fromLabel = pmNode.getChildren('from')[0].getText()
-            toLabel = pmNode.getChildren('to')[0].getText()
-            promoteMaps.append(PromoteMap(fromLabel, toLabel))
+            mapName = pmNode.getAttribute('name')
+            mapLabel = pmNode.getAttribute('label')
+            promoteMaps.append(PromoteMap(mapName, mapLabel))
         stage.promoteMaps = promoteMaps
 
 

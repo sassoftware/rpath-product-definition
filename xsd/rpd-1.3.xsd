@@ -259,10 +259,8 @@
     </xsd:complexType>
 
     <xsd:complexType name="promoteMapType">
-      <xsd:sequence>
-        <xsd:element name="from" type="xsd:string" minOccurs="1" maxOccurs="1" />
-        <xsd:element name="to" type="xsd:string" minOccurs="1" maxOccurs="1" />
-      </xsd:sequence>
+      <xsd:attribute name="name" type="xsd:string" use="required" />
+      <xsd:attribute name="label" type="xsd:string" use="required" />
     </xsd:complexType>
 
     <xsd:complexType name="platformDefinitionType">
