@@ -746,7 +746,7 @@ class ProductDefinitionRecipe(PackageRecipe):
             ret.append((name, fullLabel))
         return ret
 
-    def getPromoteMapForStages(self, fromStage, toStage):
+    def getPromoteMapsForStages(self, fromStage, toStage):
         """
         Construct a promote map from C{fromStage} to C{toStage}.
         This will include the "simple" label, all secondary labels, and
@@ -778,9 +778,13 @@ class ProductDefinitionRecipe(PackageRecipe):
                 fromTo[fromLabel] = toLabel
 
         # Promote maps
-        if toStageObj.promoteMaps is not None:
-            for map in toStageObj.promoteMaps:
-                fromTo[map.getFromLabel()] = map.getToLabel()
+        promoteMapsDest = dict((x.getMapName(), x.getMapLabel())
+            for x in toStageObj.getPromoteMaps())
+        for pm in fromStageObj.getPromoteMaps():
+            mapName = pm.getMapName()
+            if mapName not in promoteMapsDest:
+                continue
+            fromTo[pm.getMapLabel()] = promoteMapsDest[mapName]
 
         return fromTo
 
