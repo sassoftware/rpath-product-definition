@@ -1,4 +1,4 @@
-Changes in @NEW@:
+Changes in 0.2:
   o API Changes:
     * Richer flavor support: for both platform and product, there are
       base flavor, image flavors, and architecture flavors that are
