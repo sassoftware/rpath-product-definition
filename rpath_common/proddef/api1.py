@@ -301,7 +301,7 @@ class BaseDefinition(object):
                                    contact = conaryClient.cfg.contact,
                                    message = message)
         troveName = '%s:source' % self._troveName
-        cs = conaryClient.createSourceTrove(troveName, label,
+        cs = conaryClient.createSourceTrove(troveName, str(label),
             self.__class__.version, pathDict, cLog)
 
         repos = conaryClient.getRepos()
