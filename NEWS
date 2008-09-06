@@ -1,3 +1,8 @@
+Changes in 0.3:
+  Bug Fixes:
+    * The rebase operation now succeeds when an explicit baseLabel
+      is provided in the product definition. (RPCL-36)
+
 Changes in 0.2:
   o API Changes:
     * Richer flavor support: for both platform and product, there are
