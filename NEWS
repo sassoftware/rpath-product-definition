@@ -12,6 +12,8 @@ Changes in 0.2:
     * When the default label prefix is not the label for a product,
       a different label prefix ("baseLabel") can be provided.  Stage
       suffixes will still be appended to this label. (RPCL-18)
+    * Arbitrary label mappings can be provided for promote
+      operations with "promoteMap" elements. (RPCL-17)
 
   o Schema Versions:
     * 1.2: Initial support for richer flavors (RPCL-13)
