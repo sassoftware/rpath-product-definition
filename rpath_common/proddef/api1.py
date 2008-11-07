@@ -22,16 +22,18 @@ __all__ = [ 'MissingInformationError',
             'ProductDefinition',
             'ProductDefinitionError',
             'StageNotFoundError',
-            'UnsupportedImageType',
             'ProductDefinitionTroveNotFound',
             'ProductDefinitionFileNotFound',
             'RepositoryError',
             'PlatformLabelMissingError',
             'ArchitectureNotFoundError',
-            'ImageTemplateNotFoundError',
+            'FlavorSetNotFoundError',
+            'ContainerTemplateNotFoundError',
+            'BuildTemplateNotFoundError',
             ]
 
 import itertools
+import os
 import StringIO
 import weakref
 
@@ -61,11 +63,14 @@ class StageNotFoundError(ProductDefinitionError):
 class ArchitectureNotFoundError(ProductDefinitionError):
     "Raised when no such architecture exists."
 
-class ImageTemplateNotFoundError(ProductDefinitionError):
-    "Raised when no such image template exists."
+class FlavorSetNotFoundError(ProductDefinitionError):
+    "Raised when no such flavor set exists."
 
-class UnsupportedImageType(ProductDefinitionError):
-    "Raised when an unsupported image type was passed"
+class ContainerTemplateNotFoundError(ProductDefinitionError):
+    "Raised when no such container template exists."
+
+class BuildTemplateNotFoundError(ProductDefinitionError):
+    "Raised when no such build template exists."
 
 class ProductDefinitionTroveNotFound(ProductDefinitionError):
     """
@@ -85,7 +90,7 @@ class PlatformLabelMissingError(ProductDefinitionError):
 #}
 
 class BaseDefinition(object):
-    version = '1.3'
+    version = '2.0'
     defaultNamespace = _xmlConstants.defaultNamespaceList[0]
     xmlSchemaLocation = _xmlConstants.xmlSchemaLocation
 
@@ -182,7 +187,7 @@ class BaseDefinition(object):
 
     def getArchitectures(self):
         """
-        @return: all defined architectures
+        @return: all defined architectures for both proddef and platform
         @rtype: C{list}
         """
         return self.architectures
@@ -213,15 +218,21 @@ class BaseDefinition(object):
             return default
         raise ArchitectureNotFoundError(name)
 
-    def addArchitecture(self, name, flavor):
+    def addArchitecture(self, name, displayName, flavor):
         """
         Add an architecture.
         @param name: name of architecture to add
         @type name: C{str}
+        @param displayName: human readable name of the architecture
+        @type displayName: C{str}
         @param flavor: flavor of architecture to add
         @type flavor: C{str}
         """
-        obj = _Architecture(name = name, flavor = flavor)
+        for obj in self.architectures[:]:
+            if obj.name == name:
+                self.architectures.remove(obj)
+        obj = _Architecture(name = name, displayName = displayName,
+                flavor = flavor)
         self.architectures.append(obj)
 
     def clearArchitectures(self):
@@ -230,48 +241,145 @@ class BaseDefinition(object):
         """
         self.architectures = _Architectures()
 
-    def getImageTemplates(self):
+    def getFlavorSets(self):
         """
-        @return: all defined image templates
-        @rtype: C{list} of ImageTemplate objects
+        @return: all defined flavor sets
+        @rtype: C{list} of FlavorSet objects
         """
-        return self.imageTemplates
+        return self.flavorSets
 
-    def getImageTemplate(self, name, default = -1):
+    def getFlavorSet(self, name, default = -1):
         """
-        @param name: image template name
+        @param name: flavor set name
         @type name: C{str}
-        @param default: if an image template with this name is not found,
-            return this value. If not specified, C{ImageTemplateNotFoundError}
+        @param default: if an flavor set with this name is not found,
+            return this value. If not specified, C{FlavorSetNotFoundError}
             is raised.
-        @rtype: ImageTemplate object
-        @raises C{ImageTemplateNotFoundError}: if architecture is not found, and
+        @rtype: FlavorSet object
+        @raises C{FlavorSetNotFoundError}: if flavor set is not found, and
         no default was specified.
         """
-        templates = self.getImageTemplates()
-        for tmpl in templates:
+        flavorSets = self.getFlavorSets()
+        for fs in flavorSets:
+            if fs.name == name:
+                return fs
+        if default != -1:
+            return default
+        raise FlavorSetNotFoundError(name)
+
+    def addFlavorSet(self, name, displayName, flavor):
+        """
+        add a flavor set.
+        @param name: name of flavor set to add
+        @type name: C{str}
+        @param displayName: human readable name of the architecture
+        @type displayName: C{str}
+        @param flavor: flavor of flavor set to add
+        @type flavor: C{str}
+        """
+        for obj in self.flavorSets[:]:
+            if obj.name == name:
+                self.flavorSets.remove(obj)
+        obj = _FlavorSet(name = name, displayName = displayName,
+                flavor = flavor)
+        self.flavorSets.append(obj)
+
+    def clearFlavorSets(self):
+        """
+        Reset flavor sets.
+        """
+        self.flavorSets = _FlavorSets()
+
+    def getContainerTemplates(self):
+        """
+        @return: all defined container templates
+        @rtype: C{list} of ContainerTemplate objects
+        """
+        return self.containerTemplates
+
+    def getContainerTemplate(self, containerFormat, default = -1):
+        """
+        @param containerFormat: container template containerFormat
+        @type containerFormat: C{str}
+        @param default: if a container template with this containerFormat is not found,
+            return this value. If not specified, C{ContainerTemplateNotFoundError}
+            is raised.
+        @rtype: ContainerTemplate object
+        @raises C{ContainerTemplateNotFoundError}: if container template is not found, and
+        no default was specified.
+        """
+        containerTemplates = self.getContainerTemplates()
+        for tmpl in containerTemplates:
+            if tmpl.containerFormat == containerFormat:
+                return tmpl
+        if default != -1:
+            return default
+        raise ContainerTemplateNotFoundError(containerFormat)
+
+    def addContainerTemplate(self, image):
+        """
+        add a container template.
+        @param image: Image
+        @type image: C{imageTypes.Image}
+        """
+        self.containerTemplates.append(image)
+
+    def clearContainerTemplates(self):
+        """
+        Reset container templates.
+        """
+        self.containerTemplates = _ContainerTemplates()
+
+    def getBuildTemplates(self):
+        """
+        @return: all defined build templates
+        @rtype: C{list} of BuildTemplate objects
+        """
+        return self.buildTemplates
+
+    def getBuildTemplate(self, name, default = -1):
+        """
+        @param name: build template name
+        @type name: C{str}
+        @param default: if a build template with this name is not found,
+            return this value. If not specified, C{BuildTemplateNotFoundError}
+            is raised.
+        @rtype: BuildTemplate object
+        @raises C{BuildTemplateNotFoundError}: if build template is not found, and
+        no default was specified.
+        """
+        buildTemplates = self.getBuildTemplates()
+        for tmpl in buildTemplates:
             if tmpl.name == name:
                 return tmpl
         if default != -1:
             return default
-        raise ImageTemplateNotFoundError(name)
+        raise BuildTemplateNotFoundError(name)
 
-    def addImageTemplate(self, name, flavor):
+    def addBuildTemplate(self, name, displayName, architectureRef,
+            containerTemplateRef, flavorSetRef = None):
         """
-        Add an image template.
-        @param name: name of image template to add
+        add a build template.
+        @param name: name of the build template
         @type name: C{str}
-        @param flavor: flavor of image template to add
-        @type flavor: C{str}
+        @param displayName: human readable name of the build template
+        @type displayName: C{str}
+        @param architectureRef: reference to architecture
+        @type architectureRef: C{str}
+        @param containerTemplateRef: reference to container template
+        @type containerTemplateRef: C{str}
+        @pararm flavorSetRef: reference to flavorSet
+        @type flavorSetRef: C{str}
         """
-        obj = _ImageTemplate(name = name, flavor = flavor)
-        self.imageTemplates.append(obj)
+        tmpl = _BuildTemplate(name, displayName, architectureRef,
+                containerTemplateRef, flavorSetRef = flavorSetRef)
+        self.buildTemplates.append(tmpl)
 
-    def clearImageTemplates(self):
+    def clearBuildTemplates(self):
         """
-        Reset image templates.
+        Reset build templates.
         """
-        self.imageTemplates = _ImageTemplates()
+        self.buildTemplates = _BuildTemplates()
 
     def _addSource(self, troveName, label, version, cls, intList):
         "Internal function for adding a Source"
@@ -280,7 +388,6 @@ class BaseDefinition(object):
                 label = str(label)
         obj = cls(troveName = troveName, label = label, version = version)
         intList.append(obj)
-
 
     def _saveToRepository(self, conaryClient, label, message = None):
         if message is None:
@@ -343,7 +450,9 @@ class BaseDefinition(object):
         self.searchPaths = _SearchPaths()
         self.factorySources = _FactorySources()
         self.architectures = _Architectures()
-        self.imageTemplates = _ImageTemplates()
+        self.flavorSets = _FlavorSets()
+        self.containerTemplates = _ContainerTemplates()
+        self.buildTemplates = _BuildTemplates()
 
     @classmethod
     def _newNode(self, name, value):
@@ -365,7 +474,6 @@ class ProductDefinition(BaseDefinition):
     @type schemaDir: C{str}
     """
     _imageTypeDispatcher = xmllib.NodeDispatcher({})
-    _imageTypeDispatcher.registerClasses(imageTypes, imageTypes.ImageType_Base)
 
     _troveName = 'product-definition'
     _troveFileName = 'product-definition.xml'
@@ -445,7 +553,9 @@ class ProductDefinitionRecipe(PackageRecipe):
         self.searchPaths.extend(getattr(xmlObj, 'searchPaths', []))
         self.factorySources.extend(getattr(xmlObj, 'factorySources', []))
         self.architectures.extend(getattr(xmlObj, 'architectures', []))
-        self.imageTemplates.extend(getattr(xmlObj, 'imageTemplates', []))
+        self.flavorSets.extend(getattr(xmlObj, 'flavorSets', []))
+        self.containerTemplates.extend(getattr(xmlObj, 'containerTemplates', []))
+        self.buildTemplates.extend(getattr(xmlObj, 'buildTemplates', []))
         self.buildDefinition.extend(getattr(xmlObj, 'buildDefinition', []))
         # Add (weak) reference to the product definition
         for bd in self.buildDefinition:
@@ -453,16 +563,6 @@ class ProductDefinitionRecipe(PackageRecipe):
         self.platform = getattr(xmlObj, 'platform', None)
 
         self.secondaryLabels = getattr(xmlObj, 'secondaryLabels', None)
-
-        ver = xmlObj.getAttribute('version')
-        if ver is not None and ver != self.version:
-            self.version = ver
-
-        for nsName, nsVal in xmlObj.iterNamespaces():
-            if nsName is None and nsVal != self.defaultNamespace:
-                self.defaultNamespace = nsVal
-                continue
-            # XXX We don't support changing the schema location for now
 
     def serialize(self, stream):
         """
@@ -639,10 +739,12 @@ class ProductDefinitionRecipe(PackageRecipe):
         platFlv = self.getPlatformBaseFlavor()
         if platFlv is not None:
             nflv = conaryDeps.parseFlavor(platFlv)
-            flv.union(nflv)
+            #flv.union(nflv)
+            flv = conaryDeps.overrideFlavor(flv, nflv)
         if self.baseFlavor is not None:
             nflv = conaryDeps.parseFlavor(self.baseFlavor)
-            flv.union(nflv)
+            #flv.union(nflv)
+            flv = conaryDeps.overrideFlavor(flv, nflv)
         return str(flv)
 
     def getStages(self):
@@ -813,10 +915,10 @@ class ProductDefinitionRecipe(PackageRecipe):
         """
         return self.buildDefinition
 
-    def addBuildDefinition(self, name = None, baseFlavor = None,
-                           imageType = None, stages = None, imageGroup = None,
-                           architectureRef = None, imageTemplateRef = None,
-                           flavor = None):
+    def addBuildDefinition(self, name = None, image = None, stages = None,
+                           imageGroup = None, architectureRef = None,
+                           containerTemplateRef = None, buildTemplateRef = None,
+                           flavorSetRef = None, flavor = None):
         """
         Add a build definition.
         Image types are specified by calling C{ProductDefinition.imageType}.
@@ -824,11 +926,9 @@ class ProductDefinitionRecipe(PackageRecipe):
         references to architectures and image templates.
         @param name: the name for the build definition
         @type name: C{str} or C{None}
-        @param baseFlavor: the base flavor
-        @type baseFlavor: C{str}
-        @param imageType: an image type, as returned by
+        @param image: an image type, as returned by
         C{ProductDefinition.imageType}.
-        @type imageType: an instance of an C{imageTypes.ImageType_Base}
+        @type image: an instance of an C{imageTypes.ImageType_Base}
         @param stages: Stages for which to build this image type
         @type stages: C{list} of C{str} referring to a C{_Stage} object's name
         @param imageGroup: An optional image group that will override the
@@ -837,28 +937,42 @@ class ProductDefinitionRecipe(PackageRecipe):
         @param architectureRef: the name of an architecture to inherit flavors
         from.
         @type architectureRef: C{str}
-        @param imageTemplateRef: the name of an image template to inherit
-        flavors from.
-        @type imageTemplateRef: C{str}
+        @param containerTemplateRef: the name of the containerTemplate for
+        this image. This value overrides the value implied by the
+        buildTemplateRef, if supplied.
+        @type containerTemplateRef: C{str}
+        @param buildTemplateRef: the name of the buildTemplate to derive values
+        for containerTemplateRef and architectureRef.
+        type: buildTemplateRef: C{str}
+        @param flavorSetRef: the name of the flavorSet to use for this image
+        type: flavorSetRef: C{str}
         @param flavor: additional flavors
         @type flavor: C{str}
         """
-        if baseFlavor and (architectureRef or imageTemplateRef or flavor):
-            raise ProductDefinitionError("Both a base flavor and references used")
         if architectureRef:
             # Make sure we have the architecture
-            arch = self.getArchitecture(architectureRef)
-        if imageTemplateRef:
-            # Make sure we have the image template
-            arch = self.getImageTemplate(imageTemplateRef)
+            arch = self.getArchitecture(architectureRef, None)
+            if not arch:
+                self.getPlatformArchitecture(architectureRef)
+        if containerTemplateRef:
+            # make sure we have the containerTemplate
+            tmpl = self.getContainerTemplate(containerTemplateRef, None)
+            if not tmpl:
+                self.getPlatformContainerTemplate(containerTemplateRef)
+        if flavorSetRef:
+            # make sure we have the flavorSet
+            fs = self.getFlavorSet(flavorSetRef, None)
+            if not fs:
+                self.getPlatformFlavorSet(flavorSetRef)
 
-        obj = Build(name = name, baseFlavor = baseFlavor,
-                     imageType = imageType, stages = stages,
-                     imageGroup = imageGroup,
-                     parentImageGroup = self.imageGroup,
-                     architectureRef = architectureRef,
-                     imageTemplateRef = imageTemplateRef,
-                     flavor = flavor, proddef = self)
+        obj = Build(name = name, image = image, stages = stages,
+                imageGroup = imageGroup,
+                parentImageGroup = self.imageGroup,
+                architectureRef = architectureRef,
+                containerTemplateRef = containerTemplateRef,
+                flavorSetRef = flavorSetRef,
+                buildTemplateRef = buildTemplateRef,
+                proddef = self, flavor = flavor)
         self.buildDefinition.append(obj)
 
     def clearBuildDefinition(self):
@@ -1077,24 +1191,59 @@ class ProductDefinitionRecipe(PackageRecipe):
             return pa
         raise ArchitectureNotFoundError(name)
 
-    def getPlatformImageTemplate(self, name, default = -1):
+    def getPlatformFlavorSet(self, name, default = -1):
         """
-        Retrieve the image template with the specified name from the platform.
-        @param name: image template name
+        Retrieve the flavorSet with the specified name from the platform.
+        @param name: flavorSet name
         @type name: C{str}
-        @param default: if an image template with this name is not found,
-            return this value. If not specified, C{ImageTemplateNotFoundError}
-            is raised.
-        @rtype: ImageTemplate object
-        @raises C{ImageTemplateNotFoundError}: if architecture is not found, and
+        @param default: if a flavorSet with this name is not found, return
+        this value. If not specified, C{FlavorSetNotFoundError} is raised.
+        @rtype: FlavorSet object
+        @raises C{FlavorSetNotFoundError}: if flavorSet is not found, and
         no default was specified.
         """
         pa = None
         if self.platform:
-            pa = self.platform.getImageTemplate(name, None)
+            pa = self.platform.getFlavorSet(name, None)
         if pa is not None or default != -1:
             return pa
-        raise ImageTemplateNotFoundError(name)
+        raise FlavorSetNotFoundError(name)
+
+    def getPlatformContainerTemplate(self, containerFormat, default = -1):
+        """
+        Retrieve the containerTemplate with the specified containerFormat from the platform.
+        @param containerFormat: containerTemplate containerFormat
+        @type containerFormat: C{str}
+        @param default: if a containerTemplate with this containerFormat is not found, return
+        this value. If not specified, C{ContainerTemplateNotFoundError} is raised.
+        @rtype: ContainerTemplate object
+        @raises C{ContainerTemplateNotFoundError}: if containerTemplate is not found, and
+        no default was specified.
+        """
+        pa = None
+        if self.platform:
+            pa = self.platform.getContainerTemplate(containerFormat, None)
+        if pa is not None or default != -1:
+            return pa
+        raise ContainerTemplateNotFoundError(containerFormat)
+
+    def getPlatformBuildTemplate(self, name, default = -1):
+        """
+        Retrieve the buildTemplate with the specified name from the platform.
+        @param name: buildTemplate name
+        @type name: C{str}
+        @param default: if a buildTemplate with this name is not found, return
+        this value. If not specified, C{BuildTemplateNotFoundError} is raised.
+        @rtype: BuildTemplate object
+        @raises C{BuildTemplateNotFoundError}: if buildTemplate is not found, and
+        no default was specified.
+        """
+        pa = None
+        if self.platform:
+            pa = self.platform.getBuildTemplate(name, None)
+        if pa is not None or default != -1:
+            return pa
+        raise BuildTemplateNotFoundError(name)
 
     def addSecondaryLabel(self, name, label):
         """
@@ -1137,13 +1286,11 @@ class ProductDefinitionRecipe(PackageRecipe):
         @type name: C{str}
         @param fields: Fields to initialize the image type object
         @type fields: C{dict}
-        @raise UnsupportedImageType: when an unsupported image type is passed
         """
-        fnode = _ImageTypeFakeNode(name, fields or {})
-        obj = cls._imageTypeDispatcher.dispatch(fnode)
-        if obj is None:
-            raise UnsupportedImageType(name)
-        return obj
+        fields = fields or {}
+        if name is not None:
+            fields.setdefault('containerFormat', name)
+        return imageTypes.Image(fields)
 
     def getBuildsForStage(self, stageName):
         """
@@ -1264,10 +1411,22 @@ class ProductDefinitionRecipe(PackageRecipe):
             nplat.addSearchPath(troveName=troveName, label=label)
 
         for arch in self.getArchitectures():
-            nplat.addArchitecture(name = arch.name, flavor = arch.flavor)
+            nplat.addArchitecture(name = arch.name,
+                    displayName = arch.displayName, flavor = arch.flavor)
 
-        for tmpl in self.getImageTemplates():
-            nplat.addImageTemplate(name = tmpl.name, flavor = tmpl.flavor)
+        for flvSet in self.getFlavorSets():
+            nplat.addFlavorSet(name = flvSet.name,
+                    displayName = flvSet.displayName, flavor = flvSet.flavor)
+
+        for ctmpl in self.getContainerTemplates():
+            nplat.addContainerTemplate(ctmpl)
+
+        for btmpl in self.getBuildTemplates():
+            nplat.addBuildTemplate(name = btmpl.name,
+                    displayName = btmpl.displayName,
+                    architectureRef = btmpl.architectureRef,
+                    containerTemplateRef = btmpl.containerTemplateRef,
+                    flavorSetRef = btmpl.flavorSetRef,)
 
         nplat.setPlatformName(self.getPlatformName())
         nplat.setPlatformVersionTrove(self.getPlatformVersionTrove())
@@ -1316,10 +1475,21 @@ class ProductDefinitionRecipe(PackageRecipe):
                                           version=sp.version)
         for item in nplat.getArchitectures():
             self.platform.addArchitecture(name = item.name,
+                                          displayName = item.displayName,
                                           flavor = item.flavor)
-        for item in nplat.getImageTemplates():
-            self.platform.addImageTemplate(name = item.name,
-                                           flavor = item.flavor)
+        for flvSet in nplat.getFlavorSets():
+            self.platform.addFlavorSet(name = flvSet.name,
+                    displayName = flvSet.displayName, flavor = flvSet.flavor)
+
+        for image in nplat.getContainerTemplates():
+            self.platform.addContainerTemplate(image)
+
+        for btmpl in nplat.getBuildTemplates():
+            self.platform.addBuildTemplate(name = btmpl.name,
+                    displayName = btmpl.displayName,
+                    architectureRef = btmpl.architectureRef,
+                    containerTemplateRef = btmpl.containerTemplateRef,
+                    flavorSetRef = btmpl.flavorSetRef)
 
     def _getSecondaryLabel(self, label, suffix):
         """
@@ -1412,7 +1582,9 @@ class PlatformDefinitionRecipe(PackageRecipe):
         self.searchPaths = getattr(xmlObj.platform, 'searchPaths', None)
         self.factorySources = getattr(xmlObj.platform, 'factorySources', None)
         self.architectures = getattr(xmlObj.platform, 'architectures', None)
-        self.imageTemplates = getattr(xmlObj.platform, 'imageTemplates', None)
+        self.flavorSets = getattr(xmlObj.platform, 'flavorSets', None)
+        self.containerTemplates = getattr(xmlObj.platform, 'containerTemplates', None)
+        self.buildTemplates = getattr(xmlObj.platform, 'buildTemplates', None)
         self.platformName = getattr(xmlObj.platform, 'platformName', None)
         self.platformVersionTrove = getattr(xmlObj.platform, 'platformVersionTrove', None)
         self.autoLoadRecipes = getattr(xmlObj.platform, 'autoLoadRecipes', None)
@@ -1637,8 +1809,18 @@ class _Architectures(xmllib.SerializableList):
 
 # pylint: disable-msg=R0903
 # Too few public methods (1/2): this is an interface
-class _ImageTemplates(xmllib.SerializableList):
-    tag = "imageTemplates"
+class _FlavorSets(xmllib.SerializableList):
+    tag = "flavorSets"
+
+# pylint: disable-msg=R0903
+# Too few public methods (1/2): this is an interface
+class _ContainerTemplates(xmllib.SerializableList):
+    tag = "containerTemplates"
+
+# pylint: disable-msg=R0903
+# Too few public methods (1/2): this is an interface
+class _BuildTemplates(xmllib.SerializableList):
+    tag = "buildTemplates"
 
 # pylint: disable-msg=R0903
 # Too few public methods (1/2): this is an interface
@@ -1692,40 +1874,62 @@ class _FactorySource(_SearchPath):
     tag = "factorySource"
 
 class _Architecture(xmllib.SlotBasedSerializableObject):
-    __slots__ = [ 'name', 'flavor' ]
+    __slots__ = [ 'name', 'displayName', 'flavor' ]
     tag = "architecture"
 
-    def __init__(self, name, flavor):
+    def __init__(self, name, displayName, flavor):
         xmllib.SlotBasedSerializableObject.__init__(self)
         self.name = name
+        self.displayName = displayName
         self.flavor = flavor
 
-class _ImageTemplate(_Architecture):
-    tag = "imageTemplate"
+class _FlavorSet(xmllib.SlotBasedSerializableObject):
+    __slots__ = [ 'name', 'displayName', 'flavor' ]
+    tag = "flavorSet"
+
+    def __init__(self, name, displayName, flavor):
+        self.name = name
+        self.displayName = displayName
+        self.flavor = flavor
+
+class _BuildTemplate(xmllib.SlotBasedSerializableObject):
+    __slots__ = [ 'name', 'displayName', 'architectureRef',
+            'containerTemplateRef', 'flavorSetRef']
+    tag = "buildTemplate"
+
+    def __init__(self, name, displayName, architectureRef,
+            containerTemplateRef, flavorSetRef = None):
+        self.name = name
+        self.displayName = displayName
+        self.architectureRef = architectureRef
+        self.containerTemplateRef = containerTemplateRef
+        self.flavorSetRef = flavorSetRef
 
 class Build(xmllib.SerializableObject):
-    __slots__ = [ 'name', 'baseFlavor', 'imageType', 'stages', 'imageGroup',
-                  'parentImageGroup', 'architectureRef', 'imageTemplateRef',
-                  'flavor', '_proddef']
+    __slots__ = [ 'name', 'image', 'stages', 'imageGroup', 'parentImageGroup',
+                   'architectureRef', 'flavorSetRef', 'containerTemplateRef',
+                   'buildTemplateRef', 'flavor', '_proddef']
     tag = "build"
 
-    def __init__(self, name = None, baseFlavor = None,
-                 imageType = None, stages = None, imageGroup = None,
-                 parentImageGroup = None, architectureRef = None,
-                 imageTemplateRef = None, flavor = None, proddef = None,
-                 baseLabel = None):
+    def __init__(self, name = None, image = None, stages = None,
+                 imageGroup = None, parentImageGroup = None,
+                 architectureRef = None, flavorSetRef = None,
+                 containerTemplateRef = None,
+                 buildTemplateRef = None, flavor = None,
+                 proddef = None, baseLabel = None):
         xmllib.SlotBasedSerializableObject.__init__(self)
         self.name = name
-        self.baseFlavor = baseFlavor
-        self.imageType = imageType
+        self.image = image
         self.stages = stages or []
         self.imageGroup = imageGroup
         self.parentImageGroup = parentImageGroup
         self.architectureRef = architectureRef
-        self.imageTemplateRef = imageTemplateRef
-        self.flavor = flavor
+        self.containerTemplateRef = containerTemplateRef
+        self.flavorSetRef = flavorSetRef
         self._proddef = None
         self.setProductDefinition(proddef)
+        self.flavor = flavor
+        self.buildTemplateRef = buildTemplateRef
 
     def __eq__(self, build):
         for key in self.__slots__:
@@ -1744,8 +1948,21 @@ class Build(xmllib.SerializableObject):
             return self.parentImageGroup
         return self.imageGroup
 
-    def getBuildImageType(self):
-        return self.imageType
+    def getBuildImage(self):
+        fields = {}
+        if self._proddef:
+            proddef = self._proddef()
+            tmpl = proddef.getContainerTemplate(self.containerTemplateRef, None)
+            if not tmpl and proddef.platform:
+                tmpl = proddef.getPlatformContainerTemplate( \
+                        self.containerTemplateRef)
+            if tmpl:
+                fields.update(tmpl.fields)
+                fields['containerFormat'] = tmpl.containerFormat
+
+        if self.image:
+            fields.update(self.image.fields)
+        return imageTypes.Image(fields)
 
     def getBuildStages(self):
         return list(self.stages)
@@ -1754,9 +1971,6 @@ class Build(xmllib.SerializableObject):
         return self.name
 
     def getBuildBaseFlavor(self):
-        if self.baseFlavor is not None:
-            return self.baseFlavor
-
         # Grab flavor from the referenced components
         if self._proddef is None:
             return ''
@@ -1769,26 +1983,39 @@ class Build(xmllib.SerializableObject):
         # Grab base flavor from platform + product
         flv = conaryDeps.parseFlavor(pd.getBaseFlavor())
 
+        # Dereference the flavorSetRef and architectureRef from
+        # buildTemplateRef if needed
+        flavorSetRef = self.flavorSetRef
+        architectureRef = self.architectureRef
+        buildTemplateRef = self.buildTemplateRef
+        if buildTemplateRef:
+            buildTemplate = pd.getBuildTemplate(buildTemplateRef, None)
+            if not buildTemplate:
+                buildTemplate = pd.getPlatformBuildTemplate(buildTemplateRef)
+            if not architectureRef:
+                architectureRef = buildTemplate.architectureRef
+            if not flavorSetRef:
+                flavorSetRef = buildTemplate.flavorSetRef
         try:
-            if self.architectureRef:
+            if flavorSetRef:
+                methods = [ pd.getPlatformFlavorSet, pd.getFlavorSet ]
+                for meth in methods:
+                    obj = meth(flavorSetRef, None)
+                    if obj is None:
+                        continue
+                    nflv = conaryDeps.parseFlavor(obj.flavor)
+                    flv = conaryDeps.overrideFlavor(flv, nflv)
+            if architectureRef:
                 methods = [ pd.getPlatformArchitecture, pd.getArchitecture ]
                 for meth in methods:
-                    obj = meth(self.architectureRef, None)
+                    obj = meth(architectureRef, None)
                     if obj is None:
                         continue
                     nflv = conaryDeps.parseFlavor(obj.flavor)
-                    flv.union(nflv)
-            if self.imageTemplateRef:
-                methods = [ pd.getImageTemplate, pd.getPlatformImageTemplate ]
-                for meth in methods:
-                    obj = meth(self.imageTemplateRef, None)
-                    if obj is None:
-                        continue
-                    nflv = conaryDeps.parseFlavor(obj.flavor)
-                    flv.union(nflv)
+                    flv = conaryDeps.overrideFlavor(flv, nflv)
             if self.flavor:
                 nflv = conaryDeps.parseFlavor(self.flavor)
-                flv.union(nflv)
+                flv = conaryDeps.overrideFlavor(flv, nflv)
         except RuntimeError, e:
             raise ProductDefinitionError(str(e))
         return str(flv)
@@ -1805,7 +2032,9 @@ class Build(xmllib.SerializableObject):
         return {}
 
     def _iterChildren(self):
-        yield self.imageType
+        if self.image is not None:
+            attrs = self.image._iterAttributes()
+            yield xmllib.NullNode(dict(attrs), name = 'image')
         for stage in self.stages:
             yield xmllib.NullNode(dict(ref=stage), name = 'stage')
         if self.imageGroup is not None:
@@ -1813,16 +2042,11 @@ class Build(xmllib.SerializableObject):
                 self.imageGroup)
 
     def _iterAttributes(self):
-        if self.name is not None:
-            yield ('name', self.name)
-        if self.baseFlavor is not None:
-            yield ('baseFlavor', self.baseFlavor)
-        else:
-            for f in ['architectureRef', 'imageTemplateRef', 'flavor']:
-                attrVal = getattr(self, f)
-                if attrVal is not None:
-                    yield (f, attrVal)
-
+        for f in ['name', 'architectureRef', 'containerTemplateRef',
+                'flavorSetRef', 'flavor']:
+            attrVal = getattr(self, f)
+            if attrVal is not None:
+                yield (f, attrVal)
 #}
 
 class _BaseSerializableObject(xmllib.SerializableObject):
@@ -1909,17 +2133,42 @@ class BaseXmlNode(xmllib.BaseNode):
         return self._processNFCollection(architectures,
             _Architectures, _Architecture)
 
-    def _processImageTemplates(self, imageTemplates):
-        return self._processNFCollection(imageTemplates,
-            _ImageTemplates, _ImageTemplate)
+    def _processFlavorSets(self, flavorSets):
+        return self._processNFCollection(flavorSets, _FlavorSets, _FlavorSet)
+
+    def _processContainerTemplates(self, images):
+        containerTemplates = _ContainerTemplates()
+        for node in images:
+            pyObj = imageTypes.Image(node)
+            containerTemplates.append(pyObj)
+        return containerTemplates
+
+    def _processBuildTemplates(self, buildTemplates):
+        builds = _BuildTemplates()
+        for node in buildTemplates:
+            pyObj = _BuildTemplate(name = node.getAttribute('name'),
+                    displayName = node.getAttribute('displayName'),
+                    architectureRef = node.getAttribute('architectureRef'),
+                    containerTemplateRef = node.getAttribute('containerTemplateRef'),
+                    flavorSetRef = node.getAttribute('flavorSetRef'))
+            builds.append(pyObj)
+        return builds
 
     def _processNFCollection(self, collection, ListClass, ItemClass):
         collObj = ListClass()
         for node in collection:
             pyObj = ItemClass(
                 name = node.getAttribute('name'),
+                displayName = node.getAttribute('displayName'),
                 flavor = node.getAttribute('flavor'))
             collObj.append(pyObj)
+        seen = set()
+        # purge duplicate entries. last one wins (it was added most recently)
+        for node in reversed(collObj):
+            name = node.name
+            if name in seen:
+                collObj.remove(node)
+            seen.add(name)
         return collObj
 
     def _addPlatform(self, node):
@@ -1941,10 +2190,18 @@ class BaseXmlNode(xmllib.BaseNode):
         if listNode:
             self.platform.architectures = self._processArchitectures(
                 listNode[0].getChildren('architecture'))
-        listNode = node.getChildren('imageTemplates')
-        if listNode:
-            self.platform.imageTemplates = self._processImageTemplates(
-                listNode[0].getChildren('imageTemplate'))
+        flavorSets = node.getChildren('flavorSets')
+        if flavorSets:
+            self.platform.flavorSets = self._processFlavorSets(
+                    flavorSets[0].getChildren('flavorSet'))
+        containerTemplates = node.getChildren('containerTemplates')
+        if containerTemplates:
+            self.platform.containerTemplates = self._processContainerTemplates(\
+                    containerTemplates[0].getChildren('image'))
+        buildTemplates = node.getChildren('buildTemplates')
+        if buildTemplates:
+            self.platform.buildTemplates = self._processBuildTemplates(
+                    buildTemplates[0].getChildren('buildTemplate'))
         baseFlavorChildren = node.getChildren('baseFlavor')
         if baseFlavorChildren:
             self.platform.baseFlavor = baseFlavorChildren[0].getText()
@@ -1962,9 +2219,17 @@ class BaseXmlNode(xmllib.BaseNode):
                 label = child.getAttribute('label')
                 self.platform.addAutoLoadRecipe(troveName, label)
 
+    def _getSchemaVersion(self):
+        nsName = self.getAttributeByNamespace('schemaLocation',
+                xmllib.DataBinder.xmlSchemaNamespace)
+        if not nsName:
+            return None
+        nsName = os.path.basename(nsName).split()[-1]
+        assert nsName[:4] == 'rpd-'
+        assert nsName[-4:] == '.xsd'
+        return nsName[4:-4]
 
 class _ProductDefinition(BaseXmlNode):
-
     def addChild(self, childNode):
         chName = childNode.getAbsoluteName()
 
@@ -2028,11 +2293,20 @@ class _ProductDefinition(BaseXmlNode):
             self._addArchitectures(children)
             return
 
-        if chName == self._makeAbsoluteName('imageTemplates'):
-            children = childNode.getChildren('imageTemplate')
-            self._addImageTemplates(children)
+        if chName == self._makeAbsoluteName('flavorSets'):
+            children = childNode.getChildren('flavorSet')
+            self._addFlavorSets(children)
             return
 
+        if chName == self._makeAbsoluteName('containerTemplates'):
+            children = childNode.getChildren('image')
+            self._addContainerTemplates(children)
+            return
+
+        if chName == self._makeAbsoluteName('buildTemplates'):
+            children = childNode.getChildren('buildTemplate')
+            self._addBuildTemplates(children)
+            return
 
         if chName == self._makeAbsoluteName('buildDefinition'):
             children = childNode.getChildren('build')
@@ -2081,28 +2355,84 @@ class _ProductDefinition(BaseXmlNode):
     def _addArchitectures(self, architectures):
         self.architectures = self._processArchitectures(architectures)
 
-    def _addImageTemplates(self, imageTemplates):
-        self.imageTemplates = self._processImageTemplates(imageTemplates)
+    def _addFlavorSets(self, flavorSets):
+        self.flavorSets = self._processFlavorSets(flavorSets)
 
-    def _addBuildDefinition(self, buildNodes):
+    def _addContainerTemplates(self, containerTemplates):
+        self.containerTemplates = \
+                self._processContainerTemplates(containerTemplates)
+
+    def _addBuildTemplates(self, buildTemplates):
+        self.buildTemplates = self._processBuildTemplates(buildTemplates)
+
+    def _addBuildDefinition_1_x(self, buildNodes):
         dispatcher = xmllib.NodeDispatcher(self._nsMap)
-        dispatcher.registerClasses(imageTypes, imageTypes.ImageType_Base)
+        dispatcher.registerClasses(imageTypes, imageTypes.Image)
 
         builds = self.buildDefinition = _BuildDefinition()
         for node in buildNodes:
             imgType = None
             subNode = None
+            legacyImageTypes = ["amiImage", "applianceIsoImage",
+            "installableIsoImage", "liveIsoImage", "netbootImage",
+            "rawFsImage", "rawHdImage", "tarballImage", "updateIsoImage",
+            "vhdImage", "virtualIronImage", "vmwareImage",
+            "vmwareEsxImage", "xenOvaImage", ]
+
+            containerTemplateRef = None
+            for legacyImageType in legacyImageTypes:
+                imgTypes = node.getChildren(legacyImageType)
+                if imgTypes:
+                    # don't assign the containerFormat to the image, it's an
+                    # attribute of the buildDefinition
+                    imgType = imageTypes.Image(imgTypes[0])
+                    containerTemplateRef = legacyImageType
+                    break
+
             for subNode in node.iterChildren():
                 if not isinstance(subNode, xmllib.BaseNode):
                     continue
-                imgType = dispatcher.dispatch(subNode)
-                if imgType is not None:
-                    break
             if subNode is None:
                 # Build node had no children
                 continue
-            if imgType is None:
-                raise UnsupportedImageType(subNode.getName())
+            imageGroup = node.getChildren('imageGroup')
+            if imageGroup:
+                imageGroup = imageGroup[0].getText()
+            else:
+                imageGroup = None
+            baseFlavor = node.getAttribute('baseFlavor')
+            flavor = node.getAttribute('flavor')
+
+            flavor = baseFlavor or flavor
+            if flavor is not None:
+                flavor = str(flavor)
+
+            pyobj = Build(
+                name = node.getAttribute('name'),
+                image = imgType,
+                stages = [ x.getAttribute('ref')
+                           for x in node.getChildren('stage') ],
+                imageGroup = imageGroup,
+                parentImageGroup = self.imageGroup,
+                architectureRef = node.getAttribute('architectureRef'),
+                containerTemplateRef = containerTemplateRef,
+                flavor = flavor,
+                )
+            builds.append(pyobj)
+
+    def _addBuildDefinition(self, buildNodes):
+        # support pre-2.0 schemas
+        schemaVersion = self._getSchemaVersion()
+        if schemaVersion in ('1.0', '1.1', '1.2', '1.3'):
+            return self._addBuildDefinition_1_x(buildNodes)
+
+        dispatcher = xmllib.NodeDispatcher(self._nsMap)
+        dispatcher.registerClasses(imageTypes, imageTypes.Image)
+
+        builds = self.buildDefinition = _BuildDefinition()
+        for node in buildNodes:
+            image = node.getChildren('image')
+            image = image and imageTypes.Image(image[0]) or None
             imageGroup = node.getChildren('imageGroup')
             if imageGroup:
                 imageGroup = imageGroup[0].getText()
@@ -2110,15 +2440,17 @@ class _ProductDefinition(BaseXmlNode):
                 imageGroup = None
             pyobj = Build(
                 name = node.getAttribute('name'),
-                baseFlavor = node.getAttribute('baseFlavor'),
-                imageType = imgType,
+                image = image,
                 stages = [ x.getAttribute('ref')
                            for x in node.getChildren('stage') ],
                 imageGroup = imageGroup,
                 parentImageGroup = self.imageGroup,
                 architectureRef = node.getAttribute('architectureRef'),
-                imageTemplateRef = node.getAttribute('imageTemplateRef'),
+                flavorSetRef = node.getAttribute('flavorSetRef'),
+                containerTemplateRef = \
+                        node.getAttribute('containerTemplateRef'),
                 flavor = node.getAttribute('flavor'),
+                buildTemplateRef = node.getAttribute('buildTemplateRef')
                 )
             builds.append(pyobj)
 
@@ -2128,6 +2460,145 @@ class _ProductDefinition(BaseXmlNode):
             name = node.getAttribute('name')
             label = node.getText()
             self.secondaryLabels.append(SecondaryLabel(name, label))
+        return self
+
+    def finalize(self):
+        if self._getSchemaVersion() in ('1.0', '1.1', '1.2', '1.3'):
+            for build in self.buildDefinition:
+                if not build.flavor:
+                    continue
+                flavor = conaryDeps.parseFlavor(build.flavor)
+
+                architectureRef = build.architectureRef
+                if architectureRef:
+                    architectures = hasattr(self, 'architectures') \
+                            and self.architectures or []
+                    arches = [x.flavor for x in architectures \
+                            if x.name == architectureRef]
+                    if not arches:
+                        continue
+                    archFlavor = conaryDeps.parseFlavor(arches[0])
+                    flavor = flavor.difference(archFlavor)
+                flavorStr = str(flavor)
+                build.flavor = flavorStr and str(flavor) or None
+
+            self.baseFlavor = None
+            if not hasattr(self, 'platform'):
+                # we're going to need a platform to store references to the
+                # containerTemplates, architectures and flavorSets
+                self._addPlatform(_PlatformDefinition())
+
+            self.platform.baseFlavor = None
+
+            self.platform.addFlavorSet('generic', 'Generic',
+                    '~!dom0,~!domU,~!xen,~!vmware')
+            self.platform.addFlavorSet('dom0', 'dom0',
+                    '~dom0,~!domU,~xen,~!vmware')
+            self.platform.addFlavorSet('domU', 'domU',
+                    '~!dom0,~domU,~xen,~!vmware')
+            self.platform.addFlavorSet('vmware', 'VMware',
+                    '~!dom0,~!domU,~!xen,~vmware')
+
+            self.platform.addArchitecture('x86', 'x86 (32 bit)',
+                    'is: x86(i486,i586,i686,sse,sse2)')
+            self.platform.addArchitecture('x86_64', 'x86 (64 bit)',
+                    'is: x86(i486,i586,i686,sse,sse2) x86_64')
+
+            legacyImageTypes = ["amiImage", "applianceIsoImage",
+            "installableIsoImage", "liveIsoImage", "netbootImage",
+            "rawFsImage", "rawHdImage", "tarballImage", "updateIsoImage",
+            "vhdImage", "virtualIronImage", "vmwareImage",
+            "vmwareEsxImage", "xenOvaImage", ]
+
+            for containerTemplateRef in legacyImageTypes:
+                self.platform.addContainerTemplate( \
+                        imageTypes.Image({'containerFormat':
+                            containerTemplateRef}))
+
+            self.platform.addBuildTemplate(name="demo_cd",
+                    displayName="Demo CD", architectureRef="x86",
+                    containerTemplateRef="liveIsoImage")
+            self.platform.addBuildTemplate(name="ami_large",
+                    displayName="EC2 AMI Large/Huge", architectureRef="x86_64",
+                    containerTemplateRef="amiImage", flavorSetRef="domU")
+            self.platform.addBuildTemplate(name="ec2_small",
+                    displayName="EC2 AMI Small", architectureRef="x86",
+                    containerTemplateRef="amiImage", flavorSetRef="domU")
+            self.platform.addBuildTemplate(name="iso", displayName="ISO",
+                    architectureRef="x86",
+                    containerTemplateRef="applianceIsoImage")
+            self.platform.addBuildTemplate(name="iso", displayName="ISO",
+                    architectureRef="x86",
+                    containerTemplateRef="installableIsoImage")
+            self.platform.addBuildTemplate(name="iso", displayName="ISO",
+                    architectureRef="x86",
+                    containerTemplateRef="updateIsoImage")
+            self.platform.addBuildTemplate(name="iso", displayName="ISO",
+                    architectureRef="x86_64",
+                    containerTemplateRef="applianceIsoImage")
+            self.platform.addBuildTemplate(name="iso", displayName="ISO",
+                    architectureRef="x86_64",
+                    containerTemplateRef="installableIsoImage")
+            self.platform.addBuildTemplate(name="iso", displayName="ISO",
+                    architectureRef="x86_64",
+                    containerTemplateRef="updateIsoImage")
+            self.platform.addBuildTemplate(name="hyper_v",
+                    displayName="MS Hyper-V", architectureRef="x86",
+                    containerTemplateRef="vhdImage", flavorSetRef="generic")
+            self.platform.addBuildTemplate(name="hyper_v",
+                    displayName="MS Hyper-V", architectureRef="x86_64",
+                    containerTemplateRef="vhdImage", flavorSetRef="generic")
+            self.platform.addBuildTemplate(name="raw_fs",
+                    displayName="Raw Filesystem", architectureRef="x86",
+                    containerTemplateRef="rawFsImage")
+            self.platform.addBuildTemplate(name="raw_fs",
+                    displayName="Raw Filesystem", architectureRef="x86_64",
+                    containerTemplateRef="rawFsImage")
+            self.platform.addBuildTemplate(name="raw_hd",
+                    displayName="Raw Hard Disk", architectureRef="x86",
+                    containerTemplateRef="rawHdImage")
+            self.platform.addBuildTemplate(name="raw_hd",
+                    displayName="Raw Hard Disk", architectureRef="x86_64",
+                    containerTemplateRef="rawHdImage")
+            self.platform.addBuildTemplate(name="tar",
+                    displayName="Tar Image", architectureRef="x86",
+                    containerTemplateRef="tarballImage")
+            self.platform.addBuildTemplate(name="tar",
+                    displayName="Tar Image", architectureRef="x86_64",
+                    containerTemplateRef="tarballImage")
+            self.platform.addBuildTemplate(name="vmware", displayName="VMware",
+                    architectureRef="x86", containerTemplateRef="vmwareImage",
+                    flavorSetRef="vmware")
+            self.platform.addBuildTemplate(name="vmware", displayName="VMware",
+                    architectureRef="x86",
+                    containerTemplateRef="vmwareEsxImage",
+                    flavorSetRef="vmware")
+            self.platform.addBuildTemplate(name="vmware", displayName="VMware",
+                    architectureRef="x86_64",
+                    containerTemplateRef="vmwareImage",
+                    flavorSetRef="vmware")
+            self.platform.addBuildTemplate(name="vmware", displayName="VMware",
+                    architectureRef="x86_64",
+                    containerTemplateRef="vmwareEsxImage",
+                    flavorSetRef="vmware")
+            self.platform.addBuildTemplate(name="virtual_iron",
+                    displayName="Virtual Iron", architectureRef="x86",
+                    containerTemplateRef="virtualIronImage",
+                    flavorSetRef="generic")
+            self.platform.addBuildTemplate(name="virtual_iron",
+                    displayName="Virtual Iron", architectureRef="x86_64",
+                    containerTemplateRef="virtualIronImage",
+                    flavorSetRef="generic")
+            self.platform.addBuildTemplate(name="xen_ova",
+                    displayName="Xen OVA",
+                    architectureRef="x86", containerTemplateRef="xenOvaImage",
+                    flavorSetRef="domU")
+            self.platform.addBuildTemplate(name="xen_ova",
+                    displayName="Xen OVA",
+                    architectureRef="x86_64",
+                    containerTemplateRef="xenOvaImage",
+                    flavorSetRef="domU")
+
         return self
 
 class _PlatformDefinition(BaseXmlNode):
@@ -2146,7 +2617,10 @@ class _PlatformSerialization(xmllib.BaseNode):
         self.searchPaths = platform.searchPaths
         self.factorySources = platform.factorySources
         self.architectures = platform.architectures
-        self.imageTemplates = platform.imageTemplates
+
+        self.flavorSets = platform.flavorSets
+        self.containerTemplates = platform.containerTemplates
+        self.buildTemplates = platform.buildTemplates
         self.baseFlavor = xmllib.StringNode(name = 'baseFlavor').characters(platform.baseFlavor)
         self.platformName = platform.platformName
         self.platformVersionTrove = platform.platformVersionTrove
@@ -2168,8 +2642,12 @@ class _PlatformSerialization(xmllib.BaseNode):
             ret.append(self.autoLoadRecipes)
         if self.architectures:
             ret.append(self.architectures)
-        if self.imageTemplates:
-            ret.append(self.imageTemplates)
+        if self.flavorSets:
+            ret.append(self.flavorSets)
+        if self.containerTemplates:
+            ret.append(self.containerTemplates)
+        if self.buildTemplates:
+            ret.append(self.buildTemplates)
         return ret
 
 class _ProductDefinitionSerialization(xmllib.BaseNode):
@@ -2179,7 +2657,9 @@ class _ProductDefinitionSerialization(xmllib.BaseNode):
         self.searchPaths = prodDef.searchPaths
         self.factorySources = prodDef.factorySources
         self.architectures = prodDef.architectures
-        self.imageTemplates = prodDef.imageTemplates
+        self.flavorSets = prodDef.flavorSets
+        self.containerTemplates = prodDef.containerTemplates
+        self.buildTemplates = prodDef.buildTemplates
         self.buildDefinition = prodDef.getBuildDefinitions()
         if prodDef.platform:
             self.platform = _PlatformSerialization({}, namespaces,
@@ -2259,38 +2739,17 @@ class _ProductDefinitionSerialization(xmllib.BaseNode):
             ret.append(self.searchPaths)
         if len(self.factorySources):
             ret.append(self.factorySources)
-        if self.architectures:
-            ret.append(self.architectures)
-        if self.imageTemplates:
-            ret.append(self.imageTemplates)
         if self.secondaryLabels:
             ret.append(self.secondaryLabels)
+        if self.architectures:
+            ret.append(self.architectures)
+        if self.flavorSets:
+            ret.append(self.flavorSets)
+        if self.containerTemplates:
+            ret.append(self.containerTemplates)
+        if self.buildTemplates:
+            ret.append(self.buildTemplates)
         ret.append(self.buildDefinition)
         if self.platform:
             ret.append(self.platform)
         return ret
-
-class _ImageTypeFakeNode(object):
-    """Internal class for emulating the interface expected by the node
-    dispatcher for creating image types"""
-    def __init__(self, name, fields = None):
-        self.name = name
-        self.fields = fields or {}
-
-    def getAbsoluteName(self):
-        """
-        @return: the absolute node name
-        @rtype: C{str}
-        """
-        return '{}%s' % self.name
-
-    def getAttribute(self, name):
-        """
-        Get an attribute by name
-        @param name: The attribute name
-        @type name: C{str}
-        @return: The attribute with the specified name, or C{None} if one
-        could not be found.
-        @rtype: C{str} or C{None}
-        """
-        return self.fields.get(name)

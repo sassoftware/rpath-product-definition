@@ -18,15 +18,35 @@ Image types.
 from rpath_common import xmllib
 from rpath_common.proddef import _xmlConstants
 
-#{ Image Type Classes
-class ImageType_Base(xmllib.SerializableObject):
+#{ Image Type Class
+class Image(xmllib.SerializableObject):
     _defaultNamespace = _xmlConstants.defaultNamespaceList[0]
+    tag = "image"
 
     _attributes = {
-        'name'              : (str, ),
-        'autoResolve'       : (bool, ),
-        'baseFileName'      : (str, ),
-        'installLabelPath'  : (str, ),
+        'containerFormat'           : (str, ),
+
+        'amiHugeDiskMountpoint'     : (str, ),
+        'anacondaCustomTrove'       : (str, ),
+        'anacondaTemplatesTrove'    : (str, ),
+        'autoResolve'               : (bool, ),
+        'baseFileName'              : (str, ),
+        'betaNag'                   : (bool, ),
+        'bugsUrl'                   : (str, ),
+        'diskAdapter'               : (str, ),
+        'freespace'                 : (int, ),
+        'installLabelPath'          : (str, ),
+        'maxIsoSize'                : (int, ),
+        'mediaTemplateTrove'        : (str, ),
+        'name'                      : (str, ),
+        'natNetworking'             : (bool, ),
+        'showMediaCheck'            : (bool, ),
+        'swapSize'                  : (int, ),
+        'unionfs'                   : (bool, ),
+        'vhdDiskType'               : (str, ),
+        'vmMemory'                  : (int, ),
+        'vmSnapshots'               : (bool, ),
+        'zisofs'                    : (bool, ),
     }
 
     def __init__(self, node = None):
@@ -36,13 +56,25 @@ class ImageType_Base(xmllib.SerializableObject):
         """
 
         self.fields = flds = {}
+        self.containerFormat = None
 
         if node is None:
             return
 
-        for attrName, values in self._attributes.items():
+        if isinstance(node, dict):
+            getAttribute = node.get
+            self.containerFormat = node.get('containerFormat')
+        else:
+            getAttribute = node.getAttribute
+            self.containerFormat = getAttribute('containerFormat')
+
+        for attrName, values in sorted(self._attributes.items()):
+            # containerFormat isn't a build option, but may appear in the
+            # fields due to API nuances
+            if attrName == 'containerFormat':
+                continue
             attrType = values[0]
-            val = node.getAttribute(attrName)
+            val = getAttribute(attrName)
             if val is None:
                 continue
             if attrType == bool:
@@ -52,6 +84,14 @@ class ImageType_Base(xmllib.SerializableObject):
             flds[attrName] = val
 
     def __eq__(self, obj):
+        if not hasattr(obj, 'containerFormat'):
+            return False
+        if self.containerFormat != obj.containerFormat:
+            return False
+        if not hasattr(obj, 'fields'):
+            return False
+        if self.fields != obj.fields:
+            return False
         return True
 
     def __ne__(self, obj):
@@ -68,140 +108,13 @@ class ImageType_Base(xmllib.SerializableObject):
         return {}
 
     def _iterAttributes(self):
-        return self.fields.iteritems()
+        if self.containerFormat is not None:
+            yield ('containerFormat', self.containerFormat)
+        for key, val in self.fields.iteritems():
+            yield key, val
 
     def _iterChildren(self):
         return []
-
-
-class ImageType_AMI(ImageType_Base):
-    tag = "amiImage"
-    _attributes = ImageType_Base._attributes.copy()
-    _attributes.update({
-        'amiHugeDiskMountpoint'     : (str, ),
-        'freespace'                 : (int, ),
-    })
-
-class ImageType_ApplianceIso(ImageType_Base):
-    tag = "applianceIsoImage"
-    _attributes = ImageType_Base._attributes.copy()
-    _attributes.update({
-        'maxIsoSize'                : (int, ),
-        'bugsUrl'                   : (str, ),
-        'showMediaCheck'            : (bool, ),
-        'betaNag'                   : (bool, ),
-        'mediaTemplateTrove'        : (str, ),
-        'anacondaCustomTrove'       : (str, ),
-        'anacondaTemplatesTrove'    : (str, ),
-    })
-
-
-class ImageType_InstallableISO(ImageType_Base):
-    tag = "installableIsoImage"
-    _attributes = ImageType_Base._attributes.copy()
-    _attributes.update({
-        'maxIsoSize'                : (int, ),
-        'bugsUrl'                   : (str, ),
-        'showMediaCheck'            : (bool, ),
-        'betaNag'                   : (bool, ),
-        'mediaTemplateTrove'        : (str, ),
-        'anacondaCustomTrove'       : (str, ),
-        'anacondaTemplatesTrove'    : (str, ),
-    })
-
-class ImageType_LiveIso(ImageType_Base):
-    tag = "liveIsoImage"
-    _attributes = ImageType_Base._attributes.copy()
-    _attributes.update({
-        'unionfs'                   : (bool, ),
-        'zisofs'                    : (bool, ),
-    })
-
-class ImageType_Netboot(ImageType_Base):
-    tag = "netbootImage"
-    _attributes = ImageType_Base._attributes.copy()
-    _attributes.update({
-    })
-
-class ImageType_RawFs(ImageType_Base):
-    tag = "rawFsImage"
-    _attributes = ImageType_Base._attributes.copy()
-    _attributes.update({
-        'swapSize'          : (int, ),
-        'freespace'         : (int, ),
-    })
-
-class ImageType_RawHd(ImageType_Base):
-    tag = "rawHdImage"
-    _attributes = ImageType_Base._attributes.copy()
-    _attributes.update({
-        'swapSize'          : (int, ),
-        'freespace'         : (int, ),
-    })
-
-class ImageType_Tarball(ImageType_Base):
-    tag = "tarballImage"
-    _attributes = ImageType_Base._attributes.copy()
-    _attributes.update({
-        'swapSize'          : (int, ),
-    })
-
-class ImageType_UpdateIso(ImageType_Base):
-    tag = "updateIsoImage"
-    # No inheritance
-    _attributes = {
-        'baseFileName'          : (str, ),
-        'mediaTemplateTrove'    : (str, ),
-    }
-
-class ImageType_VHD(ImageType_Base):
-    tag = "vhdImage"
-    _attributes = ImageType_Base._attributes.copy()
-    _attributes.update({
-        'swapSize'          : (int, ),
-        'freespace'         : (int, ),
-        'vhdDiskType'       : (str, ),
-    })
-
-class ImageType_VirtualIron(ImageType_Base):
-    tag = "virtualIronImage"
-    _attributes = ImageType_Base._attributes.copy()
-    _attributes.update({
-        'swapSize'          : (int, ),
-        'freespace'         : (int, ),
-        'vhdDiskType'       : (str, ),
-    })
-
-class ImageType_VMWare(ImageType_Base):
-    tag = "vmwareImage"
-    _attributes = ImageType_Base._attributes.copy()
-    _attributes.update({
-        'swapSize'          : (int, ),
-        'freespace'         : (int, ),
-        'natNetworking'     : (bool, ),
-        'diskAdapter'       : (str, ),
-        'vmSnapshots'       : (bool, ),
-        'vmMemory'          : (int, ),
-    })
-
-class ImageType_VMWareEsx(ImageType_Base):
-    tag = "vmwareEsxImage"
-    _attributes = ImageType_Base._attributes.copy()
-    _attributes.update({
-        'swapSize'          : (int, ),
-        'freespace'         : (int, ),
-        'natNetworking'     : (bool, ),
-        'vmMemory'          : (int, ),
-    })
-
-class ImageType_XenOva(ImageType_Base):
-    tag = "xenOvaImage"
-    _attributes = ImageType_Base._attributes.copy()
-    _attributes.update({
-        'swapSize'          : (int, ),
-        'freespace'         : (int, ),
-        'vmMemory'          : (int, ),
-    })
 #}
 
 
