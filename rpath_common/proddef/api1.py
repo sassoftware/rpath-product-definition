@@ -2229,6 +2229,118 @@ class BaseXmlNode(xmllib.BaseNode):
         assert nsName[-4:] == '.xsd'
         return nsName[4:-4]
 
+    def _addPlatformDefaults(self, platform):
+        platform.baseFlavor = None
+
+        platform.addFlavorSet('generic', 'Generic',
+                '~!dom0,~!domU,~!xen,~!vmware')
+        platform.addFlavorSet('dom0', 'dom0',
+                '~dom0,~!domU,~xen,~!vmware')
+        platform.addFlavorSet('domU', 'domU',
+                '~!dom0,~domU,~xen,~!vmware')
+        platform.addFlavorSet('vmware', 'VMware',
+                '~!dom0,~!domU,~!xen,~vmware')
+
+        platform.addArchitecture('x86', 'x86 (32 bit)',
+                'is: x86(i486,i586,i686,sse,sse2)')
+        platform.addArchitecture('x86_64', 'x86 (64 bit)',
+                'is: x86(i486,i586,i686,sse,sse2) x86_64')
+
+        legacyImageTypes = ["amiImage", "applianceIsoImage",
+        "installableIsoImage", "liveIsoImage", "netbootImage",
+        "rawFsImage", "rawHdImage", "tarballImage", "updateIsoImage",
+        "vhdImage", "virtualIronImage", "vmwareImage",
+        "vmwareEsxImage", "xenOvaImage", ]
+
+        for containerTemplateRef in legacyImageTypes:
+            platform.addContainerTemplate( \
+                    imageTypes.Image({'containerFormat':
+                        containerTemplateRef}))
+
+        platform.addBuildTemplate(name="demo_cd",
+                displayName="Demo CD", architectureRef="x86",
+                containerTemplateRef="liveIsoImage")
+        platform.addBuildTemplate(name="ami_large",
+                displayName="EC2 AMI Large/Huge", architectureRef="x86_64",
+                containerTemplateRef="amiImage", flavorSetRef="domU")
+        platform.addBuildTemplate(name="ec2_small",
+                displayName="EC2 AMI Small", architectureRef="x86",
+                containerTemplateRef="amiImage", flavorSetRef="domU")
+        platform.addBuildTemplate(name="iso", displayName="ISO",
+                architectureRef="x86",
+                containerTemplateRef="applianceIsoImage")
+        platform.addBuildTemplate(name="iso", displayName="ISO",
+                architectureRef="x86",
+                containerTemplateRef="installableIsoImage")
+        platform.addBuildTemplate(name="iso", displayName="ISO",
+                architectureRef="x86",
+                containerTemplateRef="updateIsoImage")
+        platform.addBuildTemplate(name="iso", displayName="ISO",
+                architectureRef="x86_64",
+                containerTemplateRef="applianceIsoImage")
+        platform.addBuildTemplate(name="iso", displayName="ISO",
+                architectureRef="x86_64",
+                containerTemplateRef="installableIsoImage")
+        platform.addBuildTemplate(name="iso", displayName="ISO",
+                architectureRef="x86_64",
+                containerTemplateRef="updateIsoImage")
+        platform.addBuildTemplate(name="hyper_v",
+                displayName="MS Hyper-V", architectureRef="x86",
+                containerTemplateRef="vhdImage", flavorSetRef="generic")
+        platform.addBuildTemplate(name="hyper_v",
+                displayName="MS Hyper-V", architectureRef="x86_64",
+                containerTemplateRef="vhdImage", flavorSetRef="generic")
+        platform.addBuildTemplate(name="raw_fs",
+                displayName="Raw Filesystem", architectureRef="x86",
+                containerTemplateRef="rawFsImage")
+        platform.addBuildTemplate(name="raw_fs",
+                displayName="Raw Filesystem", architectureRef="x86_64",
+                containerTemplateRef="rawFsImage")
+        platform.addBuildTemplate(name="raw_hd",
+                displayName="Raw Hard Disk", architectureRef="x86",
+                containerTemplateRef="rawHdImage")
+        platform.addBuildTemplate(name="raw_hd",
+                displayName="Raw Hard Disk", architectureRef="x86_64",
+                containerTemplateRef="rawHdImage")
+        platform.addBuildTemplate(name="tar",
+                displayName="Tar Image", architectureRef="x86",
+                containerTemplateRef="tarballImage")
+        platform.addBuildTemplate(name="tar",
+                displayName="Tar Image", architectureRef="x86_64",
+                containerTemplateRef="tarballImage")
+        platform.addBuildTemplate(name="vmware", displayName="VMware",
+                architectureRef="x86", containerTemplateRef="vmwareImage",
+                flavorSetRef="vmware")
+        platform.addBuildTemplate(name="vmware", displayName="VMware",
+                architectureRef="x86",
+                containerTemplateRef="vmwareEsxImage",
+                flavorSetRef="vmware")
+        platform.addBuildTemplate(name="vmware", displayName="VMware",
+                architectureRef="x86_64",
+                containerTemplateRef="vmwareImage",
+                flavorSetRef="vmware")
+        platform.addBuildTemplate(name="vmware", displayName="VMware",
+                architectureRef="x86_64",
+                containerTemplateRef="vmwareEsxImage",
+                flavorSetRef="vmware")
+        platform.addBuildTemplate(name="virtual_iron",
+                displayName="Virtual Iron", architectureRef="x86",
+                containerTemplateRef="virtualIronImage",
+                flavorSetRef="generic")
+        platform.addBuildTemplate(name="virtual_iron",
+                displayName="Virtual Iron", architectureRef="x86_64",
+                containerTemplateRef="virtualIronImage",
+                flavorSetRef="generic")
+        platform.addBuildTemplate(name="xen_ova",
+                displayName="Xen OVA",
+                architectureRef="x86", containerTemplateRef="xenOvaImage",
+                flavorSetRef="domU")
+        platform.addBuildTemplate(name="xen_ova",
+                displayName="Xen OVA",
+                architectureRef="x86_64",
+                containerTemplateRef="xenOvaImage",
+                flavorSetRef="domU")
+
 class _ProductDefinition(BaseXmlNode):
     def addChild(self, childNode):
         chName = childNode.getAbsoluteName()
@@ -2482,128 +2594,28 @@ class _ProductDefinition(BaseXmlNode):
                 flavorStr = str(flavor)
                 build.flavor = flavorStr and str(flavor) or None
 
-            self.baseFlavor = None
             if not hasattr(self, 'platform'):
                 # we're going to need a platform to store references to the
                 # containerTemplates, architectures and flavorSets
                 self._addPlatform(_PlatformDefinition())
 
-            self.platform.baseFlavor = None
-
-            self.platform.addFlavorSet('generic', 'Generic',
-                    '~!dom0,~!domU,~!xen,~!vmware')
-            self.platform.addFlavorSet('dom0', 'dom0',
-                    '~dom0,~!domU,~xen,~!vmware')
-            self.platform.addFlavorSet('domU', 'domU',
-                    '~!dom0,~domU,~xen,~!vmware')
-            self.platform.addFlavorSet('vmware', 'VMware',
-                    '~!dom0,~!domU,~!xen,~vmware')
-
-            self.platform.addArchitecture('x86', 'x86 (32 bit)',
-                    'is: x86(i486,i586,i686,sse,sse2)')
-            self.platform.addArchitecture('x86_64', 'x86 (64 bit)',
-                    'is: x86(i486,i586,i686,sse,sse2) x86_64')
-
-            legacyImageTypes = ["amiImage", "applianceIsoImage",
-            "installableIsoImage", "liveIsoImage", "netbootImage",
-            "rawFsImage", "rawHdImage", "tarballImage", "updateIsoImage",
-            "vhdImage", "virtualIronImage", "vmwareImage",
-            "vmwareEsxImage", "xenOvaImage", ]
-
-            for containerTemplateRef in legacyImageTypes:
-                self.platform.addContainerTemplate( \
-                        imageTypes.Image({'containerFormat':
-                            containerTemplateRef}))
-
-            self.platform.addBuildTemplate(name="demo_cd",
-                    displayName="Demo CD", architectureRef="x86",
-                    containerTemplateRef="liveIsoImage")
-            self.platform.addBuildTemplate(name="ami_large",
-                    displayName="EC2 AMI Large/Huge", architectureRef="x86_64",
-                    containerTemplateRef="amiImage", flavorSetRef="domU")
-            self.platform.addBuildTemplate(name="ec2_small",
-                    displayName="EC2 AMI Small", architectureRef="x86",
-                    containerTemplateRef="amiImage", flavorSetRef="domU")
-            self.platform.addBuildTemplate(name="iso", displayName="ISO",
-                    architectureRef="x86",
-                    containerTemplateRef="applianceIsoImage")
-            self.platform.addBuildTemplate(name="iso", displayName="ISO",
-                    architectureRef="x86",
-                    containerTemplateRef="installableIsoImage")
-            self.platform.addBuildTemplate(name="iso", displayName="ISO",
-                    architectureRef="x86",
-                    containerTemplateRef="updateIsoImage")
-            self.platform.addBuildTemplate(name="iso", displayName="ISO",
-                    architectureRef="x86_64",
-                    containerTemplateRef="applianceIsoImage")
-            self.platform.addBuildTemplate(name="iso", displayName="ISO",
-                    architectureRef="x86_64",
-                    containerTemplateRef="installableIsoImage")
-            self.platform.addBuildTemplate(name="iso", displayName="ISO",
-                    architectureRef="x86_64",
-                    containerTemplateRef="updateIsoImage")
-            self.platform.addBuildTemplate(name="hyper_v",
-                    displayName="MS Hyper-V", architectureRef="x86",
-                    containerTemplateRef="vhdImage", flavorSetRef="generic")
-            self.platform.addBuildTemplate(name="hyper_v",
-                    displayName="MS Hyper-V", architectureRef="x86_64",
-                    containerTemplateRef="vhdImage", flavorSetRef="generic")
-            self.platform.addBuildTemplate(name="raw_fs",
-                    displayName="Raw Filesystem", architectureRef="x86",
-                    containerTemplateRef="rawFsImage")
-            self.platform.addBuildTemplate(name="raw_fs",
-                    displayName="Raw Filesystem", architectureRef="x86_64",
-                    containerTemplateRef="rawFsImage")
-            self.platform.addBuildTemplate(name="raw_hd",
-                    displayName="Raw Hard Disk", architectureRef="x86",
-                    containerTemplateRef="rawHdImage")
-            self.platform.addBuildTemplate(name="raw_hd",
-                    displayName="Raw Hard Disk", architectureRef="x86_64",
-                    containerTemplateRef="rawHdImage")
-            self.platform.addBuildTemplate(name="tar",
-                    displayName="Tar Image", architectureRef="x86",
-                    containerTemplateRef="tarballImage")
-            self.platform.addBuildTemplate(name="tar",
-                    displayName="Tar Image", architectureRef="x86_64",
-                    containerTemplateRef="tarballImage")
-            self.platform.addBuildTemplate(name="vmware", displayName="VMware",
-                    architectureRef="x86", containerTemplateRef="vmwareImage",
-                    flavorSetRef="vmware")
-            self.platform.addBuildTemplate(name="vmware", displayName="VMware",
-                    architectureRef="x86",
-                    containerTemplateRef="vmwareEsxImage",
-                    flavorSetRef="vmware")
-            self.platform.addBuildTemplate(name="vmware", displayName="VMware",
-                    architectureRef="x86_64",
-                    containerTemplateRef="vmwareImage",
-                    flavorSetRef="vmware")
-            self.platform.addBuildTemplate(name="vmware", displayName="VMware",
-                    architectureRef="x86_64",
-                    containerTemplateRef="vmwareEsxImage",
-                    flavorSetRef="vmware")
-            self.platform.addBuildTemplate(name="virtual_iron",
-                    displayName="Virtual Iron", architectureRef="x86",
-                    containerTemplateRef="virtualIronImage",
-                    flavorSetRef="generic")
-            self.platform.addBuildTemplate(name="virtual_iron",
-                    displayName="Virtual Iron", architectureRef="x86_64",
-                    containerTemplateRef="virtualIronImage",
-                    flavorSetRef="generic")
-            self.platform.addBuildTemplate(name="xen_ova",
-                    displayName="Xen OVA",
-                    architectureRef="x86", containerTemplateRef="xenOvaImage",
-                    flavorSetRef="domU")
-            self.platform.addBuildTemplate(name="xen_ova",
-                    displayName="Xen OVA",
-                    architectureRef="x86_64",
-                    containerTemplateRef="xenOvaImage",
-                    flavorSetRef="domU")
-
+        if hasattr(self, 'platform'):
+            if not self.platform.containerTemplates and \
+                    not self.platform.architectures and \
+                    not self.platform.buildTemplates and \
+                    not self.platform.flavorSets:
+                        self.baseFlavor = None
+                        self._addPlatformDefaults(self.platform)
         return self
 
 class _PlatformDefinition(BaseXmlNode):
     def finalize(self):
         self._addPlatform(self)
+        if not self.platform.containerTemplates and \
+                not self.platform.architectures and \
+                not self.platform.buildTemplates and \
+                not self.platform.flavorSets:
+                    self._addPlatformDefaults(self.platform)
         return self
 
 class _PlatformSerialization(xmllib.BaseNode):
