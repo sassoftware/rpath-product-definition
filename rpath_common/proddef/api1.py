@@ -2249,22 +2249,26 @@ class BaseXmlNode(xmllib.BaseNode):
     def _addPlatformDefaults(self, platform):
         platform.baseFlavor = None
 
+        platform.addFlavorSet('ami', 'AMI',
+                '!dom0,domU,xen,!vmware')
         platform.addFlavorSet('generic', 'Generic',
                 '~!dom0,~!domU,~!xen,~!vmware')
-        platform.addFlavorSet('dom0', 'dom0',
-                '~dom0,~!domU,~xen,~!vmware')
-        platform.addFlavorSet('domU', 'domU',
-                '~!dom0,~domU,~xen,~!vmware')
+        platform.addFlavorSet('hyper_v', 'Hyper-V',
+                '!vmware, ~!xen, !dom0')
+        platform.addFlavorSet('virtual_iron', 'Virtual Iron',
+                '!xen,!vmware')
         platform.addFlavorSet('vmware', 'VMware',
                 '~!dom0,~!domU,~!xen,~vmware')
+        platform.addFlavorSet('xen', 'Xen',
+                '~!dom0,~domU,~xen,~!vmware')
 
-        platform.addArchitecture('x86', 'x86 (32 bit)',
-                'is: x86(i486,i586,i686,sse,sse2)')
-        platform.addArchitecture('x86_64', 'x86 (64 bit)',
-                'is: x86(i486,i586,i686,sse,sse2) x86_64')
+        platform.addArchitecture('x86', 'x86 (32-bit)',
+                'is: x86(~i486,~i586,~i686,~sse,~sse2)')
+        platform.addArchitecture('x86_64', 'x86 (64-bit)',
+                'is: x86(~i486,~i586,~i686,~sse,~sse2) x86_64')
 
         legacyImageTypes = ["amiImage", "applianceIsoImage",
-        "installableIsoImage", "liveIsoImage", "netbootImage",
+        "installableIsoImage",
         "rawFsImage", "rawHdImage", "tarballImage", "updateIsoImage",
         "vhdImage", "virtualIronImage", "vmwareImage",
         "vmwareEsxImage", "xenOvaImage", ]
@@ -2274,15 +2278,12 @@ class BaseXmlNode(xmllib.BaseNode):
                     imageTypes.Image({'containerFormat':
                         containerTemplateRef}))
 
-        platform.addBuildTemplate(name="demo_cd",
-                displayName="Demo CD", architectureRef="x86",
-                containerTemplateRef="liveIsoImage")
         platform.addBuildTemplate(name="ami_large",
                 displayName="EC2 AMI Large/Huge", architectureRef="x86_64",
-                containerTemplateRef="amiImage", flavorSetRef="domU")
+                containerTemplateRef="amiImage", flavorSetRef="ami")
         platform.addBuildTemplate(name="ec2_small",
                 displayName="EC2 AMI Small", architectureRef="x86",
-                containerTemplateRef="amiImage", flavorSetRef="domU")
+                containerTemplateRef="amiImage", flavorSetRef="ami")
         platform.addBuildTemplate(name="iso", displayName="ISO",
                 architectureRef="x86",
                 containerTemplateRef="applianceIsoImage")
@@ -2343,20 +2344,20 @@ class BaseXmlNode(xmllib.BaseNode):
         platform.addBuildTemplate(name="virtual_iron",
                 displayName="Virtual Iron", architectureRef="x86",
                 containerTemplateRef="virtualIronImage",
-                flavorSetRef="generic")
+                flavorSetRef="virtual_iron")
         platform.addBuildTemplate(name="virtual_iron",
                 displayName="Virtual Iron", architectureRef="x86_64",
                 containerTemplateRef="virtualIronImage",
-                flavorSetRef="generic")
+                flavorSetRef="virtual_iron")
         platform.addBuildTemplate(name="xen_ova",
                 displayName="Xen OVA",
                 architectureRef="x86", containerTemplateRef="xenOvaImage",
-                flavorSetRef="domU")
+                flavorSetRef="xen")
         platform.addBuildTemplate(name="xen_ova",
                 displayName="Xen OVA",
                 architectureRef="x86_64",
                 containerTemplateRef="xenOvaImage",
-                flavorSetRef="domU")
+                flavorSetRef="xen")
 
 class _ProductDefinition(BaseXmlNode):
     def addChild(self, childNode):
