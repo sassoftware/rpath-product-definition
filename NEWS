@@ -16,6 +16,12 @@ Changes in 0.4:
       ProductDefinitionTroveNotFoundError, ProductDefinitionFileNotFound
       is now ProductDefinitionFileNotFoundError, and 
       InvalidSchemaVersionError has been added.
+    * New API's for interacting with the sourceGroup element.  sourceGroup
+      specifies the name of the source groups to build when building groups.
+      (RPCL-44).
+        ProductDefinition.getSourceGroup()
+        ProductDefinition.setSourceGroup(sourceGroup)
+        Build.getBuildSourceGroup()
 
   Bug Fixes:
     * Several platform attributes previously were not copied into a
@@ -23,7 +29,7 @@ Changes in 0.4:
       fixed. (RPCL-48)
 
   o Schema Versions:
-    * 2.0: Modifications required for RPCL-21
+    * 2.0: Modifications required for RPCL-21, RPCL-44
 
 Changes in 0.3:
   Bug Fixes:
