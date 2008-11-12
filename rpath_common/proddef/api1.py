@@ -22,14 +22,15 @@ __all__ = [ 'MissingInformationError',
             'ProductDefinition',
             'ProductDefinitionError',
             'StageNotFoundError',
-            'ProductDefinitionTroveNotFound',
-            'ProductDefinitionFileNotFound',
+            'ProductDefinitionTroveNotFoundError',
+            'ProductDefinitionFileNotFoundError',
             'RepositoryError',
             'PlatformLabelMissingError',
             'ArchitectureNotFoundError',
             'FlavorSetNotFoundError',
             'ContainerTemplateNotFoundError',
             'BuildTemplateNotFoundError',
+            'InvalidSchemaVersionError',
             ]
 
 import itertools
@@ -72,13 +73,13 @@ class ContainerTemplateNotFoundError(ProductDefinitionError):
 class BuildTemplateNotFoundError(ProductDefinitionError):
     "Raised when no such build template exists."
 
-class ProductDefinitionTroveNotFound(ProductDefinitionError):
+class ProductDefinitionTroveNotFoundError(ProductDefinitionError):
     """
     Raised when the trove containing the product definition file could not
     be found in the repository
     """
 
-class ProductDefinitionFileNotFound(ProductDefinitionError):
+class ProductDefinitionFileNotFoundError(ProductDefinitionError):
     "Raised when the product definition file was not found in the repository"
 
 class RepositoryError(ProductDefinitionError):
@@ -86,6 +87,9 @@ class RepositoryError(ProductDefinitionError):
 
 class PlatformLabelMissingError(ProductDefinitionError):
     "Raised when the platform label is missing, and a rebase was requested"
+
+class InvalidSchemaVersionError(ProductDefinitionError):
+    "Raised when the schema version in a product definition file is not recognized."
 
 #}
 
@@ -421,14 +425,14 @@ class BaseDefinition(object):
         try:
             troves = repos.findTroves(None, [ troveSpec ])
         except conaryErrors.TroveNotFound:
-            raise ProductDefinitionTroveNotFound("%s=%s" % (troveName, label))
+            raise ProductDefinitionTroveNotFoundError("%s=%s" % (troveName, label))
         except conaryErrors.RepositoryError, e:
             raise RepositoryError(str(e))
         # At this point, troveSpec is in troves and its value should not be
         # the empty list.
         nvfs = troves[troveSpec]
         #if not nvfs:
-        #    raise ProductDefinitionTroveNotFound("%s=%s" % (troveName, label))
+        #    raise ProductDefinitionTroveNotFoundError("%s=%s" % (troveName, label))
         trvCsSpec = (nvfs[0][0], (None, None), (nvfs[0][1], nvfs[0][2]), True)
         cs = conaryClient.createChangeSet([ trvCsSpec ], withFiles = True,
                                           withFileContents = True)
@@ -443,7 +447,7 @@ class BaseDefinition(object):
             return fileContents[0].get(), thawTrvCs.getNewNameVersionFlavor()
 
         # Couldn't find the file we expected; die
-        raise ProductDefinitionFileNotFound("%s=%s" % (troveName, label))
+        raise ProductDefinitionFileNotFoundError("%s=%s" % (troveName, label))
 
     def _initFields(self):
         self.baseFlavor = None
@@ -602,8 +606,8 @@ class ProductDefinitionRecipe(PackageRecipe):
         @param client: A Conary client object
         @type client: C{conaryclient.ConaryClient}
         @raises C{RepositoryError}:
-        @raises C{ProductDefinitionTroveNotFound}:
-        @raises C{ProductDefinitionFileNotFound}:
+        @raises C{ProductDefinitionTroveNotFoundError}:
+        @raises C{ProductDefinitionFileNotFoundError}:
         """
         label = self.getProductDefinitionLabel()
         stream, nvf = self._getStreamFromRepository(client, label)
@@ -739,11 +743,9 @@ class ProductDefinitionRecipe(PackageRecipe):
         platFlv = self.getPlatformBaseFlavor()
         if platFlv is not None:
             nflv = conaryDeps.parseFlavor(platFlv)
-            #flv.union(nflv)
             flv = conaryDeps.overrideFlavor(flv, nflv)
         if self.baseFlavor is not None:
             nflv = conaryDeps.parseFlavor(self.baseFlavor)
-            #flv.union(nflv)
             flv = conaryDeps.overrideFlavor(flv, nflv)
         return str(flv)
 
@@ -1635,8 +1637,8 @@ class PlatformDefinitionRecipe(PackageRecipe):
         @param client: A Conary client object
         @type client: C{conaryclient.ConaryClient}
         @raises C{RepositoryError}:
-        @raises C{ProductDefinitionTroveNotFound}:
-        @raises C{ProductDefinitionFileNotFound}:
+        @raises C{ProductDefinitionTroveNotFoundError}:
+        @raises C{ProductDefinitionFileNotFoundError}:
         """
         stream, nvf = self._getStreamFromRepository(client, label)
         stream.seek(0)
@@ -1668,7 +1670,7 @@ class PlatformDefinitionRecipe(PackageRecipe):
                                   self.getFactorySources()):
             key = (sp.troveName, sp.label, None)
             if key not in troves:
-                raise ProductDefinitionTroveNotFound("%s=%s" % (key[0], key[1]))
+                raise ProductDefinitionTroveNotFoundError("%s=%s" % (key[0], key[1]))
             nvf = troves[key][0]
             sp.version = str(nvf[1].trailingRevision())
 
@@ -2229,10 +2231,20 @@ class BaseXmlNode(xmllib.BaseNode):
                 xmllib.DataBinder.xmlSchemaNamespace)
         if not nsName:
             return None
-        nsName = os.path.basename(nsName).split()[-1]
-        assert nsName[:4] == 'rpd-'
-        assert nsName[-4:] == '.xsd'
-        return nsName[4:-4]
+        try:
+            nsName = os.path.basename(nsName).split()[-1]
+            prefix, nsName = nsName.split('-', 1)
+            if (prefix != 'rpd'):
+                raise InvalidSchemaVersionError(
+                    'Invalid schema prefix %s, expected rpd', prefix)
+            nsName, suffix = nsName.rsplit('.', 1)
+            if (suffix != 'xsd'):
+                raise InvalidSchemaVersionError(
+                    'Invalid schema suffix %s, expected xsd', suffix)
+            return nsName
+        except:
+            raise InvalidSchemaVersionError('Failed to parse schema version %s',
+                                       nsName)
 
     def _addPlatformDefaults(self, platform):
         platform.baseFlavor = None

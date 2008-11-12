@@ -1,3 +1,28 @@
+Changes in 0.4:
+  o API Changes:
+    * Richer flavor support: for both platform and product, there are
+      base flavor, image flavors, and architecture flavors that are
+      mixed together to discover flavors of groups to cook and images
+      to build.  As part of this work, the UnsupportedImageType and
+      ImageTemplateNotFoundError exceptions have been removed, and
+      the FlavorSetNotFoundError, ContainerTemplateNotFoundError,
+      and BuildTemplateNotFoundError exceptions have been added.
+      Incompatible schema changes were required, introducing schema
+      version 2.0.  These changes are reflected in API changes that
+      are not backwards-compatible. (RPCL-13)
+    * Exception classes have been changed to have names that consistently
+      end in "Error": ProductDefinitionTroveNotFound is now
+      ProductDefinitionTroveNotFoundError, ProductDefinitionFileNotFound
+      is now ProductDefinitionFileNotFoundError, and the
+
+  Bug Fixes:
+    * Several platform attributes previously were not copied into a
+      product definition during a rebase operation.  This has been
+      fixed. (RPCL-48)
+
+  o Schema Versions:
+    * 2.0: Modifications required for RPCL-13
+
 Changes in 0.3:
   Bug Fixes:
     * The rebase operation now succeeds when an explicit baseLabel
@@ -5,10 +30,6 @@ Changes in 0.3:
 
 Changes in 0.2:
   o API Changes:
-    * Richer flavor support: for both platform and product, there are
-      base flavor, image flavors, and architecture flavors that are
-      mixed together to discover flavors of groups to cook and images
-      to build. (RPCL-13)
     * When the default label prefix is not the label for a product,
       a different label prefix ("baseLabel") can be provided.  Stage
       suffixes will still be appended to this label. (RPCL-18)
