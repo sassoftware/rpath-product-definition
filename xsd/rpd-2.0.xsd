@@ -152,7 +152,10 @@
                     <xsd:attribute name="ref" type="xsd:string" use="required"/>
                 </xsd:complexType>
             </xsd:element>
-            <xsd:element name="imageGroup" type="rpd:troveSpecType" minOccurs="0" maxOccurs="1" />
+            <xsd:sequence>
+                <xsd:element name="imageGroup" type="rpd:troveSpecType" minOccurs="0" maxOccurs="1"/>
+                <xsd:element name="sourceGroup" type="rpd:troveSpecType" minOccurs="0" maxOccurs="1"/>
+            </xsd:sequence>
         </xsd:sequence>
         <xsd:attribute name="name" type="xsd:string" use="required" />
         <xsd:attribute name="architectureRef" type="xsd:string" />
@@ -294,7 +297,10 @@
                 <xsd:element name="productVersionDescription" type="xsd:string" />
                 <xsd:element name="conaryRepositoryHostname" type="xsd:string" />
                 <xsd:element name="conaryNamespace" type="xsd:string" />
-                <xsd:element name="imageGroup" type="rpd:troveSpecType" />
+                <xsd:sequence>
+                    <xsd:element name="imageGroup" type="rpd:troveSpecType"/>
+                    <xsd:element name="sourceGroup" type="rpd:troveSpecType" minOccurs="0" maxOccurs="1"/>
+                </xsd:sequence>
                 <!-- 1.3: explicit label when default is wrong (RPCL-18) -->
                 <xsd:element name="baseLabel" type="xsd:string" minOccurs="0" maxOccurs="1" />
                 <xsd:element name="baseFlavor" type="rpd:flavorStringType" minOccurs="0" maxOccurs="1" />

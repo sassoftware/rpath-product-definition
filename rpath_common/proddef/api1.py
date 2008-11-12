@@ -546,6 +546,7 @@ class ProductDefinitionRecipe(PackageRecipe):
         self.conaryRepositoryHostname = getattr(xmlObj,
             'conaryRepositoryHostname', None)
         self.conaryNamespace = getattr(xmlObj, 'conaryNamespace', None)
+        self.sourceGroup = getattr(xmlObj, 'sourceGroup', None)
         self.imageGroup = getattr(xmlObj, 'imageGroup', None)
         self.baseLabel = getattr(xmlObj, 'baseLabel', None)
         self.baseFlavor = getattr(xmlObj, 'baseFlavor', None)
@@ -714,6 +715,24 @@ class ProductDefinitionRecipe(PackageRecipe):
         @type conaryNamespace: C{str}
         """
         self.conaryNamespace = conaryNamespace
+
+    def getSourceGroup(self):
+        """
+        @return: the source group, if none is set, default to the image group
+        @rtype: C{str}
+        """
+        if self.sourceGroup:
+            return self.sourceGroup
+        else:
+            return None
+
+    def setSourceGroup(self, sourceGroup):
+        """
+        Set the source group name
+        @param sourceGroup: the image group name
+        @type sourceGroup: C{str}
+        """
+        self.sourceGroup = sourceGroup
 
     def getImageGroup(self):
         """
@@ -916,7 +935,8 @@ class ProductDefinitionRecipe(PackageRecipe):
         return self.buildDefinition
 
     def addBuildDefinition(self, name = None, image = None, stages = None,
-                           imageGroup = None, architectureRef = None,
+                           imageGroup = None, sourceGroup = None, 
+                           architectureRef = None,
                            containerTemplateRef = None, buildTemplateRef = None,
                            flavorSetRef = None, flavor = None):
         """
@@ -934,6 +954,9 @@ class ProductDefinitionRecipe(PackageRecipe):
         @param imageGroup: An optional image group that will override the
         product definition's image group
         @type imageGroup: C{str}
+        @param sourceGroup: An optional source group that will override the
+        product definition's source group
+        @type sourceGroup: C{str}
         @param architectureRef: the name of an architecture to inherit flavors
         from.
         @type architectureRef: C{str}
@@ -967,7 +990,9 @@ class ProductDefinitionRecipe(PackageRecipe):
 
         obj = Build(name = name, image = image, stages = stages,
                 imageGroup = imageGroup,
+                sourceGroup = sourceGroup,
                 parentImageGroup = self.imageGroup,
+                parentSourceGroup = self.sourceGroup,
                 architectureRef = architectureRef,
                 containerTemplateRef = containerTemplateRef,
                 flavorSetRef = flavorSetRef,
@@ -1523,6 +1548,7 @@ class ProductDefinitionRecipe(PackageRecipe):
         self.conaryRepositoryHostname = None
         self.conaryNamespace = None
         self.imageGroup = None
+        self.sourceGroup = None
         self.baseLabel = None
         self.buildDefinition = _BuildDefinition()
         self.platform = None
@@ -1906,13 +1932,15 @@ class _BuildTemplate(xmllib.SlotBasedSerializableObject):
         self.flavorSetRef = flavorSetRef
 
 class Build(xmllib.SerializableObject):
-    __slots__ = [ 'name', 'image', 'stages', 'imageGroup', 'parentImageGroup',
-                   'architectureRef', 'flavorSetRef', 'containerTemplateRef',
-                   'buildTemplateRef', 'flavor', '_proddef']
+    __slots__ = [ 'name', 'image', 'stages', 'imageGroup', 'sourceGroup',
+                  'parentImageGroup', 'parentSourceGroup',
+                  'architectureRef', 'flavorSetRef', 'containerTemplateRef',
+                  'buildTemplateRef', 'flavor', '_proddef']
     tag = "build"
 
     def __init__(self, name = None, image = None, stages = None,
-                 imageGroup = None, parentImageGroup = None,
+                 imageGroup = None, sourceGroup = None, 
+                 parentImageGroup = None, parentSourceGroup = None,
                  architectureRef = None, flavorSetRef = None,
                  containerTemplateRef = None,
                  buildTemplateRef = None, flavor = None,
@@ -1922,7 +1950,9 @@ class Build(xmllib.SerializableObject):
         self.image = image
         self.stages = stages or []
         self.imageGroup = imageGroup
+        self.sourceGroup = sourceGroup
         self.parentImageGroup = parentImageGroup
+        self.parentSourceGroup = parentSourceGroup
         self.architectureRef = architectureRef
         self.containerTemplateRef = containerTemplateRef
         self.flavorSetRef = flavorSetRef
@@ -1947,6 +1977,14 @@ class Build(xmllib.SerializableObject):
         if self.imageGroup is None:
             return self.parentImageGroup
         return self.imageGroup
+
+    def getBuildSourceGroup(self):
+        if self.sourceGroup:
+            return self.sourceGroup
+        elif self.parentSourceGroup:
+            return self.parentSourceGroup
+        else:
+            return None
 
     def getBuildImage(self):
         fields = {}
@@ -2040,6 +2078,9 @@ class Build(xmllib.SerializableObject):
         if self.imageGroup is not None:
             yield xmllib.StringNode(name = 'imageGroup').characters(
                 self.imageGroup)
+        if self.sourceGroup:
+            yield xmllib.StringNode(name = 'sourceGroup').characters(
+                self.sourceGroup)
 
     def _iterAttributes(self):
         for f in ['name', 'architectureRef', 'containerTemplateRef',
@@ -2377,6 +2418,10 @@ class _ProductDefinition(BaseXmlNode):
             self.imageGroup = childNode.getText()
             return
 
+        if chName == self._makeAbsoluteName('sourceGroup'):
+            self.sourceGroup = childNode.getText()
+            return
+
         if chName == self._makeAbsoluteName('baseLabel'):
             self.baseLabel = childNode.getText()
             return
@@ -2550,6 +2595,15 @@ class _ProductDefinition(BaseXmlNode):
                 imageGroup = imageGroup[0].getText()
             else:
                 imageGroup = None
+            sourceGroup = node.getChildren('sourceGroup')
+            if sourceGroup:
+                sourceGroup = sourceGroup[0].getText()
+            else:
+                sourceGroup = None
+            if hasattr(self, 'sourceGroup'):
+                parentSourceGroup = self.sourceGroup
+            else:
+                parentSourceGroup = None
             pyobj = Build(
                 name = node.getAttribute('name'),
                 image = image,
@@ -2557,6 +2611,8 @@ class _ProductDefinition(BaseXmlNode):
                            for x in node.getChildren('stage') ],
                 imageGroup = imageGroup,
                 parentImageGroup = self.imageGroup,
+                sourceGroup = sourceGroup,
+                parentSourceGroup = parentSourceGroup, 
                 architectureRef = node.getAttribute('architectureRef'),
                 flavorSetRef = node.getAttribute('flavorSetRef'),
                 containerTemplateRef = \
@@ -2724,6 +2780,12 @@ class _ProductDefinitionSerialization(xmllib.BaseNode):
         if imageGroup:
             self.imageGroup.characters(imageGroup)
 
+        self.sourceGroup = None
+        sourceGroup = prodDef.getSourceGroup()
+        if sourceGroup:
+            self.sourceGroup = xmllib.StringNode(name = 'sourceGroup')
+            self.sourceGroup.characters(sourceGroup)
+
         self.baseLabel = None
         baseLabel = prodDef.getBaseLabel()
         if baseLabel:
@@ -2744,6 +2806,7 @@ class _ProductDefinitionSerialization(xmllib.BaseNode):
                  self.conaryRepositoryHostname,
                  self.conaryNamespace,
                  self.imageGroup,
+                 self.sourceGroup,
                  self.baseLabel,
                  self.baseFlavor,
                  self.stages, ]
