@@ -1306,6 +1306,11 @@ class ProductDefinitionRecipe(PackageRecipe):
         self.setPlatformBaseFlavor(nplat.getBaseFlavor())
         self.setPlatformSourceTrove(nplat.sourceTrove)
         self.setPlatformUseLatest(useLatest)
+        self.platform.setPlatformName(nplat.getPlatformName())
+        self.platform.setPlatformVersionTrove(nplat.getPlatformVersionTrove())
+        for alr in nplat.getAutoLoadRecipes():
+            self.addPlatformAutoLoadRecipe(troveName = alr.getTroveName(),
+                    label = alr.getLabel())
         for sp in nplat.getSearchPaths():
             self.addPlatformSearchPath(troveName=sp.troveName,
                                        label=sp.label,
