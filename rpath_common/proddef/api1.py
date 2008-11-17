@@ -2287,221 +2287,221 @@ class BaseXmlNode(xmllib.BaseNode):
             raise InvalidSchemaVersionError('Failed to parse schema version %s',
                                        nsName)
 
-    def _addPlatformDefaults(self, platform):
-        platform.setBaseFlavor('~X, ~!alternatives, !bootstrap, ~builddocs, ~buildtests, !cross, ~desktop, ~!dom0, ~!domU, ~emacs, ~!gcj, ~gnome, ~gtk, ~ipv6, ~krb, ~ldap, ~nptl, pam, ~pcre, ~perl, ~!pie, ~python, ~readline, ~!sasl, ~!selinux, ~ssl, ~tcl, ~tk, ~!vmware, ~!xen, ~!xfce')
+def _addPlatformDefaults(platform):
+    platform.setBaseFlavor('~X, ~!alternatives, !bootstrap, ~builddocs, ~buildtests, !cross, ~desktop, ~!dom0, ~!domU, ~emacs, ~!gcj, ~gnome, ~gtk, ~ipv6, ~krb, ~ldap, ~nptl, pam, ~pcre, ~perl, ~!pie, ~python, ~readline, ~!sasl, ~!selinux, ~ssl, ~tcl, ~tk, ~!vmware, ~!xen, ~!xfce')
 
-        platform.addFlavorSet('ami', 'AMI',
-                '!dom0,domU,xen,!vmware')
-        platform.addFlavorSet('generic', 'Generic',
-                '~!dom0,~!domU,~!xen,~!vmware')
-        platform.addFlavorSet('hyper_v', 'Hyper-V',
-                '!vmware, ~!xen, !dom0')
-        platform.addFlavorSet('virtual_iron', 'Virtual Iron',
-                '!xen,!vmware')
-        platform.addFlavorSet('vmware', 'VMware',
-                '~!dom0,!domU,~!xen,~vmware')
-        platform.addFlavorSet('xen', 'Xen',
-                '~!dom0,~domU,~xen,~!vmware')
+    platform.addFlavorSet('ami', 'AMI',
+            '!dom0,domU,xen,!vmware')
+    platform.addFlavorSet('generic', 'Generic',
+            '~!dom0,~!domU,~!xen,~!vmware')
+    platform.addFlavorSet('hyper_v', 'Hyper-V',
+            '!vmware, ~!xen, !dom0')
+    platform.addFlavorSet('virtual_iron', 'Virtual Iron',
+            '!xen,!vmware')
+    platform.addFlavorSet('vmware', 'VMware',
+            '~!dom0,!domU,~!xen,~vmware')
+    platform.addFlavorSet('xen', 'Xen',
+            '~!dom0,~domU,~xen,~!vmware')
 
-        platform.addArchitecture('x86', 'x86 (32-bit)',
-                'grub.static,dietlibc is: x86(~i486,~i586,~i686,~sse,~sse2)')
-        platform.addArchitecture('x86_64', 'x86 (64-bit)',
-                '!grub.static,!dietlibc is: x86(~i486,~i586,~i686,~sse,~sse2) x86_64')
+    platform.addArchitecture('x86', 'x86 (32-bit)',
+            'grub.static,dietlibc is: x86(~i486,~i586,~i686,~sse,~sse2)')
+    platform.addArchitecture('x86_64', 'x86 (64-bit)',
+            '!grub.static,!dietlibc is: x86(~i486,~i586,~i686,~sse,~sse2) x86_64')
 
-        platform.addContainerTemplate(imageTypes.Image( \
-                {"containerFormat": "amiImage",
-                 "autoResolve": False,
-                 "baseFileName": "",
-                 "installLabelPath": "",
-                 "amiHugeDiskMountPoint": False,
-                 "freespace": 1024,
-                 "swapSize": 1024}))
-        platform.addContainerTemplate(imageTypes.Image( \
-                {"containerFormat": "applianceIsoImage",
-                 "autoResolve": False,
-                 "baseFileName": "",
-                 "installLabelPath": "",
-                 "anacondaCustomTrove": "",
-                 "anacondaTemplatesTrove": "conary.rpath.com@rpl:2",
-                 "betaNag": False,
-                 "bugsUrl": "",
-                 "maxIsoSize": None,
-                 "mediaTemplateTrove": "",
-                 "showMediaCheck": False}))
-        platform.addContainerTemplate(imageTypes.Image( \
-                {"containerFormat": "installableIsoImage",
-                 "autoResolve": False,
-                 "baseFileName": "",
-                 "installLabelPath": "",
-                 "anacondaCustomTrove": "",
-                 "anacondaTemplatesTrove": "conary.rpath.com@rpl:2",
-                 "betaNag": False,
-                 "bugsUrl": "",
-                 "maxIsoSize": None,
-                 "mediaTemplateTrove": "",
-                 "showMediaCheck": False}))
-        platform.addContainerTemplate(imageTypes.Image( \
-                {"containerFormat": "netBootImage",
-                 "autoResolve": False,
-                 "baseFileName": "",
-                 "installLabelPath": ""}))
-        platform.addContainerTemplate(imageTypes.Image( \
-                {"containerFormat": "rawFsImage",
-                 "autoResolve": False,
-                 "baseFileName": "",
-                 "installLabelPath": "",
-                 "freespace": 1024,
-                 "swapSize": 512}))
-        platform.addContainerTemplate(imageTypes.Image( \
-                {"containerFormat": "rawHdImage",
-                 "autoResolve": False,
-                 "baseFileName": "",
-                 "installLabelPath": "",
-                 "freespace": 1024,
-                 "swapSize": 512}))
-        platform.addContainerTemplate(imageTypes.Image( \
-                {"containerFormat": "tarballImage",
-                 "autoResolve": False,
-                 "baseFileName": "",
-                 "installLabelPath": "",
-                 "swapSize": "0"}))
-        platform.addContainerTemplate(imageTypes.Image( \
-                {"containerFormat": "updateIsoImage",
-                 "autoResolve": False,
-                 "baseFileName": "",
-                 "installLabelPath": "",
-                 "anacondaCustomTrove": "",
-                 "anacondaTemplatesTrove": "conary.rpath.com@rpl:2",
-                 "betaNag": False,
-                 "bugsUrl": "",
-                 "maxIsoSize": None,
-                 "mediaTemplateTrove": "",
-                 "showMediaCheck": False}))
-        platform.addContainerTemplate(imageTypes.Image( \
-                {"containerFormat": "vhdImage",
-                 "autoResolve": False,
-                 "baseFileName": "",
-                 "installLabelPath": "",
-                 "freespace": 1024,
-                 "swapSize": 512,
-                 "vhdDisktype": "dynamic"}))
-        platform.addContainerTemplate(imageTypes.Image( \
-                {"containerFormat": "virtualIronImage",
-                 "autoResolve": False,
-                 "baseFileName": "",
-                 "installLabelPath": "",
-                 "freespace": 1024,
-                 "swapSize": 512,
-                 "vhdDisktype": "dynamic"}))
-        platform.addContainerTemplate(imageTypes.Image( \
-                {"containerFormat": "vmwareImage",
-                 "autoResolve": False,
-                 "baseFileName": "",
-                 "installLabelPath": "",
-                 "diskAdapter": "lsilogic",
-                 "freespace": 1024,
-                 "natNetworking": True,
-                 "swapSize": 512,
-                 "vmMemory": 256,
-                 "vmSnapshots": False}))
-        platform.addContainerTemplate(imageTypes.Image( \
-                {"containerFormat": "vmwareEsxImage",
-                 "autoResolve": False,
-                 "baseFileName": "",
-                 "installLabelPath": "",
-                 "freespace": 1024,
-                 "natNetworking": True,
-                 "swapSize": 512,
-                 "vmMemory": 256}))
-        platform.addContainerTemplate(imageTypes.Image( \
-                {"containerFormat": "xenOvaImage",
-                 "autoResolve": False,
-                 "baseFileName": "",
-                 "installLabelPath": "",
-                 "freespace": 1024,
-                 "swapSize": 512,
-                 "vmMemory": 256}))
+    platform.addContainerTemplate(imageTypes.Image( \
+            {"containerFormat": "amiImage",
+             "autoResolve": False,
+             "baseFileName": "",
+             "installLabelPath": "",
+             "amiHugeDiskMountPoint": False,
+             "freespace": 1024,
+             "swapSize": 1024}))
+    platform.addContainerTemplate(imageTypes.Image( \
+            {"containerFormat": "applianceIsoImage",
+             "autoResolve": False,
+             "baseFileName": "",
+             "installLabelPath": "",
+             "anacondaCustomTrove": "",
+             "anacondaTemplatesTrove": "conary.rpath.com@rpl:2",
+             "betaNag": False,
+             "bugsUrl": "",
+             "maxIsoSize": None,
+             "mediaTemplateTrove": "",
+             "showMediaCheck": False}))
+    platform.addContainerTemplate(imageTypes.Image( \
+            {"containerFormat": "installableIsoImage",
+             "autoResolve": False,
+             "baseFileName": "",
+             "installLabelPath": "",
+             "anacondaCustomTrove": "",
+             "anacondaTemplatesTrove": "conary.rpath.com@rpl:2",
+             "betaNag": False,
+             "bugsUrl": "",
+             "maxIsoSize": None,
+             "mediaTemplateTrove": "",
+             "showMediaCheck": False}))
+    platform.addContainerTemplate(imageTypes.Image( \
+            {"containerFormat": "netBootImage",
+             "autoResolve": False,
+             "baseFileName": "",
+             "installLabelPath": ""}))
+    platform.addContainerTemplate(imageTypes.Image( \
+            {"containerFormat": "rawFsImage",
+             "autoResolve": False,
+             "baseFileName": "",
+             "installLabelPath": "",
+             "freespace": 1024,
+             "swapSize": 512}))
+    platform.addContainerTemplate(imageTypes.Image( \
+            {"containerFormat": "rawHdImage",
+             "autoResolve": False,
+             "baseFileName": "",
+             "installLabelPath": "",
+             "freespace": 1024,
+             "swapSize": 512}))
+    platform.addContainerTemplate(imageTypes.Image( \
+            {"containerFormat": "tarballImage",
+             "autoResolve": False,
+             "baseFileName": "",
+             "installLabelPath": "",
+             "swapSize": "0"}))
+    platform.addContainerTemplate(imageTypes.Image( \
+            {"containerFormat": "updateIsoImage",
+             "autoResolve": False,
+             "baseFileName": "",
+             "installLabelPath": "",
+             "anacondaCustomTrove": "",
+             "anacondaTemplatesTrove": "conary.rpath.com@rpl:2",
+             "betaNag": False,
+             "bugsUrl": "",
+             "maxIsoSize": None,
+             "mediaTemplateTrove": "",
+             "showMediaCheck": False}))
+    platform.addContainerTemplate(imageTypes.Image( \
+            {"containerFormat": "vhdImage",
+             "autoResolve": False,
+             "baseFileName": "",
+             "installLabelPath": "",
+             "freespace": 1024,
+             "swapSize": 512,
+             "vhdDisktype": "dynamic"}))
+    platform.addContainerTemplate(imageTypes.Image( \
+            {"containerFormat": "virtualIronImage",
+             "autoResolve": False,
+             "baseFileName": "",
+             "installLabelPath": "",
+             "freespace": 1024,
+             "swapSize": 512,
+             "vhdDisktype": "dynamic"}))
+    platform.addContainerTemplate(imageTypes.Image( \
+            {"containerFormat": "vmwareImage",
+             "autoResolve": False,
+             "baseFileName": "",
+             "installLabelPath": "",
+             "diskAdapter": "lsilogic",
+             "freespace": 1024,
+             "natNetworking": True,
+             "swapSize": 512,
+             "vmMemory": 256,
+             "vmSnapshots": False}))
+    platform.addContainerTemplate(imageTypes.Image( \
+            {"containerFormat": "vmwareEsxImage",
+             "autoResolve": False,
+             "baseFileName": "",
+             "installLabelPath": "",
+             "freespace": 1024,
+             "natNetworking": True,
+             "swapSize": 512,
+             "vmMemory": 256}))
+    platform.addContainerTemplate(imageTypes.Image( \
+            {"containerFormat": "xenOvaImage",
+             "autoResolve": False,
+             "baseFileName": "",
+             "installLabelPath": "",
+             "freespace": 1024,
+             "swapSize": 512,
+             "vmMemory": 256}))
 
-        platform.addBuildTemplate(name="ami_large",
-                displayName="EC2 AMI Large/Huge", architectureRef="x86_64",
-                containerTemplateRef="amiImage", flavorSetRef="ami")
-        platform.addBuildTemplate(name="ec2_small",
-                displayName="EC2 AMI Small", architectureRef="x86",
-                containerTemplateRef="amiImage", flavorSetRef="ami")
-        platform.addBuildTemplate(name="iso", displayName="ISO",
-                architectureRef="x86",
-                containerTemplateRef="applianceIsoImage")
-        platform.addBuildTemplate(name="iso", displayName="ISO",
-                architectureRef="x86",
-                containerTemplateRef="installableIsoImage")
-        platform.addBuildTemplate(name="iso", displayName="ISO",
-                architectureRef="x86",
-                containerTemplateRef="updateIsoImage")
-        platform.addBuildTemplate(name="iso", displayName="ISO",
-                architectureRef="x86_64",
-                containerTemplateRef="applianceIsoImage")
-        platform.addBuildTemplate(name="iso", displayName="ISO",
-                architectureRef="x86_64",
-                containerTemplateRef="installableIsoImage")
-        platform.addBuildTemplate(name="iso", displayName="ISO",
-                architectureRef="x86_64",
-                containerTemplateRef="updateIsoImage")
-        platform.addBuildTemplate(name="hyper_v",
-                displayName="MS Hyper-V", architectureRef="x86",
-                containerTemplateRef="vhdImage", flavorSetRef="generic")
-        platform.addBuildTemplate(name="hyper_v",
-                displayName="MS Hyper-V", architectureRef="x86_64",
-                containerTemplateRef="vhdImage", flavorSetRef="generic")
-        platform.addBuildTemplate(name="raw_fs",
-                displayName="Raw Filesystem", architectureRef="x86",
-                containerTemplateRef="rawFsImage")
-        platform.addBuildTemplate(name="raw_fs",
-                displayName="Raw Filesystem", architectureRef="x86_64",
-                containerTemplateRef="rawFsImage")
-        platform.addBuildTemplate(name="raw_hd",
-                displayName="Raw Hard Disk", architectureRef="x86",
-                containerTemplateRef="rawHdImage")
-        platform.addBuildTemplate(name="raw_hd",
-                displayName="Raw Hard Disk", architectureRef="x86_64",
-                containerTemplateRef="rawHdImage")
-        platform.addBuildTemplate(name="tar",
-                displayName="Tar Image", architectureRef="x86",
-                containerTemplateRef="tarballImage")
-        platform.addBuildTemplate(name="tar",
-                displayName="Tar Image", architectureRef="x86_64",
-                containerTemplateRef="tarballImage")
-        platform.addBuildTemplate(name="vmware", displayName="VMware",
-                architectureRef="x86", containerTemplateRef="vmwareImage",
-                flavorSetRef="vmware")
-        platform.addBuildTemplate(name="vmware", displayName="VMware",
-                architectureRef="x86",
-                containerTemplateRef="vmwareEsxImage",
-                flavorSetRef="vmware")
-        platform.addBuildTemplate(name="vmware", displayName="VMware",
-                architectureRef="x86_64",
-                containerTemplateRef="vmwareImage",
-                flavorSetRef="vmware")
-        platform.addBuildTemplate(name="vmware", displayName="VMware",
-                architectureRef="x86_64",
-                containerTemplateRef="vmwareEsxImage",
-                flavorSetRef="vmware")
-        platform.addBuildTemplate(name="virtual_iron",
-                displayName="Virtual Iron", architectureRef="x86",
-                containerTemplateRef="virtualIronImage",
-                flavorSetRef="virtual_iron")
-        platform.addBuildTemplate(name="virtual_iron",
-                displayName="Virtual Iron", architectureRef="x86_64",
-                containerTemplateRef="virtualIronImage",
-                flavorSetRef="virtual_iron")
-        platform.addBuildTemplate(name="xen_ova",
-                displayName="Xen OVA",
-                architectureRef="x86", containerTemplateRef="xenOvaImage",
-                flavorSetRef="xen")
-        platform.addBuildTemplate(name="xen_ova",
-                displayName="Xen OVA",
-                architectureRef="x86_64",
-                containerTemplateRef="xenOvaImage",
-                flavorSetRef="xen")
+    platform.addBuildTemplate(name="ami_large",
+            displayName="EC2 AMI Large/Huge", architectureRef="x86_64",
+            containerTemplateRef="amiImage", flavorSetRef="ami")
+    platform.addBuildTemplate(name="ec2_small",
+            displayName="EC2 AMI Small", architectureRef="x86",
+            containerTemplateRef="amiImage", flavorSetRef="ami")
+    platform.addBuildTemplate(name="iso", displayName="ISO",
+            architectureRef="x86",
+            containerTemplateRef="applianceIsoImage")
+    platform.addBuildTemplate(name="iso", displayName="ISO",
+            architectureRef="x86",
+            containerTemplateRef="installableIsoImage")
+    platform.addBuildTemplate(name="iso", displayName="ISO",
+            architectureRef="x86",
+            containerTemplateRef="updateIsoImage")
+    platform.addBuildTemplate(name="iso", displayName="ISO",
+            architectureRef="x86_64",
+            containerTemplateRef="applianceIsoImage")
+    platform.addBuildTemplate(name="iso", displayName="ISO",
+            architectureRef="x86_64",
+            containerTemplateRef="installableIsoImage")
+    platform.addBuildTemplate(name="iso", displayName="ISO",
+            architectureRef="x86_64",
+            containerTemplateRef="updateIsoImage")
+    platform.addBuildTemplate(name="hyper_v",
+            displayName="MS Hyper-V", architectureRef="x86",
+            containerTemplateRef="vhdImage", flavorSetRef="generic")
+    platform.addBuildTemplate(name="hyper_v",
+            displayName="MS Hyper-V", architectureRef="x86_64",
+            containerTemplateRef="vhdImage", flavorSetRef="generic")
+    platform.addBuildTemplate(name="raw_fs",
+            displayName="Raw Filesystem", architectureRef="x86",
+            containerTemplateRef="rawFsImage")
+    platform.addBuildTemplate(name="raw_fs",
+            displayName="Raw Filesystem", architectureRef="x86_64",
+            containerTemplateRef="rawFsImage")
+    platform.addBuildTemplate(name="raw_hd",
+            displayName="Raw Hard Disk", architectureRef="x86",
+            containerTemplateRef="rawHdImage")
+    platform.addBuildTemplate(name="raw_hd",
+            displayName="Raw Hard Disk", architectureRef="x86_64",
+            containerTemplateRef="rawHdImage")
+    platform.addBuildTemplate(name="tar",
+            displayName="Tar Image", architectureRef="x86",
+            containerTemplateRef="tarballImage")
+    platform.addBuildTemplate(name="tar",
+            displayName="Tar Image", architectureRef="x86_64",
+            containerTemplateRef="tarballImage")
+    platform.addBuildTemplate(name="vmware", displayName="VMware",
+            architectureRef="x86", containerTemplateRef="vmwareImage",
+            flavorSetRef="vmware")
+    platform.addBuildTemplate(name="vmware", displayName="VMware",
+            architectureRef="x86",
+            containerTemplateRef="vmwareEsxImage",
+            flavorSetRef="vmware")
+    platform.addBuildTemplate(name="vmware", displayName="VMware",
+            architectureRef="x86_64",
+            containerTemplateRef="vmwareImage",
+            flavorSetRef="vmware")
+    platform.addBuildTemplate(name="vmware", displayName="VMware",
+            architectureRef="x86_64",
+            containerTemplateRef="vmwareEsxImage",
+            flavorSetRef="vmware")
+    platform.addBuildTemplate(name="virtual_iron",
+            displayName="Virtual Iron", architectureRef="x86",
+            containerTemplateRef="virtualIronImage",
+            flavorSetRef="virtual_iron")
+    platform.addBuildTemplate(name="virtual_iron",
+            displayName="Virtual Iron", architectureRef="x86_64",
+            containerTemplateRef="virtualIronImage",
+            flavorSetRef="virtual_iron")
+    platform.addBuildTemplate(name="xen_ova",
+            displayName="Xen OVA",
+            architectureRef="x86", containerTemplateRef="xenOvaImage",
+            flavorSetRef="xen")
+    platform.addBuildTemplate(name="xen_ova",
+            displayName="Xen OVA",
+            architectureRef="x86_64",
+            containerTemplateRef="xenOvaImage",
+            flavorSetRef="xen")
 
 class _ProductDefinition(BaseXmlNode):
     def addChild(self, childNode):
@@ -2782,7 +2782,7 @@ class _ProductDefinition(BaseXmlNode):
                     not self.platform.buildTemplates and \
                     not self.platform.flavorSets:
                         self.baseFlavor = None
-                        self._addPlatformDefaults(self.platform)
+                        _addPlatformDefaults(self.platform)
         return self
 
 class _PlatformDefinition(BaseXmlNode):
@@ -2792,7 +2792,7 @@ class _PlatformDefinition(BaseXmlNode):
                 not self.platform.architectures and \
                 not self.platform.buildTemplates and \
                 not self.platform.flavorSets:
-                    self._addPlatformDefaults(self.platform)
+                    _addPlatformDefaults(self.platform)
         return self
 
 class _PlatformSerialization(xmllib.BaseNode):
