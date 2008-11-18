@@ -2291,7 +2291,7 @@ def _addPlatformDefaults(platform):
     platform.setBaseFlavor('~X, ~!alternatives, !bootstrap, ~builddocs, ~buildtests, !cross, ~desktop, ~!dom0, ~!domU, ~emacs, ~!gcj, ~gnome, ~gtk, ~ipv6, ~krb, ~ldap, ~nptl, pam, ~pcre, ~perl, ~!pie, ~python, ~readline, ~!sasl, ~!selinux, ~ssl, ~tcl, ~tk, ~!vmware, ~!xen, ~!xfce')
 
     platform.addFlavorSet('ami', 'AMI',
-            '!dom0,domU,xen,!vmware')
+            '~!dom0,~domU,~xen,~!vmware')
     platform.addFlavorSet('generic', 'Generic',
             '~!dom0,~!domU,~!xen,~!vmware')
     platform.addFlavorSet('hyper_v', 'Hyper-V',
