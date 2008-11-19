@@ -2304,9 +2304,9 @@ def _addPlatformDefaults(platform):
             '~!dom0,~domU,~xen,~!vmware')
 
     platform.addArchitecture('x86', 'x86 (32-bit)',
-            'grub.static,dietlibc is: x86(~i486,~i586,~i686,~sse,~sse2)')
+            'is: x86(~i486,~i586,~i686,~cmov,~mmx,~sse,~sse2)')
     platform.addArchitecture('x86_64', 'x86 (64-bit)',
-            '!grub.static,!dietlibc is: x86(~i486,~i586,~i686,~sse,~sse2) x86_64')
+            'is: x86(~i486,~i586,~i686,~cmov,~mmx,~sse,~sse2) x86_64')
 
     platform.addContainerTemplate(imageTypes.Image( \
             {"containerFormat": "amiImage",
