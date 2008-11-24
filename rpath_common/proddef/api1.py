@@ -2753,24 +2753,6 @@ class _ProductDefinition(BaseXmlNode):
 
     def finalize(self):
         if self._getSchemaVersion() in ('1.0', '1.1', '1.2', '1.3'):
-            for build in self.buildDefinition:
-                if not build.flavor:
-                    continue
-                flavor = conaryDeps.parseFlavor(build.flavor)
-
-                architectureRef = build.architectureRef
-                if architectureRef:
-                    architectures = hasattr(self, 'architectures') \
-                            and self.architectures or []
-                    arches = [x.flavor for x in architectures \
-                            if x.name == architectureRef]
-                    if not arches:
-                        continue
-                    archFlavor = conaryDeps.parseFlavor(arches[0])
-                    flavor = flavor.difference(archFlavor)
-                flavorStr = str(flavor)
-                build.flavor = flavorStr and str(flavor) or None
-
             if not hasattr(self, 'platform'):
                 # we're going to need a platform to store references to the
                 # containerTemplates, architectures and flavorSets
@@ -2783,6 +2765,85 @@ class _ProductDefinition(BaseXmlNode):
                     not self.platform.flavorSets:
                         self.baseFlavor = None
                         _addPlatformDefaults(self.platform)
+
+        if self._getSchemaVersion() in ('1.0', '1.1', '1.2', '1.3'):
+            for build in self.buildDefinition:
+                if not build.flavor:
+                    continue
+                flavor = conaryDeps.parseFlavor(build.flavor)
+
+                # we need to use all available information to get our
+                # inferences as right as we can. limit our arch and flavorSet
+                # guesses to those that are valid in the platform
+                matchingTemplates = [x for x in self.platform.buildTemplates \
+                        if x.containerTemplateRef == build.containerTemplateRef]
+                arches = dict([(x.name, conaryDeps.parseFlavor(x.flavor)) \
+                        for x in self.platform.architectures if x.name in \
+                        [y.architectureRef for y in matchingTemplates]])
+                if not arches:
+                    arches = dict([(x.name, conaryDeps.parseFlavor(x.flavor)) \
+                            for x in self.platform.architectures])
+                flavorSets = dict([(x.name, conaryDeps.parseFlavor(x.flavor)) \
+                        for x in self.platform.flavorSets if x.name in \
+                        [y.flavorSetRef for y in matchingTemplates]])
+                if not flavorSets:
+                    flavorSets = dict([(x.name, conaryDeps.parseFlavor(x.flavor)) \
+                            for x in self.platform.flavorSets])
+
+                def getMajorArch(flv):
+                    from conary.deps import arch
+                    if flv.members and conaryDeps.DEP_CLASS_IS in flv.members:
+                        depClass = flv.members[conaryDeps.DEP_CLASS_IS]
+                        return arch.getMajorArch(depClass.getDeps()).name
+                    return None
+
+                architectureRef = flavorSetRef = None
+                matchingArches = [x for x in arches.iteritems() \
+                        if x[1].satisfies(flavor) and \
+                        getMajorArch(x[1]) == getMajorArch(flavor)]
+                if matchingArches:
+                    architectureRef = max([(x[1].score(flavor), x[0]) \
+                            for x in matchingArches])[1]
+                else:
+                    # do what we can to infer the proper arch. this will likely
+                    # work for arches currently in the wild
+                    depName = getMajorArch(flavor)
+                    if depName in arches:
+                        architectureRef = depName
+
+                matchingFlavorSets = [x for x in flavorSets.iteritems() \
+                        if flavor.satisfies(x[1])]
+                if matchingFlavorSets:
+                    # strong Flavors is really not optimal, but historical
+                    # proddefs used flavors that were too strong,
+                    # leading to weird flavors matching over more logical ones
+                    # if we just score
+                    maxScore = max([flavor.toStrongFlavor().score( \
+                            x[1].toStrongFlavor()) for x in matchingFlavorSets])
+                    bestFlavors = [x for x in matchingFlavorSets if \
+                        flavor.toStrongFlavor().score(x[1].toStrongFlavor()) \
+                            == maxScore]
+                    if 'generic' in [x[0] for x in bestFlavors]:
+                        # if generic made the list, it's very likely the right
+                        # flavor to use
+                        flavorSetRef = 'generic'
+                    else:
+                        flavorNames = [x[0] for x in bestFlavors]
+                        # Xen and AMI are identicle on rPL 2. we will have to
+                        # resort to the container name to disambiguate
+                        if 'ami' in flavorNames and 'xen' in flavorNames:
+                            if build.containerTemplateRef == 'amiImage':
+                                flavorSetRef = 'ami'
+                            else:
+                                flavorSetRef = 'xen'
+                        else:
+                            flavorSetRef = bestFlavors[0][0]
+
+                flavorStr = str(flavor)
+                build.flavor = flavorStr and str(flavor) or None
+                build.architectureRef = architectureRef
+                build.flavorSetRef = flavorSetRef
+
         return self
 
 class _PlatformDefinition(BaseXmlNode):
