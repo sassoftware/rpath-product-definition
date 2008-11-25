@@ -23,6 +23,9 @@ Changes in 0.4:
         ProductDefinition.setSourceGroup(sourceGroup)
         Build.getBuildSourceGroup()
       (RPCL-44)
+    * Search path entries now have a getTroveTup() method to
+      produce a consistent trovespec tuple for both the search path item
+      and the label from which it was selected. (RPCL-51)
 
   Bug Fixes:
     * Several platform attributes previously were not copied into a

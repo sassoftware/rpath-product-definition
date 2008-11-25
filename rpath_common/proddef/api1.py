@@ -1684,8 +1684,7 @@ class PlatformDefinitionRecipe(PackageRecipe):
         # XXX We are ignoring the flavors for now.
         for sp in itertools.chain(self.getSearchPaths(),
                                   self.getFactorySources()):
-            key = (sp.troveName, sp.label, None)
-            troveSpecs.add(key)
+            troveSpecs.add(sp.getTroveTup(template=True))
         troveSpecs = sorted(troveSpecs)
         try:
             troves = repos.findTroves(None, troveSpecs, allowMissing = True)
@@ -1694,10 +1693,12 @@ class PlatformDefinitionRecipe(PackageRecipe):
 
         for sp in itertools.chain(self.getSearchPaths(),
                                   self.getFactorySources()):
-            key = (sp.troveName, sp.label, None)
+            key = sp.getTroveTup(template=True)
             if key not in troves:
-                raise ProductDefinitionTroveNotFoundError("%s=%s" % (key[0], key[1]))
-            nvf = troves[key][0]
+                raise ProductDefinitionTroveNotFoundError("%s=%s" % key[:2])
+            # Use the latest version, if for some reason there is more
+            # than one in the result set.
+            nvf = max(troves[key])
             sp.version = str(nvf[1].trailingRevision())
 
     def getPlatformName(self):
@@ -1902,6 +1903,23 @@ class _SearchPath(xmllib.SlotBasedSerializableObject):
         self.troveName = troveName
         self.label = label
         self.version = version
+
+    def getTroveTup(self, template=False):
+        """
+        Get a trovespec tuple for the search path or its template.
+
+        @param template: If C{True}, use the template path; otherwise
+            return the "pinned" path.
+        @type  template: C{bool}
+        @return: (name, version, flavor)
+        """
+        if template:
+            return (self.troveName, self.label, None)
+        else:
+            version = self.label
+            if self.version:
+                version += '/' + self.version
+            return (self.troveName, version, None)
 
 class _FactorySource(_SearchPath):
     tag = "factorySource"
