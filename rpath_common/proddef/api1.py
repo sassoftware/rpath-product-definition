@@ -2839,8 +2839,9 @@ class _ProductDefinition(BaseXmlNode):
                         else:
                             flavorSetRef = bestFlavors[0][0]
 
-                flavorStr = str(flavor)
-                build.flavor = flavorStr and str(flavor) or None
+                # RBL-3886 do not preserve flavor during migration. it does
+                # more harm than good
+                build.flavor = None
                 build.architectureRef = architectureRef
                 build.flavorSetRef = flavorSetRef
 
