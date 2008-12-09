@@ -2798,9 +2798,6 @@ class _ProductDefinition(BaseXmlNode):
                 arches = dict([(x.name, conaryDeps.parseFlavor(x.flavor)) \
                         for x in self.platform.architectures if x.name in \
                         [y.architectureRef for y in matchingTemplates]])
-                if not arches:
-                    arches = dict([(x.name, conaryDeps.parseFlavor(x.flavor)) \
-                            for x in self.platform.architectures])
                 flavorSets = dict([(x.name, conaryDeps.parseFlavor(x.flavor)) \
                         for x in self.platform.flavorSets if x.name in \
                         [y.flavorSetRef for y in matchingTemplates]])
@@ -2847,13 +2844,11 @@ class _ProductDefinition(BaseXmlNode):
                         flavorSetRef = 'generic'
                     else:
                         flavorNames = [x[0] for x in bestFlavors]
-                        # Xen and AMI are identicle on rPL 2. we will have to
-                        # resort to the container name to disambiguate
+                        # Xen and AMI are identicle on rPL 2, but only ami will
+                        # be rpesent if it's an amiImage, thus xen is more
+                        # dominant.
                         if 'ami' in flavorNames and 'xen' in flavorNames:
-                            if build.containerTemplateRef == 'amiImage':
-                                flavorSetRef = 'ami'
-                            else:
-                                flavorSetRef = 'xen'
+                            flavorSetRef = 'xen'
                         else:
                             flavorSetRef = bestFlavors[0][0]
 
