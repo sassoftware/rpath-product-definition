@@ -142,6 +142,24 @@ class BaseDefinition(object):
         """
         return self.searchPaths
 
+    def getResolveTroves(self):
+        """
+        @return: the search paths from this product definition, filtering
+                 any results that have the notResolveTrove attribute. This
+                 is a subset of the results from getSearchPaths
+        @rtype: C{list} of C{_SearchPath} objects
+        """
+        return [x for x in self.searchPaths if not x.notResolveTrove]
+
+    def getGroupSearchPaths(self):
+        """
+        @return: the search paths from this product definition, filtering
+                 any results that have the notGroupSearchPath attribute. This
+                 is a subset of the results from getSearchPaths
+        @rtype: C{list} of C{_SearchPath} objects
+        """
+        return [x for x in self.searchPaths if not x.notGroupSearchPath]
+
     def clearSearchPaths(self):
         """
         Delete all searchPaths.
@@ -165,7 +183,8 @@ class BaseDefinition(object):
         """
         self.factorySources = _FactorySources()
 
-    def addSearchPath(self, troveName = None, label = None, version = None):
+    def addSearchPath(self, troveName = None, label = None, version = None,
+            notResolveTrove = None, notGroupSearchPath = None):
         """
         Add an search path.
         @param troveName: the trove name for the search path.
@@ -175,7 +194,9 @@ class BaseDefinition(object):
         @param version: Version for the search path
         @param version: C{str} or C{None}
         """
-        self._addSource(troveName, label, version, _SearchPath, self.searchPaths)
+        self._addSource(troveName, label, version, _SearchPath,
+                self.searchPaths, notResolveTrove = notResolveTrove,
+                notGroupSearchPath = notGroupSearchPath)
 
     def addFactorySource(self, troveName = None, label = None, version = None):
         """
@@ -385,12 +406,13 @@ class BaseDefinition(object):
         """
         self.buildTemplates = _BuildTemplates()
 
-    def _addSource(self, troveName, label, version, cls, intList):
+    def _addSource(self, troveName, label, version, cls, intList, **kwargs):
         "Internal function for adding a Source"
         if label is not None:
             if isinstance(label, conaryVersions.Label):
                 label = str(label)
-        obj = cls(troveName = troveName, label = label, version = version)
+        obj = cls(troveName = troveName, label = label, version = version,
+                **kwargs)
         intList.append(obj)
 
     def _saveToRepository(self, conaryClient, label, message = None):
@@ -920,6 +942,36 @@ class ProductDefinitionRecipe(PackageRecipe):
             return self.searchPaths
         return self.getPlatformSearchPaths()
 
+    def getResolveTroves(self):
+        """
+        @return: the search paths from this product definition, filtering
+                 any results that have the notResolveTrove attribute. This
+                 is a subset of the results from getSearchPaths
+        @rtype: C{list} of C{_SearchPath} objects
+        """
+        if self.searchPaths:
+            searchPaths = self.searchPaths
+        else:
+            searchPaths = self.getPlatformSearchPaths()
+        if searchPaths:
+            searchPaths = [x for x in searchPaths if not x.notResolveTrove]
+        return searchPaths
+
+    def getGroupSearchPaths(self):
+        """
+        @return: the search paths from this product definition, filtering
+                 any results that have the notGroupSearchPath attribute. This
+                 is a subset of the results from getSearchPaths
+        @rtype: C{list} of C{_SearchPath} objects
+        """
+        if self.searchPaths:
+            searchPaths = self.searchPaths
+        else:
+            searchPaths = self.getPlatformSearchPaths()
+        if searchPaths:
+            searchPaths = [x for x in searchPaths if not x.notGroupSearchPath]
+        return searchPaths
+
     def getFactorySources(self):
         """
         @return: the factory sources from this product definition
@@ -1030,7 +1082,8 @@ class ProductDefinitionRecipe(PackageRecipe):
         self.platform.searchPaths = _SearchPaths()
 
     def addPlatformSearchPath(self, troveName = None, label = None,
-                              version = None):
+                              version = None, notResolveTrove = None,
+                              notGroupSearchPath = None):
         """
         Add an search path.
         @param troveName: the trove name for the search path.
@@ -1043,7 +1096,9 @@ class ProductDefinitionRecipe(PackageRecipe):
         if self.platform is None:
             self.platform = PlatformDefinition()
         self._addSource(troveName, label, version, _SearchPath,
-                        self.platform.searchPaths)
+                        self.platform.searchPaths,
+                        notResolveTrove = notResolveTrove,
+                        notGroupSearchPath = notGroupSearchPath)
 
     def getPlatformFactorySources(self):
         """
@@ -1412,12 +1467,12 @@ class ProductDefinitionRecipe(PackageRecipe):
         for build in self.buildDefinition:
             if not build.imageGroup:
                 continue
-            key = (build.imageGroup, label)
+            key = (build.imageGroup, label, tuple())
             if key not in sPathsSet:
                 sPathsList.append(key)
                 sPathsSet.add(key)
         # Append the global image group
-        key = (self.getImageGroup(), label)
+        key = (self.getImageGroup(), label, tuple())
         if key not in sPathsSet:
             sPathsList.append(key)
             sPathsSet.add(key)
@@ -1429,13 +1484,18 @@ class ProductDefinitionRecipe(PackageRecipe):
 
         sPaths = self.getSearchPaths()
         for sp in sPaths or []:
-            key = (sp.troveName, sp.label)
+            attrs = []
+            for key in ('notResolveTrove', 'notGroupSearchPath'):
+                val = sp.__getattribute__(key)
+                if val is not None:
+                    attrs.append((key, val))
+            key = (sp.troveName, sp.label, tuple(attrs))
             if key not in sPathsSet:
                 sPathsList.append(key)
                 sPathsSet.add(key)
 
-        for troveName, label in sPathsList:
-            nplat.addSearchPath(troveName=troveName, label=label)
+        for troveName, label, attrs in sPathsList:
+            nplat.addSearchPath(troveName=troveName, label=label, **dict(attrs))
 
         for arch in self.getArchitectures():
             nplat.addArchitecture(name = arch.name,
@@ -1500,11 +1560,13 @@ class ProductDefinitionRecipe(PackageRecipe):
         for sp in nplat.getSearchPaths():
             self.addPlatformSearchPath(troveName=sp.troveName,
                                        label=sp.label,
-                                       version=sp.version)
-        for sp in nplat.getFactorySources():
-            self.addPlatformFactorySource(troveName=sp.troveName,
-                                          label=sp.label,
-                                          version=sp.version)
+                                       version=sp.version,
+                                       notResolveTrove=sp.notResolveTrove,
+                                       notGroupSearchPath=sp.notGroupSearchPath)
+        for fs in nplat.getFactorySources():
+            self.addPlatformFactorySource(troveName=fs.troveName,
+                                          label=fs.label,
+                                          version=fs.version)
         for item in nplat.getArchitectures():
             self.platform.addArchitecture(name = item.name,
                                           displayName = item.displayName,
@@ -1895,14 +1957,18 @@ class _Stage(xmllib.SlotBasedSerializableObject):
         return list(self.promoteMaps)
 
 class _SearchPath(xmllib.SlotBasedSerializableObject):
-    __slots__ = [ 'troveName', 'label', 'version' ]
+    __slots__ = ['troveName', 'label', 'version', 'notResolveTrove',
+                 'notGroupSearchPath']
     tag = "searchPath"
 
-    def __init__(self, troveName = None, label = None, version = None):
+    def __init__(self, troveName = None, label = None, version = None,
+            notResolveTrove = None, notGroupSearchPath = None):
         xmllib.SlotBasedSerializableObject.__init__(self)
         self.troveName = troveName
         self.label = label
         self.version = version
+        self.notResolveTrove = notResolveTrove
+        self.notGroupSearchPath = notGroupSearchPath
 
     def getTroveTup(self, template=False):
         """
@@ -2181,7 +2247,9 @@ class BaseXmlNode(xmllib.BaseNode):
             pyObj = _SearchPath(
                 troveName = node.getAttribute('troveName'),
                 label = node.getAttribute('label'),
-                version = node.getAttribute('version'))
+                version = node.getAttribute('version'),
+                notResolveTrove = node.getAttribute('notResolveTrove'),
+                notGroupSearchPath = node.getAttribute('notGroupSearchPath'))
             sources.append(pyObj)
         return sources
 

@@ -58,6 +58,8 @@
     <xsd:complexType name="searchPathType">
         <xsd:attributeGroup ref="attrGroupNameLabel" />
         <xsd:attribute name="version" type="xsd:string" />
+        <xsd:attribute name="notResolveTrove" type="xsd:boolean" />
+        <xsd:attribute name="notGroupSearchPath" type="xsd:boolean" />
     </xsd:complexType>
 
     <xsd:complexType name="searchPathListType">
