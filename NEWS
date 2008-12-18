@@ -1,3 +1,18 @@
+Changes in @NEW@:
+  o API Changes:
+    * searchPath elements now have additional attributes exposed
+      which denote contexts to which they apply.  Right now, the
+      two attributes exposed are notResolveTrove and notGroupSearchPath
+      which default to False (no change in behavior) but can be
+      set to limit the applicability of an element.  In addition,
+      product definition objects have additional getResolveTroves
+      and getGroupSearchPaths methods which filter the searchPaths
+      by the attributes exposed. (RPCL-50)
+
+  o Schema Versions:
+    * 2.0: Backward-compatible extension to support RPCL-50.
+
+
 Changes in 0.4:
   o API Changes:
     * Images are now defined differently.  Platforms provide
