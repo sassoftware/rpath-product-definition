@@ -145,20 +145,24 @@ class BaseDefinition(object):
     def getResolveTroves(self):
         """
         @return: the search paths from this product definition, filtering
-                 any results that have the notResolveTrove attribute. This
-                 is a subset of the results from getSearchPaths
+                 any results that have the isResolveTrove attribute set to 
+                 False. This is a subset of the results from getSearchPaths
         @rtype: C{list} of C{_SearchPath} objects
         """
-        return [x for x in self.searchPaths if not x.notResolveTrove]
+        return [x for x in self.searchPaths 
+                if x.isResolveTrove or x.isResolveTrove is None]
 
     def getGroupSearchPaths(self):
         """
         @return: the search paths from this product definition, filtering
-                 any results that have the notGroupSearchPath attribute. This
-                 is a subset of the results from getSearchPaths
+                 any results that do not have isGroupSearchPathTrove attribute
+                 set to False. This is a subset of the results 
+                 from getSearchPaths
         @rtype: C{list} of C{_SearchPath} objects
         """
-        return [x for x in self.searchPaths if not x.notGroupSearchPath]
+        return  [x for x in self.searchPaths 
+                 if x.isGroupSearchPathTrove 
+                    or x.isGroupSearchPathTrove is None]
 
     def clearSearchPaths(self):
         """
@@ -184,7 +188,7 @@ class BaseDefinition(object):
         self.factorySources = _FactorySources()
 
     def addSearchPath(self, troveName = None, label = None, version = None,
-            notResolveTrove = None, notGroupSearchPath = None):
+                      isResolveTrove = True, isGroupSearchPathTrove = True):
         """
         Add an search path.
         @param troveName: the trove name for the search path.
@@ -193,10 +197,15 @@ class BaseDefinition(object):
         @type label: C{str} or C{None}
         @param version: Version for the search path
         @param version: C{str} or C{None}
+        @param isResolveTrove: set to False if this element should be not
+               be returned for getResolveTroves()  (defaults to True)
+        @param isGroupSearchPathTrove: set to False if this element should be 
+               not be returned for getGroupSearchPaths() (defaults to True)
         """
+        assert(isResolveTrove or isGroupSearchPathTrove)
         self._addSource(troveName, label, version, _SearchPath,
-                self.searchPaths, notResolveTrove = notResolveTrove,
-                notGroupSearchPath = notGroupSearchPath)
+                self.searchPaths, isResolveTrove = isResolveTrove,
+                isGroupSearchPathTrove = isGroupSearchPathTrove)
 
     def addFactorySource(self, troveName = None, label = None, version = None):
         """
@@ -945,7 +954,7 @@ class ProductDefinitionRecipe(PackageRecipe):
     def getResolveTroves(self):
         """
         @return: the search paths from this product definition, filtering
-                 any results that have the notResolveTrove attribute. This
+                 any results that have isResolveTrove set to false. This
                  is a subset of the results from getSearchPaths
         @rtype: C{list} of C{_SearchPath} objects
         """
@@ -954,14 +963,16 @@ class ProductDefinitionRecipe(PackageRecipe):
         else:
             searchPaths = self.getPlatformSearchPaths()
         if searchPaths:
-            searchPaths = [x for x in searchPaths if not x.notResolveTrove]
+            searchPaths = [x for x in searchPaths 
+                           if x.isResolveTrove or x.isResolveTrove is None]
         return searchPaths
 
     def getGroupSearchPaths(self):
         """
         @return: the search paths from this product definition, filtering
-                 any results that have the notGroupSearchPath attribute. This
-                 is a subset of the results from getSearchPaths
+                 any results that have the isGroupSearchPathTrove attribute
+                 set to False. This is a subset of the results from 
+                 getSearchPaths
         @rtype: C{list} of C{_SearchPath} objects
         """
         if self.searchPaths:
@@ -969,7 +980,9 @@ class ProductDefinitionRecipe(PackageRecipe):
         else:
             searchPaths = self.getPlatformSearchPaths()
         if searchPaths:
-            searchPaths = [x for x in searchPaths if not x.notGroupSearchPath]
+            searchPaths = [x for x in searchPaths 
+                           if x.isGroupSearchPathTrove 
+                              or x.isGroupSearchPathTrove is None]
         return searchPaths
 
     def getFactorySources(self):
@@ -1082,8 +1095,8 @@ class ProductDefinitionRecipe(PackageRecipe):
         self.platform.searchPaths = _SearchPaths()
 
     def addPlatformSearchPath(self, troveName = None, label = None,
-                              version = None, notResolveTrove = None,
-                              notGroupSearchPath = None):
+                              version = None, isResolveTrove = True,
+                              isGroupSearchPathTrove = True):
         """
         Add an search path.
         @param troveName: the trove name for the search path.
@@ -1092,13 +1105,17 @@ class ProductDefinitionRecipe(PackageRecipe):
         @type label: C{str} or C{None}
         @param version: Version for the search path
         @param version: C{str} or C{None}
+        @param isResolveTrove: set to False if this element should be not
+               be returned for getResolveTroves()  (defaults to True)
+        @param isGroupSearchPathTrove: set to False if this element should be 
+               not be returned for getGroupSearchPath() (defaults to True)
         """
         if self.platform is None:
             self.platform = PlatformDefinition()
         self._addSource(troveName, label, version, _SearchPath,
                         self.platform.searchPaths,
-                        notResolveTrove = notResolveTrove,
-                        notGroupSearchPath = notGroupSearchPath)
+                        isResolveTrove = isResolveTrove,
+                        isGroupSearchPathTrove = isGroupSearchPathTrove)
 
     def getPlatformFactorySources(self):
         """
@@ -1485,7 +1502,7 @@ class ProductDefinitionRecipe(PackageRecipe):
         sPaths = self.getSearchPaths()
         for sp in sPaths or []:
             attrs = []
-            for key in ('notResolveTrove', 'notGroupSearchPath'):
+            for key in ('isResolveTrove', 'isGroupSearchPathTrove'):
                 val = sp.__getattribute__(key)
                 if val is not None:
                     attrs.append((key, val))
@@ -1559,10 +1576,10 @@ class ProductDefinitionRecipe(PackageRecipe):
                     label = alr.getLabel())
         for sp in nplat.getSearchPaths():
             self.addPlatformSearchPath(troveName=sp.troveName,
-                                       label=sp.label,
-                                       version=sp.version,
-                                       notResolveTrove=sp.notResolveTrove,
-                                       notGroupSearchPath=sp.notGroupSearchPath)
+                               label=sp.label,
+                               version=sp.version,
+                               isResolveTrove=sp.isResolveTrove,
+                               isGroupSearchPathTrove=sp.isGroupSearchPathTrove)
         for fs in nplat.getFactorySources():
             self.addPlatformFactorySource(troveName=fs.troveName,
                                           label=fs.label,
@@ -1956,19 +1973,13 @@ class _Stage(xmllib.SlotBasedSerializableObject):
             return []
         return list(self.promoteMaps)
 
-class _SearchPath(xmllib.SlotBasedSerializableObject):
-    __slots__ = ['troveName', 'label', 'version', 'notResolveTrove',
-                 'notGroupSearchPath']
-    tag = "searchPath"
+class _TroveSpec(xmllib.SlotBasedSerializableObject):
+    __slots__ = ['troveName', 'label', 'version']
 
-    def __init__(self, troveName = None, label = None, version = None,
-            notResolveTrove = None, notGroupSearchPath = None):
-        xmllib.SlotBasedSerializableObject.__init__(self)
+    def __init__(self, troveName = None, label = None, version = None):
         self.troveName = troveName
         self.label = label
         self.version = version
-        self.notResolveTrove = notResolveTrove
-        self.notGroupSearchPath = notGroupSearchPath
 
     def getTroveTup(self, template=False):
         """
@@ -1987,7 +1998,20 @@ class _SearchPath(xmllib.SlotBasedSerializableObject):
                 version += '/' + self.version
             return (self.troveName, version, None)
 
-class _FactorySource(_SearchPath):
+
+class _SearchPath(_TroveSpec):
+    __slots__ = ['troveName', 'label', 'version', 'isResolveTrove',
+                 'isGroupSearchPathTrove']
+    tag = "searchPath"
+
+    def __init__(self, troveName = None, label = None, version = None,
+                 isResolveTrove = True, isGroupSearchPathTrove = True):
+        _TroveSpec.__init__(self, troveName=troveName, label=label,
+                            version=version)
+        self.isResolveTrove = isResolveTrove
+        self.isGroupSearchPathTrove = isGroupSearchPathTrove
+
+class _FactorySource(_TroveSpec):
     tag = "factorySource"
 
 class _Architecture(xmllib.SlotBasedSerializableObject):
@@ -2244,12 +2268,19 @@ class BaseXmlNode(xmllib.BaseNode):
     def _processSearchPaths(self, searchPaths):
         sources = _SearchPaths()
         for node in searchPaths:
+            isResolveTrove = node.getAttribute('isResolveTrove')
+            if isResolveTrove is not None:
+                isResolveTrove = xmllib.BooleanNode.fromString(isResolveTrove)
+            isGroupSearchPathTrove = node.getAttribute('isGroupSearchPathTrove')
+            if isGroupSearchPathTrove is not None:
+                isGroupSearchPathTrove = xmllib.BooleanNode.fromString(
+                                                    isGroupSearchPathTrove)
             pyObj = _SearchPath(
                 troveName = node.getAttribute('troveName'),
                 label = node.getAttribute('label'),
                 version = node.getAttribute('version'),
-                notResolveTrove = node.getAttribute('notResolveTrove'),
-                notGroupSearchPath = node.getAttribute('notGroupSearchPath'))
+                isResolveTrove = isResolveTrove,
+                isGroupSearchPathTrove = isGroupSearchPathTrove)
             sources.append(pyObj)
         return sources
 
