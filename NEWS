@@ -8,6 +8,7 @@ Changes in @NEW@:
       product definition objects have additional getResolveTroves
       and getGroupSearchPaths methods which filter the searchPaths
       by the attributes exposed. (RPCL-53)
+
   o Schema Versions:
     * 2.0: Backward-compatible extension to support RPCL-53.
 
