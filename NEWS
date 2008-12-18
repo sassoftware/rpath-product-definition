@@ -1,3 +1,7 @@
+Changes in @NEW@:
+    * searchPath entries now have isResolveTrove and isGroupSearchPathTrove
+      flags. (RPCL-53)
+
 Changes in 0.4:
   o API Changes:
     * Images are now defined differently.  Platforms provide
