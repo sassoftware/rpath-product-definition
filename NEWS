@@ -1,4 +1,4 @@
-Changes in @NEW@:
+Changes in 0.5:
   o API Changes:
     * searchPath elements now have additional attributes exposed
       which denote contexts to which they apply.  Right now, the
