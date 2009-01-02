@@ -2952,8 +2952,8 @@ class _ProductDefinition(BaseXmlNode):
                         flavorSetRef = 'generic'
                     else:
                         flavorNames = [x[0] for x in bestFlavors]
-                        # Xen and AMI are identicle on rPL 2, but only ami will
-                        # be rpesent if it's an amiImage, thus xen is more
+                        # Xen and AMI are identical on rPL 2, but only AMI will
+                        # be present if it is an amiImage; thus xen is more
                         # dominant.
                         if 'ami' in flavorNames and 'xen' in flavorNames:
                             flavorSetRef = 'xen'
