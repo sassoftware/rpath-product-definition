@@ -2876,7 +2876,16 @@ class _ProductDefinition(BaseXmlNode):
                 self._addPlatform(_PlatformDefinition())
 
         if hasattr(self, 'platform'):
-            if not self.platform.containerTemplates and \
+            # if the XML didn't have one of the 4 attributes here, then
+            # it simply won't be present, hence the usage of hasattr
+            found = False
+            for attr in ('containerTemplates', 'architectures',
+                    'buildTemplates', 'flavorSets'):
+                if hasattr(self, attr) and getattr(self, attr):
+                    found = True
+                    break
+            if not found and \
+                    not self.platform.containerTemplates and \
                     not self.platform.architectures and \
                     not self.platform.buildTemplates and \
                     not self.platform.flavorSets:
