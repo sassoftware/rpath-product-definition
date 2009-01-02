@@ -8,9 +8,12 @@ Changes in @NEW@:
       product definition objects have additional getResolveTroves
       and getGroupSearchPaths methods which filter the searchPaths
       by the attributes exposed. (RPCL-53)
-  o Schema Versions:
+
+  o Bug Fixes:
     * 2.0: Backward-compatible extension to support RPCL-53.
     * 2.0: Don't add platform defaults if proddef defines any of
+
+  o Schema Versions:
       containerTemplates, architectures, buildTemplates, flavorSets (RPCL-54).
 
 Changes in 0.4:
