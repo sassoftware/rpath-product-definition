@@ -10,8 +10,9 @@ Changes in 0.5:
       by the attributes exposed. (RPCL-53)
 
   o Bug Fixes:
-    * 2.0: Don't add platform defaults if proddef defines any of
-      containerTemplates, architectures, buildTemplates, flavorSets (RPCL-54).
+    * Don't add platform defaults if proddef defines any of
+      containerTemplates, architectures, buildTemplates, or
+      flavorSets. (RPCL-54)
 
   o Schema Versions:
     * 2.0: Backward-compatible extension to support RPCL-53.
