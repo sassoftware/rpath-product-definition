@@ -27,13 +27,22 @@
     </baseFlavor>
   <stages>
     <stage labelSuffix="-devel" name="devel"/>
+      <promoteMaps>
+        <promoteMap name="contrib" label="contrib.rpath.org@rpl:2"/>
+
+        <promoteMap name="other" label="example.rpath.org@rpl:2"/>
+      </promoteMaps>
     <stage labelSuffix="-qa" name="qa">
       <promoteMaps>
-        <promoteMap name="from1@label11:devel" label="to1@label12:qa"/>
-        <promoteMap name="from2@label21:devel" label="to2@label22:qa"/>
+        <promoteMap name="contrib" label="product.example.com@exm:group-awesome-dist-1-qa"/>
+        <promoteMap name="other" label="product.example.com@exm:other-1-qa"/>
       </promoteMaps>
     </stage>
-    <stage labelSuffix="" name="release"/>
+    <stage labelSuffix="" name="release"
+      <promoteMaps>
+        <promoteMap name="other" label="product.example.com@exm:other-1-qa"/>
+      </promoteMaps>
+    </stage>
   </stages>
   <searchPaths>
     <searchPath troveName="group-rap-standard" label="rap.rpath.com@rpath:linux-1"/>
