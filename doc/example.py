@@ -53,13 +53,19 @@ prodDef.setConaryRepositoryHostname("product.example.com")
 prodDef.setConaryNamespace("exm")
 prodDef.setImageGroup("group-awesome-dist")
 prodDef.setBaseFlavor(baseFlavor)
-prodDef.addStage(name='devel', labelSuffix='-devel')
-
-# Don't use addPromoteMap unless you know what you're doing
+# Don't use addPromoteMap unless you know what you're doing; see
+# https://issues.rpath.com/browse/RPCL-17 for more information on
+# how to use them.  These maps cause packages in devel groups to
+# be flattened into the main label on promote to QA and promotes
+# from example to be flattened into an alternate label.
+prodDef.addStage(name='devel', labelSuffix='-devel',
+    promoteMaps = [('contrib', 'contrib.rpath.org@rpl:2'),
+                   ('other', 'example.rpath.org@rpl:2')])
 prodDef.addStage(name='qa', labelSuffix='-qa',
-    promoteMaps = [('from1@label11:devel', 'to1@label12:qa'),
-                   ('from2@label21:devel', 'to2@label22:qa') ])
-prodDef.addStage(name='release', labelSuffix='')
+    promoteMaps = [('contrib', '/product.example.com@exm:group-awesome-dist-1-qa'),
+                   ('other', '/product.example.com@exm:other-1-qa') ])
+prodDef.addStage(name='release', labelSuffix='',
+    promoteMaps = [('other', '/product.example.com@exm:other-1')])
 
 prodDef.addSearchPath(troveName='group-rap-standard',
                         label='rap.rpath.com@rpath:linux-1')

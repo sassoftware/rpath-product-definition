@@ -7,6 +7,10 @@ Changes in @NEW@:
     * getAllLabelsFromTroves now accepts an optional list of labels to
       "flatten" to the target label. (RPCL-55)
 
+  o Documentation Fixes:
+    * The documentation for promoteMap specification was incorrect,
+      and has been improved. (RPCL-37)      
+
 Changes in 0.5:
   o API Changes:
     * searchPath elements now have additional attributes exposed
