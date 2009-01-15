@@ -1,3 +1,12 @@
+Changes in @NEW@:
+  o API Changes:
+    * getAllLabelsFromTroves now returns a map that will re-root all
+      implicit promotes in order to eliminate shadows. This behavior can
+      be overridden by specifying re-roots all implicit promotes in order
+      to eliminate shadows. (RPCL-55)
+    * getAllLabelsFromTroves now accepts an optional list of labels to
+      "flatten" to the target label. (RPCL-55)
+
 Changes in 0.5:
   o API Changes:
     * searchPath elements now have additional attributes exposed

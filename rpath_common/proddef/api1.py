@@ -900,26 +900,36 @@ class ProductDefinitionRecipe(PackageRecipe):
             ret.append((name, fullLabel))
         return ret
 
-    def getPromoteMapsForStages(self, fromStage, toStage):
+    def getPromoteMapsForStages(self, fromStage, toStage, flattenLabels=()):
         """
         Construct a promote map from C{fromStage} to C{toStage}.
+
         This will include the "simple" label, all secondary labels, and
-        all promote maps to C{toStage}.
+        all promote maps to C{toStage}. All implicit promotes (primary
+        label, secondary labels, and flattened labels) are re-rooted at
+        the new label rather than preserving any shadows.
 
         @param fromStage: Name of stage to promote I{from}
         @type  fromStage: C{str}
         @param toStage: Name of stage to promote I{to}
         @type  toStage: C{str}
+        @param flattenLabels: Extra labels to "flatten" by promoting to the
+                              target label.
+        @type  flattenLabels: C{sequence or set}
         @return: dictionary mapping labels on C{fromStage} to labels
             on C{toStage}
         @rtype: C{dict}
         """
         fromStageObj = self.getStage(fromStage)
         toStageObj = self.getStage(toStage)
+        toStageBranch = '/' + self._getLabelForStage(toStageObj)
 
-        # Default mapping
-        fromTo = {self._getLabelForStage(fromStageObj):
-            self._getLabelForStage(toStageObj)}
+        # Flattened labels - these come first so proddef-supplied maps 
+        # will override them.
+        fromTo = dict.fromkeys(flattenLabels, toStageBranch)
+
+        # Primary label
+        fromTo[self._getLabelForStage(fromStageObj)] = toStageBranch
 
         # Secondary labels
         if self.secondaryLabels is not None:
@@ -929,7 +939,7 @@ class ProductDefinitionRecipe(PackageRecipe):
                 label = secondaryLabel.getLabel()
                 fromLabel = self._getSecondaryLabel(label, fromSuffix)
                 toLabel = self._getSecondaryLabel(label, toSuffix)
-                fromTo[fromLabel] = toLabel
+                fromTo[fromLabel] = '/' + toLabel
 
         # Promote maps
         promoteMapsDest = dict((x.getMapName(), x.getMapLabel())
