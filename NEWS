@@ -1,4 +1,4 @@
-Changes in @NEW@:
+Changes in 0.6:
   o API Changes:
     * getAllLabelsFromTroves now returns a map that will re-root all
       implicit promotes in order to eliminate shadows. This behavior can
