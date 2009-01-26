@@ -1,4 +1,8 @@
-Changes in @NEW@:
+Changes in 1.0:
+  o General Availability
+    * rpath-product-definition is now released as generally available
+      software with a stable API.  See the README file for more
+      information.
 
 Changes in 0.6:
   o API Changes:

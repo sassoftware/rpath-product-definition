@@ -2,10 +2,9 @@ This is a component of the rpath_common set of modules.  It provides
 a stable interface for managing rPath product definition components
 as stored in rBuilder.
 
-Note that until version 1.0 is released, public APIs are subject to
-change.  All documentation regarding stable interfaces is relevant
-only to published stable releases; it is not in force for alpha
-and beta releases, including 0.x releases and any automated builds.
+All documentation regarding stable interfaces is relevant only to
+published stable releases; it is not in force for alpha and beta
+releases, including 0.x releases and any automated builds.
 
 To use the latest version of the interface:
     from rpath_common import proddef
@@ -21,8 +20,8 @@ version changes will cause the major version to be incremented.
 The schema version is included in the filename: rpd-1.0.xsd
 implements version 1.0 of the schema.  (From schema version 1.0
 to 1.1 there is a slight incompatibility; the schema version
-rules will not be strictly enforced until the software version
-reaches 1.0.)
+rules was not strictly enforced until the software version
+reached 1.0.)
 
 API documentation is available at
 http://cvs.rpath.com/product-definition-docs/ or by running "make
