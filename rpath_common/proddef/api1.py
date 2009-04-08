@@ -464,13 +464,26 @@ class BaseDefinition(object):
         nvfs = troves[troveSpec]
         #if not nvfs:
         #    raise ProductDefinitionTroveNotFoundError("%s=%s" % (troveName, label))
-        # At this point, troveSpec is in troves and its value should not be
-        # the empty list.
-        nvfs = troves[troveSpec]
-        contents = repos.getFileContentsFromTrove(nvfs[0],
-                                      [self._troveFileName])[0]
-        return contents.get(), nvfs[0]
+        if hasattr(repos, 'getFileContentsFromTrove'):
+            nvfs = troves[troveSpec]
+            contents = repos.getFileContentsFromTrove(nvfs[0],
+                                          [self._troveFileName])[0]
+            return contents.get(), nvfs[0]
+        trvCsSpec = (nvfs[0][0], (None, None), (nvfs[0][1], nvfs[0][2]), True)
+        cs = conaryClient.createChangeSet([ trvCsSpec ], withFiles = True,
+                                          withFileContents = True)
+        for thawTrvCs in cs.iterNewTroveList():
+            paths = [ x for x in thawTrvCs.getNewFileList()
+                      if x[1] == self._troveFileName ]
+            if not paths:
+                continue
+            # Fetch file from changeset
+            fileSpecs = [ (fId, fVer) for (_, _, fId, fVer) in paths ]
+            fileContents = repos.getFileContents(fileSpecs)
+            return fileContents[0].get(), thawTrvCs.getNewNameVersionFlavor()
 
+        # Couldn't find the file we expected; die
+        raise ProductDefinitionFileNotFoundError("%s=%s" % (troveName, label))
 
     def _initFields(self):
         self.baseFlavor = None
