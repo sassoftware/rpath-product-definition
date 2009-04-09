@@ -464,12 +464,13 @@ class BaseDefinition(object):
         nvfs = troves[troveSpec]
         #if not nvfs:
         #    raise ProductDefinitionTroveNotFoundError("%s=%s" % (troveName, label))
+        nvfs = troves[troveSpec]
+        n,v,f = nvfs[0]
         if hasattr(repos, 'getFileContentsFromTrove'):
-            nvfs = troves[troveSpec]
-            contents = repos.getFileContentsFromTrove(nvfs[0],
+            contents = repos.getFileContentsFromTrove(n,v,f,
                                           [self._troveFileName])[0]
-            return contents.get(), nvfs[0]
-        trvCsSpec = (nvfs[0][0], (None, None), (nvfs[0][1], nvfs[0][2]), True)
+            return contents.get(), (n,v,f)
+        trvCsSpec = (n, (None, None), (v, f), True)
         cs = conaryClient.createChangeSet([ trvCsSpec ], withFiles = True,
                                           withFileContents = True)
         for thawTrvCs in cs.iterNewTroveList():
