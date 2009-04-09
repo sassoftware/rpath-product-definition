@@ -43,6 +43,7 @@ from conary import errors as conaryErrors
 from conary import versions as conaryVersions
 from conary.conaryclient import filetypes, cmdline
 from conary.deps import deps as conaryDeps
+from conary.repository import errors as repositoryErrors
 
 from rpath_common.xmllib import api1 as xmllib
 from rpath_common.proddef import _xmlConstants
@@ -467,8 +468,11 @@ class BaseDefinition(object):
         nvfs = troves[troveSpec]
         n,v,f = nvfs[0]
         if hasattr(repos, 'getFileContentsFromTrove'):
-            contents = repos.getFileContentsFromTrove(n,v,f,
-                                          [self._troveFileName])[0]
+            try:
+                contents = repos.getFileContentsFromTrove((n,v,f),
+                                              [self._troveFileName])[0]
+            except repositoryErrors.PathsNotFound:
+                raise ProductDefinitionFileNotFoundError()
             return contents.get(), (n,v,f)
         trvCsSpec = (n, (None, None), (v, f), True)
         cs = conaryClient.createChangeSet([ trvCsSpec ], withFiles = True,
@@ -1049,9 +1053,9 @@ class ProductDefinitionRecipe(PackageRecipe):
         @type containerTemplateRef: C{str}
         @param buildTemplateRef: the name of the buildTemplate to derive values
         for containerTemplateRef and architectureRef.
-        type: buildTemplateRef: C{str}
+        @type: buildTemplateRef: C{str}
         @param flavorSetRef: the name of the flavorSet to use for this image
-        type: flavorSetRef: C{str}
+        @type: flavorSetRef: C{str}
         @param flavor: additional flavors
         @type flavor: C{str}
         """
