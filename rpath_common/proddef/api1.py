@@ -469,7 +469,7 @@ class BaseDefinition(object):
         n,v,f = nvfs[0]
         if hasattr(repos, 'getFileContentsFromTrove'):
             try:
-                contents = repos.getFileContentsFromTrove((n,v,f),
+                contents = repos.getFileContentsFromTrove(n,v,f,
                                               [self._troveFileName])[0]
             except repositoryErrors.PathsNotFound:
                 raise ProductDefinitionFileNotFoundError()
