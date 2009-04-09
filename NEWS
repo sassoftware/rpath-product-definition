@@ -1,4 +1,7 @@
 Changes in @NEW@:
+  o Bug Fixes:
+    * Use the faster getFileContentsFromTrove Conary interface, when
+      available, for getting product definitions from repositories.
 
 Changes in 1.0:
   o General Availability
