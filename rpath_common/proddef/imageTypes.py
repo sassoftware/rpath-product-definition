@@ -33,7 +33,7 @@ class Image(xmllib.SerializableObject):
         'baseFileName'              : (str, ),
         'betaNag'                   : (bool, ),
         'bugsUrl'                   : (str, ),
-        'buildOVF1_0'               : (bool, ),
+        'buildOVF10'               : (bool, ),
         'diskAdapter'               : (str, ),
         'freespace'                 : (int, ),
         'installLabelPath'          : (str, ),
