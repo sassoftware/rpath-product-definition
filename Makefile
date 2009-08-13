@@ -22,7 +22,7 @@ export TOPDIR = $(shell pwd)
 # the name of packages containing a product definition
 export DISTDIR = $(TOPDIR)/rpath-product-definition-$(VERSION)
 
-SUBDIRS=rpath_common xsd doc
+SUBDIRS=rpath_proddef xsd doc
 
 dist_files = $(extra_files)
 

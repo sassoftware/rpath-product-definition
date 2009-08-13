@@ -28,15 +28,15 @@ If the C{VERSION} starts with C{0.}, none of the included
 interfaces is stable and may change without warning.
 
 To use the latest version of the interface::
-    from rpath_common import proddef
+    from rpath_proddef import proddef
 To use a specific API Version of the interface::
-    from rpath_common.proddef import api1 as proddef
+    from rpath_proddef.proddef import api1 as proddef
 """
 
 # Default to current API version
 #pylint: disable-msg=W0401
-from rpath_common.proddef.api1 import *
+from rpath_proddef.proddef.api1 import *
 
 # Import the automatically-generated VERSION
 #pylint: disable-msg=W0212
-from rpath_common.proddef.proddef_constants import _VERSION as VERSION
+from rpath_proddef.proddef.proddef_constants import _VERSION as VERSION

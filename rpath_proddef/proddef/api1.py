@@ -12,7 +12,7 @@
 # full details.
 #
 """
-The rPath Common Library Module for Product Definition, API version 1
+The rPath Product Definition Library Module, API version 1
 
 All interfaces in this modules that do not start with a C{_}
 character are public interfaces.
@@ -45,9 +45,9 @@ from conary.conaryclient import filetypes, cmdline
 from conary.deps import deps as conaryDeps
 from conary.repository import errors as repositoryErrors
 
-from rpath_common.xmllib import api1 as xmllib
-from rpath_common.proddef import _xmlConstants
-from rpath_common.proddef import imageTypes
+from rpath_xmllib.xmllib import api1 as xmllib
+from rpath_proddef.proddef import _xmlConstants
+from rpath_proddef.proddef import imageTypes
 
 #{ Exception classes
 class ProductDefinitionError(Exception):

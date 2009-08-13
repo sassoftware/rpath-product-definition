@@ -15,8 +15,8 @@
 Image types.
 """
 
-from rpath_common import xmllib
-from rpath_common.proddef import _xmlConstants
+from rpath_xmllib import xmllib
+from rpath_proddef.proddef import _xmlConstants
 
 #{ Image Type Class
 class Image(xmllib.SerializableObject):

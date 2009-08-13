@@ -15,7 +15,7 @@
 Example code for interacting with rPath product definition xml files.
 """
 
-from rpath_common.proddef import api1 as proddef
+from rpath_proddef.proddef import api1 as proddef
 import sys
 
 # This is an example of how this module would be used to generate the XML
