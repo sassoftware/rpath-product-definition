@@ -95,7 +95,7 @@ class InvalidSchemaVersionError(ProductDefinitionError):
 #}
 
 class BaseDefinition(object):
-    version = '2.0'
+    version = '3.0'
     defaultNamespace = _xmlConstants.defaultNamespaceList[0]
     xmlSchemaLocation = _xmlConstants.xmlSchemaLocation
 
@@ -437,7 +437,7 @@ class BaseDefinition(object):
         pathDict = {
             "%s.recipe" % self._troveName : filetypes.RegularFile(
                 contents = recipe, config=True),
-            self._troveFileName : filetypes.RegularFile(
+            self._troveFileNames[0] : filetypes.RegularFile(
                 contents = stream.getvalue(), config=True),
         }
         cLog = changelog.ChangeLog(name = conaryClient.cfg.name,
@@ -468,24 +468,36 @@ class BaseDefinition(object):
         nvfs = troves[troveSpec]
         n,v,f = nvfs[0]
         if hasattr(repos, 'getFileContentsFromTrove'):
-            try:
-                contents = repos.getFileContentsFromTrove(n,v,f,
-                                              [self._troveFileName])[0]
-            except repositoryErrors.PathsNotFound:
+            contents = None
+            for troveFileName in self._troveFileNames:
+                try:
+                    contents = repos.getFileContentsFromTrove(n,v,f,
+                                                  [troveFileName])[0]
+                except repositoryErrors.PathsNotFound:
+                    pass
+            if contents is None:
                 raise ProductDefinitionFileNotFoundError()
             return contents.get(), (n,v,f)
+
         trvCsSpec = (n, (None, None), (v, f), True)
         cs = conaryClient.createChangeSet([ trvCsSpec ], withFiles = True,
                                           withFileContents = True)
         for thawTrvCs in cs.iterNewTroveList():
-            paths = [ x for x in thawTrvCs.getNewFileList()
-                      if x[1] == self._troveFileName ]
+            score = None
+            fileSpec = None
+            for newFile in thawTrvCs.getNewFileList():
+                if newFile[1] in self._troveFileNames:
+                    idx = self._troveFileNames.index(newFile[1])
+                    if score is None or idx < score:
+                        score = idx
+                        fileSpec = newFile
+
             if not paths:
                 continue
             # Fetch file from changeset
-            fileSpecs = [ (fId, fVer) for (_, _, fId, fVer) in paths ]
-            fileContents = repos.getFileContents(fileSpecs)
-            return fileContents[0].get(), thawTrvCs.getNewNameVersionFlavor()
+            pathId, _, fileId, _ = fileSpec
+            fileContents = cs.getFileContents(pathId, fileId)
+            return fileContents[1].get(), thawTrvCs.getNewNameVersionFlavor()
 
         # Couldn't find the file we expected; die
         raise ProductDefinitionFileNotFoundError("%s=%s" % (troveName, label))
@@ -521,7 +533,9 @@ class ProductDefinition(BaseDefinition):
     _imageTypeDispatcher = xmllib.NodeDispatcher({})
 
     _troveName = 'product-definition'
-    _troveFileName = 'product-definition.xml'
+    _troveFileNames = [
+        'product-definition.xml',
+    ]
 
     _recipe = '''
 #
@@ -1665,7 +1679,12 @@ class ProductDefinitionRecipe(PackageRecipe):
 
 class PlatformDefinition(BaseDefinition):
     _troveName = 'platform-definition'
-    _troveFileName = 'platform-definition.xml'
+
+    # list of files to search for in the trove, ordered by priority.
+    _troveFileNames = [
+        'platform-definition-3.0.xml',
+        'platform-definition.xml',
+    ]
 
     _recipe = '''
 #

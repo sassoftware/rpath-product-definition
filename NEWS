@@ -1,4 +1,7 @@
 Changes in @NEW@:
+  o New Feature:
+    * Added support for versioned platform-defintions (RBL-5007).
+
   o Bug Fixes:
     * Use the faster getFileContentsFromTrove Conary interface, when
       available, for getting product definitions from repositories.
