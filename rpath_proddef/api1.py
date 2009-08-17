@@ -45,9 +45,9 @@ from conary.conaryclient import filetypes, cmdline
 from conary.deps import deps as conaryDeps
 from conary.repository import errors as repositoryErrors
 
-from rpath_common.xmllib import api1 as xmllib
-from rpath_common.proddef import _xmlConstants
-from rpath_common.proddef import imageTypes
+from rpath_xmllib import api1 as xmllib
+from rpath_proddef import _xmlConstants
+from rpath_proddef import imageTypes
 
 #{ Exception classes
 class ProductDefinitionError(Exception):
@@ -99,7 +99,7 @@ class BaseDefinition(object):
     defaultNamespace = _xmlConstants.defaultNamespaceList[0]
     xmlSchemaLocation = _xmlConstants.xmlSchemaLocation
 
-    schemaDir = "/usr/share/rpath_common"
+    schemaDir = "/usr/share/rpath_proddef"
 
     def __init__(self, fromStream = None, validate = False, schemaDir = None):
         """

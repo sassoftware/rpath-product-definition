@@ -17,10 +17,10 @@ SCHEMA_FILES = $(wildcard *.xsd)
 
 all: default-all
 
-install: all default-install $(DESTDIR)$(datadir)/rpath_common
-	install $(SCHEMA_FILES) $(DESTDIR)$(datadir)/rpath_common/
+install: all default-install $(DESTDIR)$(datadir)/rpath_proddef
+	install $(SCHEMA_FILES) $(DESTDIR)$(datadir)/rpath_proddef/
 
-$(DESTDIR)$(datadir)/rpath_common:
+$(DESTDIR)$(datadir)/rpath_proddef:
 	install -d -m755 $@
 
 validate-schema:

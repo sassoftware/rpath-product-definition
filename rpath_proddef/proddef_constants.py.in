@@ -11,30 +11,14 @@
 # or fitness for a particular purpose. See the Common Public License for
 # full details.
 #
+"""
+The rPath Product Definition API Constants definition
 
-# Note: do not list __init__.py in python_files -- it is here only
-# to support testing out of the tree.  When distributed, this
-# file is provided by the rpath-common package instead.
+The module data elements in this module are a private interface,
+available through the rpath_proddef module.
+@var _VERSION: Product Definition version
+@type _VERSION: string
+"""
 
-SUBDIRS = proddef
-SYMLINKS = xmllib
-
-dist_files = Makefile __init__.py
-
-all: default-all default-subdirs symlinks
-
-install: all default-install install-subdirs
-
-dist: default-dist
-
-clean: default-clean symlink-clean
-
-symlink-clean:
-	@rm -f $(SYMLINKS)
-
-symlinks:
-	[ -z "$$XMLLIB_PATH" ] || [ -h xmllib ] || ln -s $$XMLLIB_PATH/rpath_common/xmllib .
-
-
-include ../Make.rules
-include ../Make.defs
+# NOTE: constants.py is auto generated from constants.py.in
+_VERSION          = "@version@"        # proddef version

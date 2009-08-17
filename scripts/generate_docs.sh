@@ -1,2 +1,2 @@
 #!/bin/sh -x
-epydoc --verbose --html --config docs/config/epydoc rpath_common/proddef
+epydoc --verbose --html --config docs/config/epydoc rpath_proddef

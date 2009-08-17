@@ -7,9 +7,9 @@ published stable releases; it is not in force for alpha and beta
 releases, including 0.x releases and any automated builds.
 
 To use the latest version of the interface:
-    from rpath_common import proddef
+    import rpath_proddef
 To use a specific API Version of the interface:
-    from rpath_common.proddef import api1 as proddef
+    from rpath_proddef import api1 as proddef
 
 The schema definitions are versioned with major and minor numbers.
 Within a major version, only new elements will be added; elements

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2006-2008 rPath, Inc.
+# Copyright (c) 2006-2009 rPath, Inc.
 #
 # This program is distributed under the terms of the Common Public License,
 # version 1.0. A copy of this license should have been distributed with this
@@ -22,7 +22,7 @@ export TOPDIR = $(shell pwd)
 # the name of packages containing a product definition
 export DISTDIR = $(TOPDIR)/rpath-product-definition-$(VERSION)
 
-SUBDIRS=rpath_common xsd doc
+SUBDIRS=rpath_proddef xsd doc
 
 dist_files = $(extra_files)
 

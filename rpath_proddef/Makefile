@@ -18,19 +18,19 @@ dist_files = Makefile proddef_constants.py.in $(python_files)
 
 all: default-all proddef_constants.py
 
-proddef_constants.py: proddef_constants.py.in ../../Makefile ../../Make.defs Makefile
+proddef_constants.py: proddef_constants.py.in ../Makefile ../Make.defs Makefile
 	sed -e s,@version@,$(VERSION),g \
 	$< > $@
 
 install: all pyfiles-install default-install
-	install proddef_constants.py $(DESTDIR)$(pydir)/proddef/proddef_constants.py
-	$(PYTHON) -c "import compileall; compileall.compile_dir('$(DESTDIR)$(pydir)/proddef', ddir='$(pydir)/proddef', quiet=1)"
-	$(PYTHON) -OO -c "import compileall; compileall.compile_dir('$(DESTDIR)$(pydir)/proddef', ddir='$(pydir)/proddef', quiet=1)"
+	install proddef_constants.py $(DESTDIR)$(pydir)/proddef_constants.py
+	$(PYTHON) -c "import compileall; compileall.compile_dir('$(DESTDIR)$(pydir)', ddir='$(pydir)', quiet=1)"
+	$(PYTHON) -OO -c "import compileall; compileall.compile_dir('$(DESTDIR)$(pydir)', ddir='$(pydir)', quiet=1)"
 
 dist: default-dist
 
 clean: default-clean
 	rm -f proddef_constants.py
 
-include ../../Make.rules
-include ../../Make.defs
+include ../Make.rules
+include ../Make.defs
