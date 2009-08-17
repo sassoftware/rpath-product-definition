@@ -1,13 +1,10 @@
 (^|/)\.hg($|/)
-.*\.pyc$
+.*\.(pyc|pyo|o|so|swp|swo|orig|rej)$
 .*\~$
 .*,cover$
-.*\.o$
-.*\.so$
 ^tmp/
 docs/developer/.*
-rpath_common/proddef/proddef_constants.pyc?$
-rpath_common/xmllib
+rpath_proddef/proddef_constants.pyc?$
 ^pylint/reports/
 ^rpath-common-.*.tar.bz2
 ^\..*project
