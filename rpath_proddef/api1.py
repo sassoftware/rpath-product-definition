@@ -482,17 +482,19 @@ class BaseDefinition(object):
         trvCsSpec = (n, (None, None), (v, f), True)
         cs = conaryClient.createChangeSet([ trvCsSpec ], withFiles = True,
                                           withFileContents = True)
+        troveFileNames = dict((x, i) for i, x in enumerate(self._troveFileNames))
         for thawTrvCs in cs.iterNewTroveList():
             score = None
             fileSpec = None
             for newFile in thawTrvCs.getNewFileList():
-                if newFile[1] in self._troveFileNames:
-                    idx = self._troveFileNames.index(newFile[1])
+                filePath = newFile[1]
+                if filePath in troveFileNames:
+                    idx = troveFileNames[filePath]
                     if score is None or idx < score:
                         score = idx
                         fileSpec = newFile
 
-            if not paths:
+            if fileSpec is None:
                 continue
             # Fetch file from changeset
             pathId, _, fileId, _ = fileSpec
