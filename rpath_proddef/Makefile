@@ -44,6 +44,7 @@ rule-%:
 	cp generatedssuper.py $(call xmlDir,$@)/
 	$(GENERATE_DS) -f --silence \
                 --no-dates \
+                --member-specs=list \
                 --super=supers \
                 --external-encoding=utf-8 \
                 -o $(call xmlDir,$@)/supers.py \
