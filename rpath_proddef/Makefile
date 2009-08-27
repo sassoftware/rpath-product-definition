@@ -32,5 +32,24 @@ dist: default-dist
 clean: default-clean
 	rm -f proddef_constants.py
 
+GENERATE_DS=~/hg/generateDS/generateDS.py
+xmlDir = $(subst .,_,$(patsubst rule-%,xml_%,$(1)))
+xmlVer = $(patsubst rule-%,%,$(1))
+
+generate: $(patsubst ../xsd/rpd-%.xsd,rule-%,$(wildcard ../xsd/rpd-*.xsd))
+
+rule-%:
+	mkdir -p $(call xmlDir,$@)
+	touch $(call xmlDir,$@)/__init__.py
+	cp generatedssuper.py $(call xmlDir,$@)/
+	$(GENERATE_DS) -f --silence \
+                --no-dates \
+                --super=supers \
+                --external-encoding=utf-8 \
+                -o $(call xmlDir,$@)/supers.py \
+                -s $(call xmlDir,$@)/subs.py \
+                --user-methods=gends_user_methods \
+                ../xsd/rpd-$(call xmlVer,$@).xsd
+
 include ../Make.rules
 include ../Make.defs
