@@ -19,8 +19,8 @@ PYINCLUDE = $(shell $(PYTHON) -c 'import os, sys; print os.sep.join((sys.prefix,
 pyfiles-install:
 	mkdir -p $(DESTDIR)$(pydir)
 	for f in $(python_files); do \
-		mkdir -p `dirname $(DESTDIR)/$(sitedir)/$(DIR)/$$f`; \
-		cp -a $$f $(DESTDIR)/$(sitedir)/$(DIR)/$$f; \
+		mkdir -p `dirname $(DESTDIR)$(pydir)/$$f`; \
+		cp -a $$f $(DESTDIR)/$(pydir)/$$f; \
 	done
 
 default-dist: dist-subdirs

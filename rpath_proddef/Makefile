@@ -22,7 +22,7 @@ proddef_constants.py: proddef_constants.py.in ../Makefile ../Make.defs Makefile
 	sed -e s,@version@,$(VERSION),g \
 	$< > $@
 
-install: all pyfiles-install default-install
+install: all pyfiles-install default-install install-generate
 	install proddef_constants.py $(DESTDIR)$(pydir)/proddef_constants.py
 	$(PYTHON) -c "import compileall; compileall.compile_dir('$(DESTDIR)$(pydir)', ddir='$(pydir)', quiet=1)"
 	$(PYTHON) -OO -c "import compileall; compileall.compile_dir('$(DESTDIR)$(pydir)', ddir='$(pydir)', quiet=1)"
@@ -50,6 +50,12 @@ rule-%:
                 -s $(call xmlDir,$@)/subs.py \
                 --user-methods=gends_user_methods \
                 ../xsd/rpd-$(call xmlVer,$@).xsd
+
+install-generate: $(addprefix install-rule-,$(wildcard xml_*))
+
+install-rule-%: %
+	install -d $(DESTDIR)$(pydir)$<
+	install $</*.py $(DESTDIR)$(pydir)$</
 
 include ../Make.rules
 include ../Make.defs
