@@ -160,7 +160,7 @@ class BaseDefinition(object):
     @classmethod
     def loadModule(cls, version):
         moduleName = "xml_%s.subs" % version.replace('.', '_')
-        module = __import__(moduleName, globals(), fromlist = [moduleName])
+        module = __import__(moduleName, globals(), None, [moduleName])
         return module
 
     def serialize(self, stream):
