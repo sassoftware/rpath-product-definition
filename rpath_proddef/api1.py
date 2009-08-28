@@ -160,7 +160,10 @@ class BaseDefinition(object):
     @classmethod
     def loadModule(cls, version):
         moduleName = "xml_%s.subs" % version.replace('.', '_')
-        module = __import__(moduleName, globals(), None, [moduleName])
+        try:
+            module = __import__(moduleName, globals(), None, [moduleName])
+        except ImportError:
+            raise InvalidSchemaVersionError(version)
         return module
 
     def serialize(self, stream):
