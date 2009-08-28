@@ -2162,7 +2162,7 @@ def _addPlatformDefaults(platform):
              "maxIsoSize": None,
              "mediaTemplateTrove": "",
              "showMediaCheck": False}))
-    platform.addContainerTemplate(platform.imageType("netBootImage",
+    platform.addContainerTemplate(platform.imageType("netbootImage",
             {
              "autoResolve": False,
              "baseFileName": "",
@@ -2637,6 +2637,15 @@ class Migrate_30_31(BaseMigration):
             if obsoleteVal and not newImg.vhdDiskType:
                 newImg.vhdDiskType = obsoleteVal
 
+    def _migrateBuildDefinitions(self, fromObj, toObj):
+        buildDefinitions = toObj.get_buildDefinition()
+        if not buildDefinitions:
+            return
+        buildDefinitions = buildDefinitions.get_build()
+        for bd in buildDefinitions:
+            if bd.containerTemplateRef == 'netBootImage':
+                bd.containerTemplateRef = 'netbootImage'
+
     def migrateCommon(self, fromObj, toObj, newModule):
         self._migrateContainerTemplates(fromObj, toObj)
 
@@ -2644,5 +2653,6 @@ class Migrate_30_31(BaseMigration):
         platobj = fromObj.get_platform()
         if platobj:
             self._migrateContainerTemplates(platobj, toObj.get_platform())
+        self._migrateBuildDefinitions(fromObj, toObj)
 
 MigrationManager.register(Migrate_30_31)

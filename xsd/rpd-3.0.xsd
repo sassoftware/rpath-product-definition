@@ -82,6 +82,11 @@
                     <xsd:enumeration value="installableIsoImage" />
                     <xsd:enumeration value="liveIsoImage" />
                     <xsd:enumeration value="netbootImage" />
+                    <!-- This is unfortunate - we had a typo in the 1.3 to 2.0
+                    schema conversion, so now we have to define both
+                    netbootImage and netBootImage
+                    -->
+                    <xsd:enumeration value="netBootImage" />
                     <xsd:enumeration value="rawFsImage" />
                     <xsd:enumeration value="rawHdImage" />
                     <xsd:enumeration value="tarballImage" />
