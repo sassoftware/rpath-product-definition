@@ -696,11 +696,6 @@ class BaseDefinition(object):
     def _postinit(self):
         pass
 
-    @classmethod
-    def _newNode(self, name, value):
-        node = xmllib.StringNode(name = name).characters(value)
-        return node
-
     def _setDefault(self, field, factory):
         getter = getattr(self._rootObj, 'get_%s' % field)
         vals = getter()
@@ -2397,15 +2392,6 @@ def _convertBuildTemplates(fromObj, proddef, newModule):
         nbuild.architectureRef = architectureRef
         nbuild.flavorSetRef = flavorSetRef
         nbuild.containerTemplateRef = containerTemplateRef
-
-def _mergeFlavors(*flavors):
-    ret = conaryDeps.parseFlavor('')
-    for flv in flavors:
-        if flv is None:
-            continue
-        flv = BaseDefinition.parseFlavor(flv)
-        ret = conaryDeps.overrideFlavor(ret, flv)
-    return str(ret)
 
 class MigrationManager(object):
     __slots__ = [ '_version', '_path' ]
