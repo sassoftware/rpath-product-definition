@@ -31,12 +31,13 @@ __all__ = [ 'MissingInformationError',
             'ContainerTemplateNotFoundError',
             'BuildTemplateNotFoundError',
             'InvalidSchemaVersionError',
+            'SchemaValidationError',
             ]
 
 import itertools
 import os
 import StringIO
-import weakref
+from lxml import etree
 
 from conary import changelog
 from conary import errors as conaryErrors
@@ -46,7 +47,6 @@ from conary.deps import deps as conaryDeps
 from conary.lib import util
 from conary.repository import errors as repositoryErrors
 
-from rpath_xmllib import api1 as xmllib
 from rpath_proddef import _xmlConstants
 
 #{ Exception classes
@@ -92,6 +92,9 @@ class PlatformLabelMissingError(ProductDefinitionError):
 class InvalidSchemaVersionError(ProductDefinitionError):
     "Raised when the schema version in a product definition file is not recognized."
 
+class SchemaValidationError(ProductDefinitionError):
+    "XML document does not validate against the XML schema"
+
 #}
 
 class BaseDefinition(object):
@@ -115,6 +118,10 @@ class BaseDefinition(object):
         """
 
         self._initFields()
+        self._validate = validate
+        if schemaDir:
+            self.schemaDir = schemaDir
+
 
         if fromStream:
             self.parseStream(fromStream, validate = validate,
@@ -166,7 +173,25 @@ class BaseDefinition(object):
             raise InvalidSchemaVersionError(version)
         return module
 
-    def serialize(self, stream):
+    @classmethod
+    def getSchemaFile(cls, schemaDir, version):
+        schemaFile = os.path.join(schemaDir, "rpd-%s.xsd" % version)
+        try:
+            file(schemaFile)
+        except OSError:
+            raise SchemaValidationError("Unable to load schema file %s" % schemaFile)
+        return schemaFile
+
+    @classmethod
+    def validate(cls, stream, schemaDir, version):
+        schemaFile = cls.getSchemaFile(schemaDir, version)
+        schema = etree.XMLSchema(file = schemaFile)
+        tree = etree.parse(stream)
+        if not schema.validate(tree):
+            raise SchemaValidationError(str(schema.error_log))
+        return tree
+
+    def serialize(self, stream, validate = True):
         """
         Serialize the current object as an XML stream.
         @param stream: stream to write the serialized object
@@ -174,7 +199,7 @@ class BaseDefinition(object):
         """
         attrs = [
             ('xmlns', self.defaultNamespace),
-            ('xmlns:xsi', xmllib.DataBinder.xmlSchemaNamespace),
+            ('xmlns:xsi', _xmlConstants.xmlSchemaNamespace),
             ("xsi:schemaLocation", self.xmlSchemaLocation),
         ]
         namespacedef = ' '.join('%s="%s"' % a for a in attrs)
@@ -185,8 +210,16 @@ class BaseDefinition(object):
         self._rootObj.export(bsio, 0, namespace_ = '', name_ = self.RootNode,
             namespacedef_ = namespacedef)
         bsio.seek(0)
-        from lxml import etree
-        tree = etree.parse(bsio)
+        if validate and os.path.exists(self.schemaDir):
+            tree = self.validate(bsio, self.schemaDir,
+                self._rootObj.get_version())
+        elif validate:
+            import sys
+            sys.stderr.write("Warning: unable to validate schema: directory %s missing"
+                % self.schemaDir)
+            tree = etree.parse(bsio)
+        else:
+            tree = etree.parse(bsio)
         tree.write(stream, encoding = 'UTF-8', pretty_print = True,
             xml_declaration = True)
 
@@ -694,7 +727,6 @@ class BaseDefinition(object):
             setattr(self._rootObj, field, '')
         if self.Versioned:
             self._rootObj.set_version(self.version)
-        self._defaultNamespace = None
 
     def _postinit(self):
         pass
@@ -718,15 +750,11 @@ class ProductDefinition(BaseDefinition):
     @type defaultNamespace: C{str}
     @cvar xmlSchemaLocation:
     @type xmlSchemaLocation: C{str}
-    @cvar _imageTypeDispatcher: an object factory for imageType objects
-    @type _imageTypeDispatcher: C{xmllib.NodeDispatcher}
     @cvar schemaDir: Directory where schema definitions are stored
     @type schemaDir: C{str}
     """
     ClassFactoryName = 'productDefinitionSub'
     RootNode = 'productDefinition'
-
-    _imageTypeDispatcher = xmllib.NodeDispatcher({})
 
     _troveName = 'product-definition'
     _troveFileNames = [
@@ -773,7 +801,8 @@ class ProductDefinitionRecipe(PackageRecipe):
         outStr = StringIO.StringIO()
         self.serialize(outStr)
         inStr = StringIO.StringIO(outStr.getvalue())
-        return ProductDefinition(inStr)
+        return ProductDefinition(inStr, schemaDir = self.schemaDir,
+            validate = self._validate)
 
     def saveToRepository(self, client, message = None):
         """
