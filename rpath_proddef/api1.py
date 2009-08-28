@@ -716,15 +716,6 @@ class BaseDefinition(object):
     def _initFields(self):
         xmlsubs = self.xmlFactory()
         self._rootObj = getattr(xmlsubs, self.ClassFactoryName)()
-        # Initialize some required fields
-        # XXX we should probably try to get generateDS to initialize them for
-        # us
-        reqFields = [ 'productName', 'productShortname', 'productDescription',
-            'productVersion', 'productVersionDescription',
-            'conaryRepositoryHostname', 'conaryNamespace', 'imageGroup',
-            'baseFlavor' ]
-        for field in reqFields:
-            setattr(self._rootObj, field, '')
         if self.Versioned:
             self._rootObj.set_version(self.version)
 
