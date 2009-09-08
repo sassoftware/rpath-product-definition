@@ -98,7 +98,7 @@ class SchemaValidationError(ProductDefinitionError):
 #}
 
 class BaseDefinition(object):
-    version = '3.1'
+    version = _xmlConstants.version
     Versioned = True
     defaultNamespace = _xmlConstants.defaultNamespaceList[0]
     xmlSchemaLocation = _xmlConstants.xmlSchemaLocation
@@ -2588,12 +2588,6 @@ class Migrate_20_30(BaseMigration):
     fromVersion = '2.0'
     toVersion = '3.0'
 
-MigrationManager.register(Migrate_20_30)
-
-class Migrate_30_31(BaseMigration):
-    fromVersion = '3.0'
-    toVersion = '3.1'
-
     def _migrateContainerTemplates(self, fromObj, toObj):
         containerTemplates = fromObj.get_containerTemplates()
         if not containerTemplates:
@@ -2626,4 +2620,4 @@ class Migrate_30_31(BaseMigration):
             self._migrateContainerTemplates(platobj, toObj.get_platform())
         self._migrateBuildDefinitions(fromObj, toObj)
 
-MigrationManager.register(Migrate_30_31)
+MigrationManager.register(Migrate_20_30)

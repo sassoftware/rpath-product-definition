@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #
-# Generated  by generateDS.py version 1.18c.
+# Generated  by generateDS.py version 1.18e.
 #
 
 import sys
@@ -934,7 +934,9 @@ class imageType(GeneratedsSuper):
         _MemberSpec('anacondaCustomTrove', 'rpd:troveSpecType', 0),
         _MemberSpec('mediaTemplateTrove', 'rpd:troveSpecType', 0),
         _MemberSpec('baseFileName', 'xsd:string', 0),
+        _MemberSpec('amiHugeDiskMountPoint', 'xsd:string', 0),
         _MemberSpec('vmSnapshots', 'xsd:boolean', 0),
+        _MemberSpec('vhdDisktype', 'xsd:string', 0),
         _MemberSpec('swapSize', 'xsd:nonNegativeInteger', 0),
         _MemberSpec('betaNag', 'xsd:boolean', 0),
         _MemberSpec('anacondaTemplatesTrove', 'rpd:troveSpecType', 0),
@@ -951,7 +953,7 @@ class imageType(GeneratedsSuper):
         ]
     subclass = None
     superclass = None
-    def __init__(self, autoResolve=None, maxIsoSize=None, bugsUrl=None, natNetworking=None, vhdDiskType=None, anacondaCustomTrove=None, mediaTemplateTrove=None, baseFileName=None, vmSnapshots=None, swapSize=None, betaNag=None, anacondaTemplatesTrove=None, vmMemory=None, installLabelPath=None, unionfs=None, containerFormat=None, freespace=None, name=None, zisofs=None, diskAdapter=None, amiHugeDiskMountpoint=None, showMediaCheck=None, valueOf_=''):
+    def __init__(self, autoResolve=None, maxIsoSize=None, bugsUrl=None, natNetworking=None, vhdDiskType=None, anacondaCustomTrove=None, mediaTemplateTrove=None, baseFileName=None, amiHugeDiskMountPoint=None, vmSnapshots=None, vhdDisktype=None, swapSize=None, betaNag=None, anacondaTemplatesTrove=None, vmMemory=None, installLabelPath=None, unionfs=None, containerFormat=None, freespace=None, name=None, zisofs=None, diskAdapter=None, amiHugeDiskMountpoint=None, showMediaCheck=None, valueOf_=''):
         self.autoResolve = _cast(bool, autoResolve)
         self.maxIsoSize = _cast(int, maxIsoSize)
         self.bugsUrl = _cast(None, bugsUrl)
@@ -960,7 +962,9 @@ class imageType(GeneratedsSuper):
         self.anacondaCustomTrove = _cast(None, anacondaCustomTrove)
         self.mediaTemplateTrove = _cast(None, mediaTemplateTrove)
         self.baseFileName = _cast(None, baseFileName)
+        self.amiHugeDiskMountPoint = _cast(None, amiHugeDiskMountPoint)
         self.vmSnapshots = _cast(bool, vmSnapshots)
+        self.vhdDisktype = _cast(None, vhdDisktype)
         self.swapSize = _cast(int, swapSize)
         self.betaNag = _cast(bool, betaNag)
         self.anacondaTemplatesTrove = _cast(None, anacondaTemplatesTrove)
@@ -997,8 +1001,12 @@ class imageType(GeneratedsSuper):
     def set_mediaTemplateTrove(self, mediaTemplateTrove): self.mediaTemplateTrove = mediaTemplateTrove
     def get_baseFileName(self): return self.baseFileName
     def set_baseFileName(self, baseFileName): self.baseFileName = baseFileName
+    def get_amiHugeDiskMountPoint(self): return self.amiHugeDiskMountPoint
+    def set_amiHugeDiskMountPoint(self, amiHugeDiskMountPoint): self.amiHugeDiskMountPoint = amiHugeDiskMountPoint
     def get_vmSnapshots(self): return self.vmSnapshots
     def set_vmSnapshots(self, vmSnapshots): self.vmSnapshots = vmSnapshots
+    def get_vhdDisktype(self): return self.vhdDisktype
+    def set_vhdDisktype(self, vhdDisktype): self.vhdDisktype = vhdDisktype
     def get_swapSize(self): return self.swapSize
     def set_swapSize(self, swapSize): self.swapSize = swapSize
     def get_betaNag(self): return self.betaNag
@@ -1054,8 +1062,12 @@ class imageType(GeneratedsSuper):
             outfile.write(' mediaTemplateTrove=%s' % (quote_attrib(self.mediaTemplateTrove), ))
         if self.baseFileName is not None:
             outfile.write(' baseFileName=%s' % (self.format_string(quote_attrib(self.baseFileName).encode(ExternalEncoding), input_name='baseFileName'), ))
+        if self.amiHugeDiskMountPoint is not None:
+            outfile.write(' amiHugeDiskMountPoint=%s' % (self.format_string(quote_attrib(self.amiHugeDiskMountPoint).encode(ExternalEncoding), input_name='amiHugeDiskMountPoint'), ))
         if self.vmSnapshots is not None:
             outfile.write(' vmSnapshots="%s"' % self.format_boolean(str_lower(str(self.vmSnapshots)), input_name='vmSnapshots'))
+        if self.vhdDisktype is not None:
+            outfile.write(' vhdDisktype=%s' % (self.format_string(quote_attrib(self.vhdDisktype).encode(ExternalEncoding), input_name='vhdDisktype'), ))
         if self.swapSize is not None:
             outfile.write(' swapSize="%s"' % self.format_integer(self.swapSize, input_name='swapSize'))
         if self.betaNag is not None:
@@ -1127,9 +1139,15 @@ class imageType(GeneratedsSuper):
         if self.baseFileName is not None:
             showIndent(outfile, level)
             outfile.write('baseFileName = %s,\n' % (self.baseFileName,))
+        if self.amiHugeDiskMountPoint is not None:
+            showIndent(outfile, level)
+            outfile.write('amiHugeDiskMountPoint = %s,\n' % (self.amiHugeDiskMountPoint,))
         if self.vmSnapshots is not None:
             showIndent(outfile, level)
             outfile.write('vmSnapshots = %s,\n' % (self.vmSnapshots,))
+        if self.vhdDisktype is not None:
+            showIndent(outfile, level)
+            outfile.write('vhdDisktype = %s,\n' % (self.vhdDisktype,))
         if self.swapSize is not None:
             showIndent(outfile, level)
             outfile.write('swapSize = %s,\n' % (self.swapSize,))
@@ -1211,6 +1229,8 @@ class imageType(GeneratedsSuper):
             self.mediaTemplateTrove = attrs.get('mediaTemplateTrove').value
         if attrs.get('baseFileName'):
             self.baseFileName = attrs.get('baseFileName').value
+        if attrs.get('amiHugeDiskMountPoint'):
+            self.amiHugeDiskMountPoint = attrs.get('amiHugeDiskMountPoint').value
         if attrs.get('vmSnapshots'):
             if attrs.get('vmSnapshots').value in ('true', '1'):
                 self.vmSnapshots = True
@@ -1218,6 +1238,8 @@ class imageType(GeneratedsSuper):
                 self.vmSnapshots = False
             else:
                 raise ValueError('Bad boolean attribute (vmSnapshots)')
+        if attrs.get('vhdDisktype'):
+            self.vhdDisktype = attrs.get('vhdDisktype').value
         if attrs.get('swapSize'):
             try:
                 self.swapSize = int(attrs.get('swapSize').value)
@@ -3116,7 +3138,7 @@ class productDefinition(GeneratedsSuper):
         if self.buildTemplates:
             self.buildTemplates.export(outfile, level, namespace_, name_='buildTemplates')
         if self.buildDefinition:
-            self.buildDefinition.export(outfile, level, namespace_, name_='buildDefinition', )
+            self.buildDefinition.export(outfile, level, namespace_, name_='buildDefinition')
         if self.platform:
             self.platform.export(outfile, level, namespace_, name_='platform')
     def hasContent_(self):

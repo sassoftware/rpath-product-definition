@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #
-# Generated  by generateDS.py version 1.18c.
+# Generated  by generateDS.py version 1.18e.
 #
 
 import sys
@@ -78,8 +78,8 @@ supermod.buildDefinitionType.subclass = buildDefinitionTypeSub
 
 
 class imageTypeSub(supermod.imageType):
-    def __init__(self, autoResolve=None, maxIsoSize=None, bugsUrl=None, natNetworking=None, vhdDiskType=None, anacondaCustomTrove=None, mediaTemplateTrove=None, baseFileName=None, amiHugeDiskMountPoint=None, vmSnapshots=None, vhdDisktype=None, swapSize=None, betaNag=None, anacondaTemplatesTrove=None, vmMemory=None, installLabelPath=None, unionfs=None, containerFormat=None, freespace=None, name=None, zisofs=None, diskAdapter=None, amiHugeDiskMountpoint=None, showMediaCheck=None, valueOf_=''):
-        supermod.imageType.__init__(self, autoResolve, maxIsoSize, bugsUrl, natNetworking, vhdDiskType, anacondaCustomTrove, mediaTemplateTrove, baseFileName, amiHugeDiskMountPoint, vmSnapshots, vhdDisktype, swapSize, betaNag, anacondaTemplatesTrove, vmMemory, installLabelPath, unionfs, containerFormat, freespace, name, zisofs, diskAdapter, amiHugeDiskMountpoint, showMediaCheck, valueOf_)
+    def __init__(self, autoResolve=None, maxIsoSize=None, bugsUrl=None, natNetworking=None, vhdDiskType=None, anacondaCustomTrove=None, mediaTemplateTrove=None, baseFileName=None, vmSnapshots=None, swapSize=None, betaNag=None, anacondaTemplatesTrove=None, vmMemory=None, installLabelPath=None, unionfs=None, containerFormat=None, freespace=None, name=None, zisofs=None, diskAdapter=None, amiHugeDiskMountpoint=None, showMediaCheck=None, valueOf_=''):
+        supermod.imageType.__init__(self, autoResolve, maxIsoSize, bugsUrl, natNetworking, vhdDiskType, anacondaCustomTrove, mediaTemplateTrove, baseFileName, vmSnapshots, swapSize, betaNag, anacondaTemplatesTrove, vmMemory, installLabelPath, unionfs, containerFormat, freespace, name, zisofs, diskAdapter, amiHugeDiskMountpoint, showMediaCheck, valueOf_)
 supermod.imageType.subclass = imageTypeSub
 # end class imageTypeSub
 
@@ -127,15 +127,15 @@ supermod.promoteMapType.subclass = promoteMapTypeSub
 
 
 class platformDefinitionTypeSub(supermod.platformDefinitionType):
-    def __init__(self, version=None, platformName=None, platformVersionTrove=None, baseFlavor=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None):
-        supermod.platformDefinitionType.__init__(self, version, platformName, platformVersionTrove, baseFlavor, searchPaths, factorySources, autoLoadRecipes, architectures, flavorSets, containerTemplates, buildTemplates)
+    def __init__(self, version=None, platformName=None, platformVersionTrove=None, baseFlavor=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None):
+        supermod.platformDefinitionType.__init__(self, version, platformName, platformVersionTrove, baseFlavor, searchPaths, factorySources, autoLoadRecipes, secondaryLabels, architectures, flavorSets, containerTemplates, buildTemplates)
 supermod.platformDefinitionType.subclass = platformDefinitionTypeSub
 # end class platformDefinitionTypeSub
 
 
 class platformTypeSub(supermod.platformType):
-    def __init__(self, sourceTrove=None, useLatest=None, platformName=None, platformVersionTrove=None, baseFlavor=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None):
-        supermod.platformType.__init__(self, sourceTrove, useLatest, platformName, platformVersionTrove, baseFlavor, searchPaths, factorySources, autoLoadRecipes, architectures, flavorSets, containerTemplates, buildTemplates)
+    def __init__(self, sourceTrove=None, useLatest=None, platformName=None, platformVersionTrove=None, baseFlavor=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None):
+        supermod.platformType.__init__(self, sourceTrove, useLatest, platformName, platformVersionTrove, baseFlavor, searchPaths, factorySources, autoLoadRecipes, secondaryLabels, architectures, flavorSets, containerTemplates, buildTemplates)
 supermod.platformType.subclass = platformTypeSub
 # end class platformTypeSub
 
@@ -183,8 +183,8 @@ supermod.buildTemplatesType.subclass = buildTemplatesTypeSub
 
 
 class productDefinitionSub(supermod.productDefinition):
-    def __init__(self, version=None, productName=None, productShortname=None, productDescription=None, productVersion=None, productVersionDescription=None, conaryRepositoryHostname=None, conaryNamespace=None, imageGroup=None, sourceGroup=None, baseLabel=None, baseFlavor=None, stages=None, searchPaths=None, factorySources=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None, buildDefinition=None, platform=None):
-        supermod.productDefinition.__init__(self, version, productName, productShortname, productDescription, productVersion, productVersionDescription, conaryRepositoryHostname, conaryNamespace, imageGroup, sourceGroup, baseLabel, baseFlavor, stages, searchPaths, factorySources, secondaryLabels, architectures, flavorSets, containerTemplates, buildTemplates, buildDefinition, platform)
+    def __init__(self, version=None, productName=None, productShortname=None, productDescription=None, productVersion=None, productVersionDescription=None, conaryRepositoryHostname=None, conaryNamespace=None, imageGroup=None, sourceGroup=None, baseLabel=None, baseFlavor=None, stages=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None, buildDefinition=None, platform=None):
+        supermod.productDefinition.__init__(self, version, productName, productShortname, productDescription, productVersion, productVersionDescription, conaryRepositoryHostname, conaryNamespace, imageGroup, sourceGroup, baseLabel, baseFlavor, stages, searchPaths, factorySources, autoLoadRecipes, secondaryLabels, architectures, flavorSets, containerTemplates, buildTemplates, buildDefinition, platform)
 supermod.productDefinition.subclass = productDefinitionSub
 # end class productDefinitionSub
 

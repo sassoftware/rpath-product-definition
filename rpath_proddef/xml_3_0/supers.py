@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #
-# Generated  by generateDS.py version 1.18c.
+# Generated  by generateDS.py version 1.18e.
 #
 
 import sys
@@ -934,9 +934,7 @@ class imageType(GeneratedsSuper):
         _MemberSpec('anacondaCustomTrove', 'rpd:troveSpecType', 0),
         _MemberSpec('mediaTemplateTrove', 'rpd:troveSpecType', 0),
         _MemberSpec('baseFileName', 'xsd:string', 0),
-        _MemberSpec('amiHugeDiskMountPoint', 'xsd:string', 0),
         _MemberSpec('vmSnapshots', 'xsd:boolean', 0),
-        _MemberSpec('vhdDisktype', 'xsd:string', 0),
         _MemberSpec('swapSize', 'xsd:nonNegativeInteger', 0),
         _MemberSpec('betaNag', 'xsd:boolean', 0),
         _MemberSpec('anacondaTemplatesTrove', 'rpd:troveSpecType', 0),
@@ -953,7 +951,7 @@ class imageType(GeneratedsSuper):
         ]
     subclass = None
     superclass = None
-    def __init__(self, autoResolve=None, maxIsoSize=None, bugsUrl=None, natNetworking=None, vhdDiskType=None, anacondaCustomTrove=None, mediaTemplateTrove=None, baseFileName=None, amiHugeDiskMountPoint=None, vmSnapshots=None, vhdDisktype=None, swapSize=None, betaNag=None, anacondaTemplatesTrove=None, vmMemory=None, installLabelPath=None, unionfs=None, containerFormat=None, freespace=None, name=None, zisofs=None, diskAdapter=None, amiHugeDiskMountpoint=None, showMediaCheck=None, valueOf_=''):
+    def __init__(self, autoResolve=None, maxIsoSize=None, bugsUrl=None, natNetworking=None, vhdDiskType=None, anacondaCustomTrove=None, mediaTemplateTrove=None, baseFileName=None, vmSnapshots=None, swapSize=None, betaNag=None, anacondaTemplatesTrove=None, vmMemory=None, installLabelPath=None, unionfs=None, containerFormat=None, freespace=None, name=None, zisofs=None, diskAdapter=None, amiHugeDiskMountpoint=None, showMediaCheck=None, valueOf_=''):
         self.autoResolve = _cast(bool, autoResolve)
         self.maxIsoSize = _cast(int, maxIsoSize)
         self.bugsUrl = _cast(None, bugsUrl)
@@ -962,9 +960,7 @@ class imageType(GeneratedsSuper):
         self.anacondaCustomTrove = _cast(None, anacondaCustomTrove)
         self.mediaTemplateTrove = _cast(None, mediaTemplateTrove)
         self.baseFileName = _cast(None, baseFileName)
-        self.amiHugeDiskMountPoint = _cast(None, amiHugeDiskMountPoint)
         self.vmSnapshots = _cast(bool, vmSnapshots)
-        self.vhdDisktype = _cast(None, vhdDisktype)
         self.swapSize = _cast(int, swapSize)
         self.betaNag = _cast(bool, betaNag)
         self.anacondaTemplatesTrove = _cast(None, anacondaTemplatesTrove)
@@ -1001,12 +997,8 @@ class imageType(GeneratedsSuper):
     def set_mediaTemplateTrove(self, mediaTemplateTrove): self.mediaTemplateTrove = mediaTemplateTrove
     def get_baseFileName(self): return self.baseFileName
     def set_baseFileName(self, baseFileName): self.baseFileName = baseFileName
-    def get_amiHugeDiskMountPoint(self): return self.amiHugeDiskMountPoint
-    def set_amiHugeDiskMountPoint(self, amiHugeDiskMountPoint): self.amiHugeDiskMountPoint = amiHugeDiskMountPoint
     def get_vmSnapshots(self): return self.vmSnapshots
     def set_vmSnapshots(self, vmSnapshots): self.vmSnapshots = vmSnapshots
-    def get_vhdDisktype(self): return self.vhdDisktype
-    def set_vhdDisktype(self, vhdDisktype): self.vhdDisktype = vhdDisktype
     def get_swapSize(self): return self.swapSize
     def set_swapSize(self, swapSize): self.swapSize = swapSize
     def get_betaNag(self): return self.betaNag
@@ -1062,12 +1054,8 @@ class imageType(GeneratedsSuper):
             outfile.write(' mediaTemplateTrove=%s' % (quote_attrib(self.mediaTemplateTrove), ))
         if self.baseFileName is not None:
             outfile.write(' baseFileName=%s' % (self.format_string(quote_attrib(self.baseFileName).encode(ExternalEncoding), input_name='baseFileName'), ))
-        if self.amiHugeDiskMountPoint is not None:
-            outfile.write(' amiHugeDiskMountPoint=%s' % (self.format_string(quote_attrib(self.amiHugeDiskMountPoint).encode(ExternalEncoding), input_name='amiHugeDiskMountPoint'), ))
         if self.vmSnapshots is not None:
             outfile.write(' vmSnapshots="%s"' % self.format_boolean(str_lower(str(self.vmSnapshots)), input_name='vmSnapshots'))
-        if self.vhdDisktype is not None:
-            outfile.write(' vhdDisktype=%s' % (self.format_string(quote_attrib(self.vhdDisktype).encode(ExternalEncoding), input_name='vhdDisktype'), ))
         if self.swapSize is not None:
             outfile.write(' swapSize="%s"' % self.format_integer(self.swapSize, input_name='swapSize'))
         if self.betaNag is not None:
@@ -1139,15 +1127,9 @@ class imageType(GeneratedsSuper):
         if self.baseFileName is not None:
             showIndent(outfile, level)
             outfile.write('baseFileName = %s,\n' % (self.baseFileName,))
-        if self.amiHugeDiskMountPoint is not None:
-            showIndent(outfile, level)
-            outfile.write('amiHugeDiskMountPoint = %s,\n' % (self.amiHugeDiskMountPoint,))
         if self.vmSnapshots is not None:
             showIndent(outfile, level)
             outfile.write('vmSnapshots = %s,\n' % (self.vmSnapshots,))
-        if self.vhdDisktype is not None:
-            showIndent(outfile, level)
-            outfile.write('vhdDisktype = %s,\n' % (self.vhdDisktype,))
         if self.swapSize is not None:
             showIndent(outfile, level)
             outfile.write('swapSize = %s,\n' % (self.swapSize,))
@@ -1229,8 +1211,6 @@ class imageType(GeneratedsSuper):
             self.mediaTemplateTrove = attrs.get('mediaTemplateTrove').value
         if attrs.get('baseFileName'):
             self.baseFileName = attrs.get('baseFileName').value
-        if attrs.get('amiHugeDiskMountPoint'):
-            self.amiHugeDiskMountPoint = attrs.get('amiHugeDiskMountPoint').value
         if attrs.get('vmSnapshots'):
             if attrs.get('vmSnapshots').value in ('true', '1'):
                 self.vmSnapshots = True
@@ -1238,8 +1218,6 @@ class imageType(GeneratedsSuper):
                 self.vmSnapshots = False
             else:
                 raise ValueError('Bad boolean attribute (vmSnapshots)')
-        if attrs.get('vhdDisktype'):
-            self.vhdDisktype = attrs.get('vhdDisktype').value
         if attrs.get('swapSize'):
             try:
                 self.swapSize = int(attrs.get('swapSize').value)
@@ -1940,6 +1918,7 @@ class platformDefinitionType(GeneratedsSuper):
         _MemberSpec('searchPaths', 'searchPathListType', 0),
         _MemberSpec('factorySources', 'factorySourceListType', 0),
         _MemberSpec('autoLoadRecipes', 'autoLoadRecipesType', 0),
+        _MemberSpec('secondaryLabels', 'secondaryLabelsType', 0),
         _MemberSpec('architectures', 'architecturesType', 0),
         _MemberSpec('flavorSets', 'flavorSetsType', 0),
         _MemberSpec('containerTemplates', 'containerTemplatesType', 0),
@@ -1947,7 +1926,7 @@ class platformDefinitionType(GeneratedsSuper):
         ]
     subclass = None
     superclass = None
-    def __init__(self, version=None, platformName=None, platformVersionTrove=None, baseFlavor=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None):
+    def __init__(self, version=None, platformName=None, platformVersionTrove=None, baseFlavor=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None):
         self.version = _cast(None, version)
         self.platformName = platformName
         self.platformVersionTrove = platformVersionTrove
@@ -1955,6 +1934,7 @@ class platformDefinitionType(GeneratedsSuper):
         self.searchPaths = searchPaths
         self.factorySources = factorySources
         self.autoLoadRecipes = autoLoadRecipes
+        self.secondaryLabels = secondaryLabels
         self.architectures = architectures
         self.flavorSets = flavorSets
         self.containerTemplates = containerTemplates
@@ -1980,6 +1960,8 @@ class platformDefinitionType(GeneratedsSuper):
     def set_factorySources(self, factorySources): self.factorySources = factorySources
     def get_autoLoadRecipes(self): return self.autoLoadRecipes
     def set_autoLoadRecipes(self, autoLoadRecipes): self.autoLoadRecipes = autoLoadRecipes
+    def get_secondaryLabels(self): return self.secondaryLabels
+    def set_secondaryLabels(self, secondaryLabels): self.secondaryLabels = secondaryLabels
     def get_architectures(self): return self.architectures
     def set_architectures(self, architectures): self.architectures = architectures
     def get_flavorSets(self): return self.flavorSets
@@ -2020,6 +2002,8 @@ class platformDefinitionType(GeneratedsSuper):
             self.factorySources.export(outfile, level, namespace_, name_='factorySources')
         if self.autoLoadRecipes:
             self.autoLoadRecipes.export(outfile, level, namespace_, name_='autoLoadRecipes')
+        if self.secondaryLabels:
+            self.secondaryLabels.export(outfile, level, namespace_, name_='secondaryLabels')
         if self.architectures:
             self.architectures.export(outfile, level, namespace_, name_='architectures')
         if self.flavorSets:
@@ -2036,6 +2020,7 @@ class platformDefinitionType(GeneratedsSuper):
             self.searchPaths is not None or
             self.factorySources is not None or
             self.autoLoadRecipes is not None or
+            self.secondaryLabels is not None or
             self.architectures is not None or
             self.flavorSets is not None or
             self.containerTemplates is not None or
@@ -2076,6 +2061,12 @@ class platformDefinitionType(GeneratedsSuper):
             showIndent(outfile, level)
             outfile.write('autoLoadRecipes=model_.autoLoadRecipesType(\n')
             self.autoLoadRecipes.exportLiteral(outfile, level, name_='autoLoadRecipes')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.secondaryLabels:
+            showIndent(outfile, level)
+            outfile.write('secondaryLabels=model_.secondaryLabelsType(\n')
+            self.secondaryLabels.exportLiteral(outfile, level, name_='secondaryLabels')
             showIndent(outfile, level)
             outfile.write('),\n')
         if self.architectures:
@@ -2147,6 +2138,11 @@ class platformDefinitionType(GeneratedsSuper):
             obj_.build(child_)
             self.set_autoLoadRecipes(obj_)
         elif child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'secondaryLabels':
+            obj_ = secondaryLabelsType.factory()
+            obj_.build(child_)
+            self.set_secondaryLabels(obj_)
+        elif child_.nodeType == Node.ELEMENT_NODE and \
             nodeName_ == 'architectures':
             obj_ = architecturesType.factory()
             obj_.build(child_)
@@ -2179,6 +2175,7 @@ class platformType(GeneratedsSuper):
         _MemberSpec('searchPaths', 'searchPathListType', 0),
         _MemberSpec('factorySources', 'factorySourceListType', 0),
         _MemberSpec('autoLoadRecipes', 'autoLoadRecipesType', 0),
+        _MemberSpec('secondaryLabels', 'secondaryLabelsType', 0),
         _MemberSpec('architectures', 'architecturesType', 0),
         _MemberSpec('flavorSets', 'flavorSetsType', 0),
         _MemberSpec('containerTemplates', 'containerTemplatesType', 0),
@@ -2186,7 +2183,7 @@ class platformType(GeneratedsSuper):
         ]
     subclass = None
     superclass = None
-    def __init__(self, sourceTrove=None, useLatest=None, platformName=None, platformVersionTrove=None, baseFlavor=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None):
+    def __init__(self, sourceTrove=None, useLatest=None, platformName=None, platformVersionTrove=None, baseFlavor=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None):
         self.sourceTrove = _cast(None, sourceTrove)
         self.useLatest = _cast(bool, useLatest)
         self.platformName = platformName
@@ -2195,6 +2192,7 @@ class platformType(GeneratedsSuper):
         self.searchPaths = searchPaths
         self.factorySources = factorySources
         self.autoLoadRecipes = autoLoadRecipes
+        self.secondaryLabels = secondaryLabels
         self.architectures = architectures
         self.flavorSets = flavorSets
         self.containerTemplates = containerTemplates
@@ -2220,6 +2218,8 @@ class platformType(GeneratedsSuper):
     def set_factorySources(self, factorySources): self.factorySources = factorySources
     def get_autoLoadRecipes(self): return self.autoLoadRecipes
     def set_autoLoadRecipes(self, autoLoadRecipes): self.autoLoadRecipes = autoLoadRecipes
+    def get_secondaryLabels(self): return self.secondaryLabels
+    def set_secondaryLabels(self, secondaryLabels): self.secondaryLabels = secondaryLabels
     def get_architectures(self): return self.architectures
     def set_architectures(self, architectures): self.architectures = architectures
     def get_flavorSets(self): return self.flavorSets
@@ -2264,6 +2264,8 @@ class platformType(GeneratedsSuper):
             self.factorySources.export(outfile, level, namespace_, name_='factorySources')
         if self.autoLoadRecipes:
             self.autoLoadRecipes.export(outfile, level, namespace_, name_='autoLoadRecipes')
+        if self.secondaryLabels:
+            self.secondaryLabels.export(outfile, level, namespace_, name_='secondaryLabels')
         if self.architectures:
             self.architectures.export(outfile, level, namespace_, name_='architectures')
         if self.flavorSets:
@@ -2280,6 +2282,7 @@ class platformType(GeneratedsSuper):
             self.searchPaths is not None or
             self.factorySources is not None or
             self.autoLoadRecipes is not None or
+            self.secondaryLabels is not None or
             self.architectures is not None or
             self.flavorSets is not None or
             self.containerTemplates is not None or
@@ -2323,6 +2326,12 @@ class platformType(GeneratedsSuper):
             showIndent(outfile, level)
             outfile.write('autoLoadRecipes=model_.autoLoadRecipesType(\n')
             self.autoLoadRecipes.exportLiteral(outfile, level, name_='autoLoadRecipes')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.secondaryLabels:
+            showIndent(outfile, level)
+            outfile.write('secondaryLabels=model_.secondaryLabelsType(\n')
+            self.secondaryLabels.exportLiteral(outfile, level, name_='secondaryLabels')
             showIndent(outfile, level)
             outfile.write('),\n')
         if self.architectures:
@@ -2400,6 +2409,11 @@ class platformType(GeneratedsSuper):
             obj_ = autoLoadRecipesType.factory()
             obj_.build(child_)
             self.set_autoLoadRecipes(obj_)
+        elif child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'secondaryLabels':
+            obj_ = secondaryLabelsType.factory()
+            obj_.build(child_)
+            self.set_secondaryLabels(obj_)
         elif child_.nodeType == Node.ELEMENT_NODE and \
             nodeName_ == 'architectures':
             obj_ = architecturesType.factory()
@@ -2981,6 +2995,7 @@ class productDefinition(GeneratedsSuper):
         _MemberSpec('stages', 'stageListType', 0),
         _MemberSpec('searchPaths', 'searchPathListType', 0),
         _MemberSpec('factorySources', 'factorySourceListType', 0),
+        _MemberSpec('autoLoadRecipes', 'autoLoadRecipesType', 0),
         _MemberSpec('secondaryLabels', 'secondaryLabelsType', 0),
         _MemberSpec('architectures', 'architecturesType', 0),
         _MemberSpec('flavorSets', 'flavorSetsType', 0),
@@ -2991,7 +3006,7 @@ class productDefinition(GeneratedsSuper):
         ]
     subclass = None
     superclass = None
-    def __init__(self, version=None, productName=None, productShortname=None, productDescription=None, productVersion=None, productVersionDescription=None, conaryRepositoryHostname=None, conaryNamespace=None, imageGroup=None, sourceGroup=None, baseLabel=None, baseFlavor=None, stages=None, searchPaths=None, factorySources=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None, buildDefinition=None, platform=None):
+    def __init__(self, version=None, productName=None, productShortname=None, productDescription=None, productVersion=None, productVersionDescription=None, conaryRepositoryHostname=None, conaryNamespace=None, imageGroup=None, sourceGroup=None, baseLabel=None, baseFlavor=None, stages=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None, buildDefinition=None, platform=None):
         self.version = _cast(None, version)
         self.productName = productName
         self.productShortname = productShortname
@@ -3007,6 +3022,7 @@ class productDefinition(GeneratedsSuper):
         self.stages = stages
         self.searchPaths = searchPaths
         self.factorySources = factorySources
+        self.autoLoadRecipes = autoLoadRecipes
         self.secondaryLabels = secondaryLabels
         self.architectures = architectures
         self.flavorSets = flavorSets
@@ -3057,6 +3073,8 @@ class productDefinition(GeneratedsSuper):
     def set_searchPaths(self, searchPaths): self.searchPaths = searchPaths
     def get_factorySources(self): return self.factorySources
     def set_factorySources(self, factorySources): self.factorySources = factorySources
+    def get_autoLoadRecipes(self): return self.autoLoadRecipes
+    def set_autoLoadRecipes(self, autoLoadRecipes): self.autoLoadRecipes = autoLoadRecipes
     def get_secondaryLabels(self): return self.secondaryLabels
     def set_secondaryLabels(self, secondaryLabels): self.secondaryLabels = secondaryLabels
     def get_architectures(self): return self.architectures
@@ -3127,6 +3145,8 @@ class productDefinition(GeneratedsSuper):
             self.searchPaths.export(outfile, level, namespace_, name_='searchPaths')
         if self.factorySources:
             self.factorySources.export(outfile, level, namespace_, name_='factorySources')
+        if self.autoLoadRecipes:
+            self.autoLoadRecipes.export(outfile, level, namespace_, name_='autoLoadRecipes')
         if self.secondaryLabels:
             self.secondaryLabels.export(outfile, level, namespace_, name_='secondaryLabels')
         if self.architectures:
@@ -3157,6 +3177,7 @@ class productDefinition(GeneratedsSuper):
             self.stages is not None or
             self.searchPaths is not None or
             self.factorySources is not None or
+            self.autoLoadRecipes is not None or
             self.secondaryLabels is not None or
             self.architectures is not None or
             self.flavorSets is not None or
@@ -3216,6 +3237,12 @@ class productDefinition(GeneratedsSuper):
             showIndent(outfile, level)
             outfile.write('factorySources=model_.factorySourceListType(\n')
             self.factorySources.exportLiteral(outfile, level, name_='factorySources')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.autoLoadRecipes:
+            showIndent(outfile, level)
+            outfile.write('autoLoadRecipes=model_.autoLoadRecipesType(\n')
+            self.autoLoadRecipes.exportLiteral(outfile, level, name_='autoLoadRecipes')
             showIndent(outfile, level)
             outfile.write('),\n')
         if self.secondaryLabels:
@@ -3354,6 +3381,11 @@ class productDefinition(GeneratedsSuper):
             obj_ = factorySourceListType.factory()
             obj_.build(child_)
             self.set_factorySources(obj_)
+        elif child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'autoLoadRecipes':
+            obj_ = autoLoadRecipesType.factory()
+            obj_.build(child_)
+            self.set_autoLoadRecipes(obj_)
         elif child_.nodeType == Node.ELEMENT_NODE and \
             nodeName_ == 'secondaryLabels':
             obj_ = secondaryLabelsType.factory()

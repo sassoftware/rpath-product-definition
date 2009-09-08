@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #
-# Generated  by generateDS.py version 1.18c.
+# Generated  by generateDS.py version 1.18e.
 #
 
 import sys
@@ -78,8 +78,8 @@ supermod.buildDefinitionType.subclass = buildDefinitionTypeSub
 
 
 class imageTypeSub(supermod.imageType):
-    def __init__(self, autoResolve=None, maxIsoSize=None, bugsUrl=None, natNetworking=None, vhdDiskType=None, anacondaCustomTrove=None, mediaTemplateTrove=None, baseFileName=None, vmSnapshots=None, swapSize=None, betaNag=None, anacondaTemplatesTrove=None, vmMemory=None, installLabelPath=None, unionfs=None, containerFormat=None, freespace=None, name=None, zisofs=None, diskAdapter=None, amiHugeDiskMountpoint=None, showMediaCheck=None, valueOf_=''):
-        supermod.imageType.__init__(self, autoResolve, maxIsoSize, bugsUrl, natNetworking, vhdDiskType, anacondaCustomTrove, mediaTemplateTrove, baseFileName, vmSnapshots, swapSize, betaNag, anacondaTemplatesTrove, vmMemory, installLabelPath, unionfs, containerFormat, freespace, name, zisofs, diskAdapter, amiHugeDiskMountpoint, showMediaCheck, valueOf_)
+    def __init__(self, autoResolve=None, maxIsoSize=None, bugsUrl=None, natNetworking=None, vhdDiskType=None, anacondaCustomTrove=None, mediaTemplateTrove=None, baseFileName=None, amiHugeDiskMountPoint=None, vmSnapshots=None, vhdDisktype=None, swapSize=None, betaNag=None, anacondaTemplatesTrove=None, vmMemory=None, installLabelPath=None, unionfs=None, containerFormat=None, freespace=None, name=None, zisofs=None, diskAdapter=None, amiHugeDiskMountpoint=None, showMediaCheck=None, valueOf_=''):
+        supermod.imageType.__init__(self, autoResolve, maxIsoSize, bugsUrl, natNetworking, vhdDiskType, anacondaCustomTrove, mediaTemplateTrove, baseFileName, amiHugeDiskMountPoint, vmSnapshots, vhdDisktype, swapSize, betaNag, anacondaTemplatesTrove, vmMemory, installLabelPath, unionfs, containerFormat, freespace, name, zisofs, diskAdapter, amiHugeDiskMountpoint, showMediaCheck, valueOf_)
 supermod.imageType.subclass = imageTypeSub
 # end class imageTypeSub
 
