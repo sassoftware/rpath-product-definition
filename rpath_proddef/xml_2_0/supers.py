@@ -21,7 +21,7 @@ try:
     from generatedssuper import GeneratedsSuper
 except ImportError, exp:
 
-    class GeneratedsSuper:
+    class GeneratedsSuper(object):
         def format_string(self, input_data, input_name=''):
             return input_data
         def format_integer(self, input_data, input_name=''):
@@ -1310,7 +1310,8 @@ class imageType(GeneratedsSuper):
     def getFields(self):
         fieldNames = [ x.get_name()
             for x in self._member_data_items ]
-        fields = ((x, getattr(self, x)) for x in fieldNames)
+        fields = ((x, getattr(self, x)) for x in fieldNames
+            if x != 'containerFormat')
         fields = dict((x, y) for (x, y) in fields if y is not None)
         return fields
 

@@ -113,7 +113,8 @@ imageTypeGetFields = MethodSpec(name='getTroveTup',
     def getFields(self):
         fieldNames = [ x.get_name()
             for x in self._member_data_items ]
-        fields = ((x, getattr(self, x)) for x in fieldNames)
+        fields = ((x, getattr(self, x)) for x in fieldNames
+            if x != 'containerFormat')
         fields = dict((x, y) for (x, y) in fields if y is not None)
         return fields
 

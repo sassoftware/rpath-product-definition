@@ -21,7 +21,7 @@ try:
     from generatedssuper import GeneratedsSuper
 except ImportError, exp:
 
-    class GeneratedsSuper:
+    class GeneratedsSuper(object):
         def format_string(self, input_data, input_name=''):
             return input_data
         def format_integer(self, input_data, input_name=''):

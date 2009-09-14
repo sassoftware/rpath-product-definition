@@ -31,7 +31,8 @@ class Image(module.imageTypeSub):
         'xsd:nonNegativeInteger' : int,
     }
     _attributes = dict([ (x.name, _schemaToPythonTypeMap[x.data_type])
-        for x in module.imageTypeSub._member_data_items ])
+        for x in module.imageTypeSub._member_data_items
+            if x.name != 'containerFormat'])
 
     def __init__(self, fields):
         module.imageTypeSub.__init__(self, **fields)
