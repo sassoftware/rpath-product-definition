@@ -1547,6 +1547,15 @@ class ProductDefinitionRecipe(PackageRecipe):
             return pa
         raise BuildTemplateNotFoundError(name)
 
+    def getPlatformBuildTemplates(self):
+        if self.platform is None:
+            return []
+        return self.platform.getBuildTemplates()
+
+    def iterAllBuildTemplates(self):
+        return itertools.chain(self.getBuildTemplates(),
+                               self.getPlatformBuildTemplates())
+
     def addSecondaryLabel(self, name, label):
         """
         Add a secondary label to the product definition.
