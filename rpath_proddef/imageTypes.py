@@ -21,5 +21,17 @@ import api1
 
 module = api1.BaseDefinition.loadModule(api1.BaseDefinition.version)
 class Image(module.imageTypeSub):
+    # Preserve interface for mint - it tries to build its own type maps based
+    # on the images
+    _schemaToPythonTypeMap = {
+        'xsd:string' : str,
+        'xsd:boolean' : bool,
+        'xsd:positiveInteger' : int,
+        'rpd:troveSpecType' : str,
+        'xsd:nonNegativeInteger' : int,
+    }
+    _attributes = dict([ (x.name, _schemaToPythonTypeMap[x.data_type])
+        for x in module.imageTypeSub._member_data_items ])
+
     def __init__(self, fields):
         module.imageTypeSub.__init__(self, **fields)
