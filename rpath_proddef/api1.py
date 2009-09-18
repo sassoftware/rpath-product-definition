@@ -613,6 +613,10 @@ class BaseDefinition(object):
         fields = fields or {}
         if name is not None:
             fields.setdefault('containerFormat', name)
+        # vhdDiskType is special for some reason - mint keeps trying to set it
+        # to the empty string
+        if fields.get('vhdDiskType') == '':
+            del fields['vhdDiskType']
         return xmlsubs.imageTypeSub.factory(**fields)
 
     @classmethod
