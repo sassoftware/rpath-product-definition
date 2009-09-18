@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #
-# Generated  by generateDS.py version 1.18e.
+# Generated  by generateDS.py.
 #
 
 import sys
@@ -213,7 +213,7 @@ class stageType(GeneratedsSuper):
     def set_name(self, name): self.name = name
     def export(self, outfile, level, namespace_='rpd:', name_='stageType', namespacedef_=''):
         showIndent(outfile, level)
-        outfile.write('<%s%s %s' % (namespace_, name_, namespacedef_, ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         self.exportAttributes(outfile, level, namespace_, name_='stageType')
         if self.hasContent_():
             outfile.write('>\n')
@@ -221,7 +221,7 @@ class stageType(GeneratedsSuper):
             showIndent(outfile, level)
             outfile.write('</%s%s>\n' % (namespace_, name_))
         else:
-            outfile.write(' />\n')
+            outfile.write('/>\n')
     def exportAttributes(self, outfile, level, namespace_='rpd:', name_='stageType'):
         outfile.write(' labelSuffix=%s' % (self.format_string(quote_attrib(self.labelSuffix).encode(ExternalEncoding), input_name='labelSuffix'), ))
         outfile.write(' name=%s' % (self.format_string(quote_attrib(self.name).encode(ExternalEncoding), input_name='name'), ))
@@ -303,7 +303,7 @@ class stageListType(GeneratedsSuper):
     def insert_stage(self, index, value): self.stage[index] = value
     def export(self, outfile, level, namespace_='rpd:', name_='stageListType', namespacedef_=''):
         showIndent(outfile, level)
-        outfile.write('<%s%s %s' % (namespace_, name_, namespacedef_, ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         self.exportAttributes(outfile, level, namespace_, name_='stageListType')
         if self.hasContent_():
             outfile.write('>\n')
@@ -311,7 +311,7 @@ class stageListType(GeneratedsSuper):
             showIndent(outfile, level)
             outfile.write('</%s%s>\n' % (namespace_, name_))
         else:
-            outfile.write(' />\n')
+            outfile.write('/>\n')
     def exportAttributes(self, outfile, level, namespace_='rpd:', name_='stageListType'):
         pass
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='stageListType'):
@@ -386,14 +386,14 @@ class nameLabelType(GeneratedsSuper):
     def setValueOf_(self, valueOf_): self.valueOf_ = valueOf_
     def export(self, outfile, level, namespace_='rpd:', name_='nameLabelType', namespacedef_=''):
         showIndent(outfile, level)
-        outfile.write('<%s%s %s' % (namespace_, name_, namespacedef_, ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         self.exportAttributes(outfile, level, namespace_, name_='nameLabelType')
         if self.hasContent_():
             outfile.write('>')
             self.exportChildren(outfile, level + 1, namespace_, name_)
             outfile.write('</%s%s>\n' % (namespace_, name_))
         else:
-            outfile.write(' />\n')
+            outfile.write('/>\n')
     def exportAttributes(self, outfile, level, namespace_='rpd:', name_='nameLabelType'):
         if self.troveName is not None:
             outfile.write(' troveName=%s' % (self.format_string(quote_attrib(self.troveName).encode(ExternalEncoding), input_name='troveName'), ))
@@ -489,14 +489,14 @@ class searchPathType(GeneratedsSuper):
     def setValueOf_(self, valueOf_): self.valueOf_ = valueOf_
     def export(self, outfile, level, namespace_='rpd:', name_='searchPathType', namespacedef_=''):
         showIndent(outfile, level)
-        outfile.write('<%s%s %s' % (namespace_, name_, namespacedef_, ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         self.exportAttributes(outfile, level, namespace_, name_='searchPathType')
         if self.hasContent_():
             outfile.write('>')
             self.exportChildren(outfile, level + 1, namespace_, name_)
             outfile.write('</%s%s>\n' % (namespace_, name_))
         else:
-            outfile.write(' />\n')
+            outfile.write('/>\n')
     def exportAttributes(self, outfile, level, namespace_='rpd:', name_='searchPathType'):
         if self.isGroupSearchPathTrove is not None:
             outfile.write(' isGroupSearchPathTrove="%s"' % self.format_boolean(str_lower(str(self.isGroupSearchPathTrove)), input_name='isGroupSearchPathTrove'))
@@ -623,7 +623,7 @@ class searchPathListType(GeneratedsSuper):
     def insert_searchPath(self, index, value): self.searchPath[index] = value
     def export(self, outfile, level, namespace_='rpd:', name_='searchPathListType', namespacedef_=''):
         showIndent(outfile, level)
-        outfile.write('<%s%s %s' % (namespace_, name_, namespacedef_, ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         self.exportAttributes(outfile, level, namespace_, name_='searchPathListType')
         if self.hasContent_():
             outfile.write('>\n')
@@ -631,7 +631,7 @@ class searchPathListType(GeneratedsSuper):
             showIndent(outfile, level)
             outfile.write('</%s%s>\n' % (namespace_, name_))
         else:
-            outfile.write(' />\n')
+            outfile.write('/>\n')
     def exportAttributes(self, outfile, level, namespace_='rpd:', name_='searchPathListType'):
         pass
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='searchPathListType'):
@@ -704,7 +704,7 @@ class factorySourceListType(GeneratedsSuper):
     def insert_factorySource(self, index, value): self.factorySource[index] = value
     def export(self, outfile, level, namespace_='rpd:', name_='factorySourceListType', namespacedef_=''):
         showIndent(outfile, level)
-        outfile.write('<%s%s %s' % (namespace_, name_, namespacedef_, ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         self.exportAttributes(outfile, level, namespace_, name_='factorySourceListType')
         if self.hasContent_():
             outfile.write('>\n')
@@ -712,7 +712,7 @@ class factorySourceListType(GeneratedsSuper):
             showIndent(outfile, level)
             outfile.write('</%s%s>\n' % (namespace_, name_))
         else:
-            outfile.write(' />\n')
+            outfile.write('/>\n')
     def exportAttributes(self, outfile, level, namespace_='rpd:', name_='factorySourceListType'):
         pass
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='factorySourceListType'):
@@ -785,7 +785,7 @@ class autoLoadRecipesType(GeneratedsSuper):
     def insert_autoLoadRecipe(self, index, value): self.autoLoadRecipe[index] = value
     def export(self, outfile, level, namespace_='rpd:', name_='autoLoadRecipesType', namespacedef_=''):
         showIndent(outfile, level)
-        outfile.write('<%s%s %s' % (namespace_, name_, namespacedef_, ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         self.exportAttributes(outfile, level, namespace_, name_='autoLoadRecipesType')
         if self.hasContent_():
             outfile.write('>\n')
@@ -793,7 +793,7 @@ class autoLoadRecipesType(GeneratedsSuper):
             showIndent(outfile, level)
             outfile.write('</%s%s>\n' % (namespace_, name_))
         else:
-            outfile.write(' />\n')
+            outfile.write('/>\n')
     def exportAttributes(self, outfile, level, namespace_='rpd:', name_='autoLoadRecipesType'):
         pass
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='autoLoadRecipesType'):
@@ -866,7 +866,7 @@ class buildDefinitionType(GeneratedsSuper):
     def insert_build(self, index, value): self.build_[index] = value
     def export(self, outfile, level, namespace_='rpd:', name_='buildDefinitionType', namespacedef_=''):
         showIndent(outfile, level)
-        outfile.write('<%s%s %s' % (namespace_, name_, namespacedef_, ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         self.exportAttributes(outfile, level, namespace_, name_='buildDefinitionType')
         if self.hasContent_():
             outfile.write('>\n')
@@ -874,7 +874,7 @@ class buildDefinitionType(GeneratedsSuper):
             showIndent(outfile, level)
             outfile.write('</%s%s>\n' % (namespace_, name_))
         else:
-            outfile.write(' />\n')
+            outfile.write('/>\n')
     def exportAttributes(self, outfile, level, namespace_='rpd:', name_='buildDefinitionType'):
         pass
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='buildDefinitionType'):
@@ -1029,14 +1029,14 @@ class imageType(GeneratedsSuper):
     def setValueOf_(self, valueOf_): self.valueOf_ = valueOf_
     def export(self, outfile, level, namespace_='rpd:', name_='imageType', namespacedef_=''):
         showIndent(outfile, level)
-        outfile.write('<%s%s %s' % (namespace_, name_, namespacedef_, ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         self.exportAttributes(outfile, level, namespace_, name_='imageType')
         if self.hasContent_():
             outfile.write('>')
             self.exportChildren(outfile, level + 1, namespace_, name_)
             outfile.write('</%s%s>\n' % (namespace_, name_))
         else:
-            outfile.write(' />\n')
+            outfile.write('/>\n')
     def exportAttributes(self, outfile, level, namespace_='rpd:', name_='imageType'):
         if self.autoResolve is not None:
             outfile.write(' autoResolve="%s"' % self.format_boolean(str_lower(str(self.autoResolve)), input_name='autoResolve'))
@@ -1354,7 +1354,7 @@ class buildType(GeneratedsSuper):
     def set_flavorSetRef(self, flavorSetRef): self.flavorSetRef = flavorSetRef
     def export(self, outfile, level, namespace_='rpd:', name_='buildType', namespacedef_=''):
         showIndent(outfile, level)
-        outfile.write('<%s%s %s' % (namespace_, name_, namespacedef_, ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         self.exportAttributes(outfile, level, namespace_, name_='buildType')
         if self.hasContent_():
             outfile.write('>\n')
@@ -1362,7 +1362,7 @@ class buildType(GeneratedsSuper):
             showIndent(outfile, level)
             outfile.write('</%s%s>\n' % (namespace_, name_))
         else:
-            outfile.write(' />\n')
+            outfile.write('/>\n')
     def exportAttributes(self, outfile, level, namespace_='rpd:', name_='buildType'):
         if self.containerTemplateRef is not None:
             outfile.write(' containerTemplateRef=%s' % (self.format_string(quote_attrib(self.containerTemplateRef).encode(ExternalEncoding), input_name='containerTemplateRef'), ))
@@ -1523,14 +1523,14 @@ class stage(GeneratedsSuper):
     def setValueOf_(self, valueOf_): self.valueOf_ = valueOf_
     def export(self, outfile, level, namespace_='rpd:', name_='stage', namespacedef_=''):
         showIndent(outfile, level)
-        outfile.write('<%s%s %s' % (namespace_, name_, namespacedef_, ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         self.exportAttributes(outfile, level, namespace_, name_='stage')
         if self.hasContent_():
             outfile.write('>')
             self.exportChildren(outfile, level + 1, namespace_, name_)
             outfile.write('</%s%s>\n' % (namespace_, name_))
         else:
-            outfile.write(' />\n')
+            outfile.write('/>\n')
     def exportAttributes(self, outfile, level, namespace_='rpd:', name_='stage'):
         outfile.write(' ref=%s' % (self.format_string(quote_attrib(self.ref).encode(ExternalEncoding), input_name='ref'), ))
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='stage'):
@@ -1601,7 +1601,7 @@ class secondaryLabelsType(GeneratedsSuper):
     def insert_secondaryLabel(self, index, value): self.secondaryLabel[index] = value
     def export(self, outfile, level, namespace_='rpd:', name_='secondaryLabelsType', namespacedef_=''):
         showIndent(outfile, level)
-        outfile.write('<%s%s %s' % (namespace_, name_, namespacedef_, ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         self.exportAttributes(outfile, level, namespace_, name_='secondaryLabelsType')
         if self.hasContent_():
             outfile.write('>\n')
@@ -1609,7 +1609,7 @@ class secondaryLabelsType(GeneratedsSuper):
             showIndent(outfile, level)
             outfile.write('</%s%s>\n' % (namespace_, name_))
         else:
-            outfile.write(' />\n')
+            outfile.write('/>\n')
     def exportAttributes(self, outfile, level, namespace_='rpd:', name_='secondaryLabelsType'):
         pass
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='secondaryLabelsType'):
@@ -1680,14 +1680,14 @@ class secondaryLabel(GeneratedsSuper):
     def setValueOf_(self, valueOf_): self.valueOf_ = valueOf_
     def export(self, outfile, level, namespace_='rpd:', name_='secondaryLabel', namespacedef_=''):
         showIndent(outfile, level)
-        outfile.write('<%s%s %s' % (namespace_, name_, namespacedef_, ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         self.exportAttributes(outfile, level, namespace_, name_='secondaryLabel')
         if self.hasContent_():
             outfile.write('>')
             self.exportChildren(outfile, level + 1, namespace_, name_)
             outfile.write('</%s%s>\n' % (namespace_, name_))
         else:
-            outfile.write(' />\n')
+            outfile.write('/>\n')
     def exportAttributes(self, outfile, level, namespace_='rpd:', name_='secondaryLabel'):
         outfile.write(' name=%s' % (self.format_string(quote_attrib(self.name).encode(ExternalEncoding), input_name='name'), ))
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='secondaryLabel'):
@@ -1763,7 +1763,7 @@ class promoteMapsType(GeneratedsSuper):
     def insert_promoteMap(self, index, value): self.promoteMap[index] = value
     def export(self, outfile, level, namespace_='rpd:', name_='promoteMapsType', namespacedef_=''):
         showIndent(outfile, level)
-        outfile.write('<%s%s %s' % (namespace_, name_, namespacedef_, ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         self.exportAttributes(outfile, level, namespace_, name_='promoteMapsType')
         if self.hasContent_():
             outfile.write('>\n')
@@ -1771,7 +1771,7 @@ class promoteMapsType(GeneratedsSuper):
             showIndent(outfile, level)
             outfile.write('</%s%s>\n' % (namespace_, name_))
         else:
-            outfile.write(' />\n')
+            outfile.write('/>\n')
     def exportAttributes(self, outfile, level, namespace_='rpd:', name_='promoteMapsType'):
         pass
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='promoteMapsType'):
@@ -1846,14 +1846,14 @@ class promoteMapType(GeneratedsSuper):
     def setValueOf_(self, valueOf_): self.valueOf_ = valueOf_
     def export(self, outfile, level, namespace_='rpd:', name_='promoteMapType', namespacedef_=''):
         showIndent(outfile, level)
-        outfile.write('<%s%s %s' % (namespace_, name_, namespacedef_, ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         self.exportAttributes(outfile, level, namespace_, name_='promoteMapType')
         if self.hasContent_():
             outfile.write('>')
             self.exportChildren(outfile, level + 1, namespace_, name_)
             outfile.write('</%s%s>\n' % (namespace_, name_))
         else:
-            outfile.write(' />\n')
+            outfile.write('/>\n')
     def exportAttributes(self, outfile, level, namespace_='rpd:', name_='promoteMapType'):
         outfile.write(' name=%s' % (self.format_string(quote_attrib(self.name).encode(ExternalEncoding), input_name='name'), ))
         outfile.write(' label=%s' % (self.format_string(quote_attrib(self.label).encode(ExternalEncoding), input_name='label'), ))
@@ -1975,7 +1975,7 @@ class platformDefinitionType(GeneratedsSuper):
     def set_version(self, version): self.version = version
     def export(self, outfile, level, namespace_='rpd:', name_='platformDefinitionType', namespacedef_=''):
         showIndent(outfile, level)
-        outfile.write('<%s%s %s' % (namespace_, name_, namespacedef_, ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         self.exportAttributes(outfile, level, namespace_, name_='platformDefinitionType')
         if self.hasContent_():
             outfile.write('>\n')
@@ -1983,7 +1983,7 @@ class platformDefinitionType(GeneratedsSuper):
             showIndent(outfile, level)
             outfile.write('</%s%s>\n' % (namespace_, name_))
         else:
-            outfile.write(' />\n')
+            outfile.write('/>\n')
     def exportAttributes(self, outfile, level, namespace_='rpd:', name_='platformDefinitionType'):
         if self.version is not None:
             outfile.write(' version=%s' % (self.format_string(quote_attrib(self.version).encode(ExternalEncoding), input_name='version'), ))
@@ -2235,7 +2235,7 @@ class platformType(GeneratedsSuper):
     def set_useLatest(self, useLatest): self.useLatest = useLatest
     def export(self, outfile, level, namespace_='rpd:', name_='platformType', namespacedef_=''):
         showIndent(outfile, level)
-        outfile.write('<%s%s %s' % (namespace_, name_, namespacedef_, ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         self.exportAttributes(outfile, level, namespace_, name_='platformType')
         if self.hasContent_():
             outfile.write('>\n')
@@ -2243,7 +2243,7 @@ class platformType(GeneratedsSuper):
             showIndent(outfile, level)
             outfile.write('</%s%s>\n' % (namespace_, name_))
         else:
-            outfile.write(' />\n')
+            outfile.write('/>\n')
     def exportAttributes(self, outfile, level, namespace_='rpd:', name_='platformType'):
         if self.sourceTrove is not None:
             outfile.write(' sourceTrove=%s' % (self.format_string(quote_attrib(self.sourceTrove).encode(ExternalEncoding), input_name='sourceTrove'), ))
@@ -2467,14 +2467,14 @@ class nameFlavorType(GeneratedsSuper):
     def setValueOf_(self, valueOf_): self.valueOf_ = valueOf_
     def export(self, outfile, level, namespace_='rpd:', name_='nameFlavorType', namespacedef_=''):
         showIndent(outfile, level)
-        outfile.write('<%s%s %s' % (namespace_, name_, namespacedef_, ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         self.exportAttributes(outfile, level, namespace_, name_='nameFlavorType')
         if self.hasContent_():
             outfile.write('>')
             self.exportChildren(outfile, level + 1, namespace_, name_)
             outfile.write('</%s%s>\n' % (namespace_, name_))
         else:
-            outfile.write(' />\n')
+            outfile.write('/>\n')
     def exportAttributes(self, outfile, level, namespace_='rpd:', name_='nameFlavorType'):
         outfile.write(' flavor=%s' % (self.format_string(quote_attrib(self.flavor).encode(ExternalEncoding), input_name='flavor'), ))
         outfile.write(' displayName=%s' % (self.format_string(quote_attrib(self.displayName).encode(ExternalEncoding), input_name='displayName'), ))
@@ -2557,7 +2557,7 @@ class architecturesType(GeneratedsSuper):
     def insert_architecture(self, index, value): self.architecture[index] = value
     def export(self, outfile, level, namespace_='rpd:', name_='architecturesType', namespacedef_=''):
         showIndent(outfile, level)
-        outfile.write('<%s%s %s' % (namespace_, name_, namespacedef_, ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         self.exportAttributes(outfile, level, namespace_, name_='architecturesType')
         if self.hasContent_():
             outfile.write('>\n')
@@ -2565,7 +2565,7 @@ class architecturesType(GeneratedsSuper):
             showIndent(outfile, level)
             outfile.write('</%s%s>\n' % (namespace_, name_))
         else:
-            outfile.write(' />\n')
+            outfile.write('/>\n')
     def exportAttributes(self, outfile, level, namespace_='rpd:', name_='architecturesType'):
         pass
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='architecturesType'):
@@ -2638,7 +2638,7 @@ class flavorSetsType(GeneratedsSuper):
     def insert_flavorSet(self, index, value): self.flavorSet[index] = value
     def export(self, outfile, level, namespace_='rpd:', name_='flavorSetsType', namespacedef_=''):
         showIndent(outfile, level)
-        outfile.write('<%s%s %s' % (namespace_, name_, namespacedef_, ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         self.exportAttributes(outfile, level, namespace_, name_='flavorSetsType')
         if self.hasContent_():
             outfile.write('>\n')
@@ -2646,7 +2646,7 @@ class flavorSetsType(GeneratedsSuper):
             showIndent(outfile, level)
             outfile.write('</%s%s>\n' % (namespace_, name_))
         else:
-            outfile.write(' />\n')
+            outfile.write('/>\n')
     def exportAttributes(self, outfile, level, namespace_='rpd:', name_='flavorSetsType'):
         pass
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='flavorSetsType'):
@@ -2719,7 +2719,7 @@ class containerTemplatesType(GeneratedsSuper):
     def insert_image(self, index, value): self.image[index] = value
     def export(self, outfile, level, namespace_='rpd:', name_='containerTemplatesType', namespacedef_=''):
         showIndent(outfile, level)
-        outfile.write('<%s%s %s' % (namespace_, name_, namespacedef_, ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         self.exportAttributes(outfile, level, namespace_, name_='containerTemplatesType')
         if self.hasContent_():
             outfile.write('>\n')
@@ -2727,7 +2727,7 @@ class containerTemplatesType(GeneratedsSuper):
             showIndent(outfile, level)
             outfile.write('</%s%s>\n' % (namespace_, name_))
         else:
-            outfile.write(' />\n')
+            outfile.write('/>\n')
     def exportAttributes(self, outfile, level, namespace_='rpd:', name_='containerTemplatesType'):
         pass
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='containerTemplatesType'):
@@ -2814,14 +2814,14 @@ class buildTemplateType(GeneratedsSuper):
     def setValueOf_(self, valueOf_): self.valueOf_ = valueOf_
     def export(self, outfile, level, namespace_='rpd:', name_='buildTemplateType', namespacedef_=''):
         showIndent(outfile, level)
-        outfile.write('<%s%s %s' % (namespace_, name_, namespacedef_, ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         self.exportAttributes(outfile, level, namespace_, name_='buildTemplateType')
         if self.hasContent_():
             outfile.write('>')
             self.exportChildren(outfile, level + 1, namespace_, name_)
             outfile.write('</%s%s>\n' % (namespace_, name_))
         else:
-            outfile.write(' />\n')
+            outfile.write('/>\n')
     def exportAttributes(self, outfile, level, namespace_='rpd:', name_='buildTemplateType'):
         if self.containerTemplateRef is not None:
             outfile.write(' containerTemplateRef=%s' % (self.format_string(quote_attrib(self.containerTemplateRef).encode(ExternalEncoding), input_name='containerTemplateRef'), ))
@@ -2921,7 +2921,7 @@ class buildTemplatesType(GeneratedsSuper):
     def insert_buildTemplate(self, index, value): self.buildTemplate[index] = value
     def export(self, outfile, level, namespace_='rpd:', name_='buildTemplatesType', namespacedef_=''):
         showIndent(outfile, level)
-        outfile.write('<%s%s %s' % (namespace_, name_, namespacedef_, ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         self.exportAttributes(outfile, level, namespace_, name_='buildTemplatesType')
         if self.hasContent_():
             outfile.write('>\n')
@@ -2929,7 +2929,7 @@ class buildTemplatesType(GeneratedsSuper):
             showIndent(outfile, level)
             outfile.write('</%s%s>\n' % (namespace_, name_))
         else:
-            outfile.write(' />\n')
+            outfile.write('/>\n')
     def exportAttributes(self, outfile, level, namespace_='rpd:', name_='buildTemplatesType'):
         pass
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='buildTemplatesType'):
@@ -3094,7 +3094,7 @@ class productDefinition(GeneratedsSuper):
     def set_version(self, version): self.version = version
     def export(self, outfile, level, namespace_='rpd:', name_='productDefinition', namespacedef_=''):
         showIndent(outfile, level)
-        outfile.write('<%s%s %s' % (namespace_, name_, namespacedef_, ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         self.exportAttributes(outfile, level, namespace_, name_='productDefinition')
         if self.hasContent_():
             outfile.write('>\n')
@@ -3102,7 +3102,7 @@ class productDefinition(GeneratedsSuper):
             showIndent(outfile, level)
             outfile.write('</%s%s>\n' % (namespace_, name_))
         else:
-            outfile.write(' />\n')
+            outfile.write('/>\n')
     def exportAttributes(self, outfile, level, namespace_='rpd:', name_='productDefinition'):
         if self.version is not None:
             outfile.write(' version=%s' % (self.format_string(quote_attrib(self.version).encode(ExternalEncoding), input_name='version'), ))

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #
-# Generated  by generateDS.py version 1.18e.
+# Generated  by generateDS.py.
 #
 
 import sys
