@@ -2619,7 +2619,7 @@ class Migrate_20_30(BaseMigration):
         for bd in buildDefinitions:
             if bd.containerTemplateRef == 'netBootImage':
                 bd.containerTemplateRef = 'netbootImage'
-            if bd.image.vhdDiskType == '':
+            if bd.image and bd.image.vhdDiskType == '':
                 bd.image.vhdDiskType = None
 
     def migrateCommon(self, fromObj, toObj, newModule):
