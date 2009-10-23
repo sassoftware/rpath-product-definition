@@ -17,8 +17,11 @@ SCHEMA_FILES = $(wildcard *.xsd)
 
 all: default-all
 
+include ../Make.rules
+include ../Make.defs
+
 install: all default-install $(DESTDIR)$(datadir)/rpath_proddef
-	install $(SCHEMA_FILES) $(DESTDIR)$(datadir)/rpath_proddef/
+	install -m644 $(SCHEMA_FILES) $(DESTDIR)$(datadir)/rpath_proddef/
 
 $(DESTDIR)$(datadir)/rpath_proddef:
 	install -d -m755 $@
@@ -29,6 +32,3 @@ validate-schema:
 dist: default-dist
 
 clean: default-clean
-
-include ../Make.rules
-include ../Make.defs
