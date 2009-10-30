@@ -2202,18 +2202,18 @@ class contentProviderType(GeneratedsSuper):
     member_data_items_ = [
         MemberSpec_('name', 'xsd:string', 0),
         MemberSpec_('description', 'xsd:string', 0),
-        MemberSpec_('sourceType', 'contentSourceTypeType', 1),
+        MemberSpec_('contentSourceType', 'contentSourceTypeType', 1),
         MemberSpec_('dataSource', 'dataSourceType', 1),
         ]
     subclass = None
     superclass = None
-    def __init__(self, name=None, description=None, sourceType=None, dataSource=None):
+    def __init__(self, name=None, description=None, contentSourceType=None, dataSource=None):
         self.name = _cast(None, name)
         self.description = _cast(None, description)
-        if sourceType is None:
-            self.sourceType = []
+        if contentSourceType is None:
+            self.contentSourceType = []
         else:
-            self.sourceType = sourceType
+            self.contentSourceType = contentSourceType
         if dataSource is None:
             self.dataSource = []
         else:
@@ -2224,10 +2224,10 @@ class contentProviderType(GeneratedsSuper):
         else:
             return contentProviderType(*args_, **kwargs_)
     factory = staticmethod(factory)
-    def get_sourceType(self): return self.sourceType
-    def set_sourceType(self, sourceType): self.sourceType = sourceType
-    def add_sourceType(self, value): self.sourceType.append(value)
-    def insert_sourceType(self, index, value): self.sourceType[index] = value
+    def get_contentSourceType(self): return self.contentSourceType
+    def set_contentSourceType(self, contentSourceType): self.contentSourceType = contentSourceType
+    def add_contentSourceType(self, value): self.contentSourceType.append(value)
+    def insert_contentSourceType(self, index, value): self.contentSourceType[index] = value
     def get_dataSource(self): return self.dataSource
     def set_dataSource(self, dataSource): self.dataSource = dataSource
     def add_dataSource(self, value): self.dataSource.append(value)
@@ -2251,13 +2251,13 @@ class contentProviderType(GeneratedsSuper):
         outfile.write(' name=%s' % (self.format_string(quote_attrib(self.name).encode(ExternalEncoding), input_name='name'), ))
         outfile.write(' description=%s' % (self.format_string(quote_attrib(self.description).encode(ExternalEncoding), input_name='description'), ))
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='contentProviderType'):
-        for sourceType_ in self.sourceType:
-            sourceType_.export(outfile, level, namespace_, name_='sourceType')
+        for contentSourceType_ in self.contentSourceType:
+            contentSourceType_.export(outfile, level, namespace_, name_='contentSourceType')
         for dataSource_ in self.dataSource:
             dataSource_.export(outfile, level, namespace_, name_='dataSource')
     def hasContent_(self):
         if (
-            self.sourceType or
+            self.contentSourceType or
             self.dataSource
             ):
             return True
@@ -2277,12 +2277,12 @@ class contentProviderType(GeneratedsSuper):
             outfile.write('description = %s,\n' % (self.description,))
     def exportLiteralChildren(self, outfile, level, name_):
         showIndent(outfile, level)
-        outfile.write('sourceType=[\n')
+        outfile.write('contentSourceType=[\n')
         level += 1
-        for sourceType in self.sourceType:
+        for contentSourceType in self.contentSourceType:
             showIndent(outfile, level)
-            outfile.write('model_.sourceType(\n')
-            sourceType.exportLiteral(outfile, level, name_='sourceType')
+            outfile.write('model_.contentSourceType(\n')
+            contentSourceType.exportLiteral(outfile, level, name_='contentSourceType')
             showIndent(outfile, level)
             outfile.write('),\n')
         level -= 1
@@ -2313,10 +2313,10 @@ class contentProviderType(GeneratedsSuper):
             self.description = attrs.get('description').value
     def buildChildren(self, child_, nodeName_):
         if child_.nodeType == Node.ELEMENT_NODE and \
-            nodeName_ == 'sourceType':
+            nodeName_ == 'contentSourceType':
             obj_ = contentSourceTypeType.factory()
             obj_.build(child_)
-            self.sourceType.append(obj_)
+            self.contentSourceType.append(obj_)
         elif child_.nodeType == Node.ELEMENT_NODE and \
             nodeName_ == 'dataSource':
             obj_ = dataSourceType.factory()
@@ -2329,11 +2329,11 @@ class contentProviderType(GeneratedsSuper):
         return self.dataSource
     dataSources = property(_getDataSources)
 
-    def _getSourceTypes(self):
-        if self.sourceType is None:
+    def _getContentSourceTypes(self):
+        if self.contentSourceType is None:
             return []
-        return self.sourceType
-    sourceTypes = property(_getSourceTypes)
+        return self.contentSourceType
+    contentSourceTypes = property(_getContentSourceTypes)
 # end class contentProviderType
 
 

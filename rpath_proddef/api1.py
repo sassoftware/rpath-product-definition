@@ -1970,7 +1970,7 @@ class BasePlatform(BaseDefinition):
             cprov.add_dataSource(ds)
         for cst in (contentSourceTypes or []):
             assert isinstance(cst, contentSourceTypeType)
-            cprov.add_sourceType(cst)
+            cprov.add_contentSourceType(cst)
         self._rootObj.contentProvider = cprov
 
     def getContentProvider(self):

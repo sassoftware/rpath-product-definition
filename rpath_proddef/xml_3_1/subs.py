@@ -133,8 +133,8 @@ supermod.platformDefinitionType.subclass = platformDefinitionTypeSub
 
 
 class contentProviderTypeSub(supermod.contentProviderType):
-    def __init__(self, name=None, description=None, sourceType=None, dataSource=None):
-        supermod.contentProviderType.__init__(self, name, description, sourceType, dataSource)
+    def __init__(self, name=None, description=None, contentSourceType=None, dataSource=None):
+        supermod.contentProviderType.__init__(self, name, description, contentSourceType, dataSource)
 supermod.contentProviderType.subclass = contentProviderTypeSub
 # end class contentProviderTypeSub
 

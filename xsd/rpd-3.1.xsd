@@ -208,7 +208,7 @@
 
     <xsd:complexType name="contentProviderType">
       <xsd:sequence>
-        <xsd:element name="sourceType" type="contentSourceTypeType"
+        <xsd:element name="contentSourceType" type="contentSourceTypeType"
             minOccurs="1" maxOccurs="unbounded" />
         <xsd:element name="dataSource" type="dataSourceType"
             minOccurs="1" maxOccurs="unbounded" />

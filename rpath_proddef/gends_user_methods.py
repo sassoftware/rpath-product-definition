@@ -199,11 +199,11 @@ contentProviderTypeMethods = MethodSpec('contentProviderTypeMethods',
         return self.dataSource
     dataSources = property(_getDataSources)
 
-    def _getSourceTypes(self):
-        if self.sourceType is None:
+    def _getContentSourceTypes(self):
+        if self.contentSourceType is None:
             return []
-        return self.sourceType
-    sourceTypes = property(_getSourceTypes)
+        return self.contentSourceType
+    contentSourceTypes = property(_getContentSourceTypes)
 ''',
     class_names = r'contentProviderType$',
     )
