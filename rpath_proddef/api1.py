@@ -1958,6 +1958,23 @@ class BasePlatform(BaseDefinition):
             return []
         return vals.get_autoLoadRecipe()
 
+    def setContentSourceType(self, type, name, sources = None):
+        xmlsubs = self.xmlFactory()
+        sourceType = xmlsubs.contentSourceTypeSourceTypeSub
+        cst = xmlsubs.contentSourceTypeTypeSub.factory(
+            name = name, type_ = type)
+        for source in (sources or []):
+            assert isinstance(source, sourceType)
+            cst.add_source(source)
+        self._rootObj.contentSourceType = cst
+
+    def getContentSourceType(self):
+        return self._rootObj.contentSourceType
+
+    def newContentSource(self, label, name):
+        return self.xmlFactory().contentSourceTypeSourceTypeSub.factory(
+            name = name, label = label)
+
 class Platform(BasePlatform):
     ClassFactoryName = 'platformTypeSub'
     RootNode = 'platform'
@@ -2636,3 +2653,8 @@ class Migrate_20_30(BaseMigration):
         self._migrateBuildDefinitions(fromObj, toObj)
 
 MigrationManager.register(Migrate_20_30)
+
+class Migrate_30_31(BaseMigration):
+    fromVersion = '3.0'
+    toVersion = '3.1'
+MigrationManager.register(Migrate_30_31)
