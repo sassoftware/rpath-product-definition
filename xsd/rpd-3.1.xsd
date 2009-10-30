@@ -206,18 +206,25 @@
       </xsd:sequence>
     </xsd:group>
 
-    <xsd:complexType name="contentSourceTypeType">
+    <xsd:complexType name="contentProviderType">
       <xsd:sequence>
-        <xsd:element name="source" type="contentSourceTypeSourceType"
-            minOccurs="0" maxOccurs="unbounded" />
+        <xsd:element name="sourceType" type="contentSourceTypeType"
+            minOccurs="1" maxOccurs="unbounded" />
+        <xsd:element name="dataSource" type="dataSourceType"
+            minOccurs="1" maxOccurs="unbounded" />
       </xsd:sequence>
       <xsd:attribute name="name" type="xsd:string" use="required" />
-      <xsd:attribute name="type" type="xsd:string" use="required" />
+      <xsd:attribute name="description" type="xsd:string" use="required" />
     </xsd:complexType>
 
-    <xsd:complexType name="contentSourceTypeSourceType">
+    <xsd:complexType name="dataSourceType">
       <xsd:attribute name="name" type="xsd:string" use="required" />
-      <xsd:attribute name="label" type="xsd:string" use="required" />
+      <xsd:attribute name="description" type="xsd:string" use="required" />
+    </xsd:complexType>
+
+    <xsd:complexType name="contentSourceTypeType">
+      <xsd:attribute name="name" type="xsd:string" use="required" />
+      <xsd:attribute name="description" type="xsd:string" use="required" />
     </xsd:complexType>
 
     <xsd:group name="platformDefinitionElements">
@@ -228,7 +235,7 @@
             minOccurs="0" maxOccurs="1" />
         <xsd:element name="baseFlavor" type="rpd:flavorStringType"
             minOccurs="0" maxOccurs="1" />
-        <xsd:element name="contentSourceType" type="rpd:contentSourceTypeType"
+        <xsd:element name="contentProvider" type="rpd:contentProviderType"
             minOccurs="0" maxOccurs="1" />
       </xsd:sequence>
     </xsd:group>

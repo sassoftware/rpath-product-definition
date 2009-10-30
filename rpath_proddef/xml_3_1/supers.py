@@ -1930,7 +1930,7 @@ class platformDefinitionType(GeneratedsSuper):
         MemberSpec_('platformName', 'xsd:string', 0),
         MemberSpec_('platformVersionTrove', 'xsd:string', 0),
         MemberSpec_('baseFlavor', ['flavorStringType', 'xsd:string', 'xsd:string'], 0),
-        MemberSpec_('contentSourceType', 'contentSourceTypeType', 0),
+        MemberSpec_('contentProvider', 'contentProviderType', 0),
         MemberSpec_('searchPaths', 'searchPathListType', 0),
         MemberSpec_('factorySources', 'factorySourceListType', 0),
         MemberSpec_('autoLoadRecipes', 'autoLoadRecipesType', 0),
@@ -1942,12 +1942,12 @@ class platformDefinitionType(GeneratedsSuper):
         ]
     subclass = None
     superclass = None
-    def __init__(self, version=None, platformName=None, platformVersionTrove=None, baseFlavor=None, contentSourceType=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None):
+    def __init__(self, version=None, platformName=None, platformVersionTrove=None, baseFlavor=None, contentProvider=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None):
         self.version = _cast(None, version)
         self.platformName = platformName
         self.platformVersionTrove = platformVersionTrove
         self.baseFlavor = baseFlavor
-        self.contentSourceType = contentSourceType
+        self.contentProvider = contentProvider
         self.searchPaths = searchPaths
         self.factorySources = factorySources
         self.autoLoadRecipes = autoLoadRecipes
@@ -1971,8 +1971,8 @@ class platformDefinitionType(GeneratedsSuper):
     def validate_baseFlavor(self, value):
         # validate type baseFlavor
         pass
-    def get_contentSourceType(self): return self.contentSourceType
-    def set_contentSourceType(self, contentSourceType): self.contentSourceType = contentSourceType
+    def get_contentProvider(self): return self.contentProvider
+    def set_contentProvider(self, contentProvider): self.contentProvider = contentProvider
     def get_searchPaths(self): return self.searchPaths
     def set_searchPaths(self, searchPaths): self.searchPaths = searchPaths
     def get_factorySources(self): return self.factorySources
@@ -2015,8 +2015,8 @@ class platformDefinitionType(GeneratedsSuper):
         if self.baseFlavor is not None:
             showIndent(outfile, level)
             outfile.write('<%sbaseFlavor>%s</%sbaseFlavor>\n' % (namespace_, self.format_string(quote_xml(self.baseFlavor).encode(ExternalEncoding), input_name='baseFlavor'), namespace_))
-        if self.contentSourceType:
-            self.contentSourceType.export(outfile, level, namespace_, name_='contentSourceType')
+        if self.contentProvider:
+            self.contentProvider.export(outfile, level, namespace_, name_='contentProvider')
         if self.searchPaths:
             self.searchPaths.export(outfile, level, namespace_, name_='searchPaths')
         if self.factorySources:
@@ -2038,7 +2038,7 @@ class platformDefinitionType(GeneratedsSuper):
             self.platformName is not None or
             self.platformVersionTrove is not None or
             self.baseFlavor is not None or
-            self.contentSourceType is not None or
+            self.contentProvider is not None or
             self.searchPaths is not None or
             self.factorySources is not None or
             self.autoLoadRecipes is not None or
@@ -2067,10 +2067,10 @@ class platformDefinitionType(GeneratedsSuper):
         outfile.write('platformVersionTrove=%s,\n' % quote_python(self.platformVersionTrove).encode(ExternalEncoding))
         showIndent(outfile, level)
         outfile.write('baseFlavor=%s,\n' % quote_python(self.baseFlavor).encode(ExternalEncoding))
-        if self.contentSourceType:
+        if self.contentProvider:
             showIndent(outfile, level)
-            outfile.write('contentSourceType=model_.contentSourceTypeType(\n')
-            self.contentSourceType.exportLiteral(outfile, level, name_='contentSourceType')
+            outfile.write('contentProvider=model_.contentProviderType(\n')
+            self.contentProvider.exportLiteral(outfile, level, name_='contentProvider')
             showIndent(outfile, level)
             outfile.write('),\n')
         if self.searchPaths:
@@ -2151,10 +2151,10 @@ class platformDefinitionType(GeneratedsSuper):
             self.baseFlavor = baseFlavor_
             self.validate_baseFlavor(self.baseFlavor)    # validate type baseFlavor
         elif child_.nodeType == Node.ELEMENT_NODE and \
-            nodeName_ == 'contentSourceType':
-            obj_ = contentSourceTypeType.factory()
+            nodeName_ == 'contentProvider':
+            obj_ = contentProviderType.factory()
             obj_.build(child_)
-            self.set_contentSourceType(obj_)
+            self.set_contentProvider(obj_)
         elif child_.nodeType == Node.ELEMENT_NODE and \
             nodeName_ == 'searchPaths':
             obj_ = searchPathListType.factory()
@@ -2198,39 +2198,48 @@ class platformDefinitionType(GeneratedsSuper):
 # end class platformDefinitionType
 
 
-class contentSourceTypeType(GeneratedsSuper):
+class contentProviderType(GeneratedsSuper):
     member_data_items_ = [
-        MemberSpec_('type', 'xsd:string', 0),
         MemberSpec_('name', 'xsd:string', 0),
-        MemberSpec_('source', 'contentSourceTypeSourceType', 1),
+        MemberSpec_('description', 'xsd:string', 0),
+        MemberSpec_('sourceType', 'contentSourceTypeType', 1),
+        MemberSpec_('dataSource', 'dataSourceType', 1),
         ]
     subclass = None
     superclass = None
-    def __init__(self, type_=None, name=None, source=None):
-        self.type_ = _cast(None, type_)
+    def __init__(self, name=None, description=None, sourceType=None, dataSource=None):
         self.name = _cast(None, name)
-        if source is None:
-            self.source = []
+        self.description = _cast(None, description)
+        if sourceType is None:
+            self.sourceType = []
         else:
-            self.source = source
+            self.sourceType = sourceType
+        if dataSource is None:
+            self.dataSource = []
+        else:
+            self.dataSource = dataSource
     def factory(*args_, **kwargs_):
-        if contentSourceTypeType.subclass:
-            return contentSourceTypeType.subclass(*args_, **kwargs_)
+        if contentProviderType.subclass:
+            return contentProviderType.subclass(*args_, **kwargs_)
         else:
-            return contentSourceTypeType(*args_, **kwargs_)
+            return contentProviderType(*args_, **kwargs_)
     factory = staticmethod(factory)
-    def get_source(self): return self.source
-    def set_source(self, source): self.source = source
-    def add_source(self, value): self.source.append(value)
-    def insert_source(self, index, value): self.source[index] = value
-    def get_type(self): return self.type_
-    def set_type(self, type_): self.type_ = type_
+    def get_sourceType(self): return self.sourceType
+    def set_sourceType(self, sourceType): self.sourceType = sourceType
+    def add_sourceType(self, value): self.sourceType.append(value)
+    def insert_sourceType(self, index, value): self.sourceType[index] = value
+    def get_dataSource(self): return self.dataSource
+    def set_dataSource(self, dataSource): self.dataSource = dataSource
+    def add_dataSource(self, value): self.dataSource.append(value)
+    def insert_dataSource(self, index, value): self.dataSource[index] = value
     def get_name(self): return self.name
     def set_name(self, name): self.name = name
-    def export(self, outfile, level, namespace_='rpd:', name_='contentSourceTypeType', namespacedef_=''):
+    def get_description(self): return self.description
+    def set_description(self, description): self.description = description
+    def export(self, outfile, level, namespace_='rpd:', name_='contentProviderType', namespacedef_=''):
         showIndent(outfile, level)
         outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
-        self.exportAttributes(outfile, level, namespace_, name_='contentSourceTypeType')
+        self.exportAttributes(outfile, level, namespace_, name_='contentProviderType')
         if self.hasContent_():
             outfile.write('>\n')
             self.exportChildren(outfile, level + 1, namespace_, name_)
@@ -2238,39 +2247,54 @@ class contentSourceTypeType(GeneratedsSuper):
             outfile.write('</%s%s>\n' % (namespace_, name_))
         else:
             outfile.write('/>\n')
-    def exportAttributes(self, outfile, level, namespace_='rpd:', name_='contentSourceTypeType'):
-        outfile.write(' type=%s' % (self.format_string(quote_attrib(self.type_).encode(ExternalEncoding), input_name='type'), ))
+    def exportAttributes(self, outfile, level, namespace_='rpd:', name_='contentProviderType'):
         outfile.write(' name=%s' % (self.format_string(quote_attrib(self.name).encode(ExternalEncoding), input_name='name'), ))
-    def exportChildren(self, outfile, level, namespace_='rpd:', name_='contentSourceTypeType'):
-        for source_ in self.source:
-            source_.export(outfile, level, namespace_, name_='source')
+        outfile.write(' description=%s' % (self.format_string(quote_attrib(self.description).encode(ExternalEncoding), input_name='description'), ))
+    def exportChildren(self, outfile, level, namespace_='rpd:', name_='contentProviderType'):
+        for sourceType_ in self.sourceType:
+            sourceType_.export(outfile, level, namespace_, name_='sourceType')
+        for dataSource_ in self.dataSource:
+            dataSource_.export(outfile, level, namespace_, name_='dataSource')
     def hasContent_(self):
         if (
-            self.source
+            self.sourceType or
+            self.dataSource
             ):
             return True
         else:
             return False
-    def exportLiteral(self, outfile, level, name_='contentSourceTypeType'):
+    def exportLiteral(self, outfile, level, name_='contentProviderType'):
         level += 1
         self.exportLiteralAttributes(outfile, level, name_)
         if self.hasContent_():
             self.exportLiteralChildren(outfile, level, name_)
     def exportLiteralAttributes(self, outfile, level, name_):
-        if self.type_ is not None:
-            showIndent(outfile, level)
-            outfile.write('type_ = %s,\n' % (self.type_,))
         if self.name is not None:
             showIndent(outfile, level)
             outfile.write('name = %s,\n' % (self.name,))
+        if self.description is not None:
+            showIndent(outfile, level)
+            outfile.write('description = %s,\n' % (self.description,))
     def exportLiteralChildren(self, outfile, level, name_):
         showIndent(outfile, level)
-        outfile.write('source=[\n')
+        outfile.write('sourceType=[\n')
         level += 1
-        for source in self.source:
+        for sourceType in self.sourceType:
             showIndent(outfile, level)
-            outfile.write('model_.source(\n')
-            source.exportLiteral(outfile, level, name_='source')
+            outfile.write('model_.sourceType(\n')
+            sourceType.exportLiteral(outfile, level, name_='sourceType')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        level -= 1
+        showIndent(outfile, level)
+        outfile.write('],\n')
+        showIndent(outfile, level)
+        outfile.write('dataSource=[\n')
+        level += 1
+        for dataSource in self.dataSource:
+            showIndent(outfile, level)
+            outfile.write('model_.dataSource(\n')
+            dataSource.exportLiteral(outfile, level, name_='dataSource')
             showIndent(outfile, level)
             outfile.write('),\n')
         level -= 1
@@ -2283,57 +2307,74 @@ class contentSourceTypeType(GeneratedsSuper):
             nodeName_ = child_.nodeName.split(':')[-1]
             self.buildChildren(child_, nodeName_)
     def buildAttributes(self, attrs):
-        if attrs.get('type'):
-            self.type_ = attrs.get('type').value
         if attrs.get('name'):
             self.name = attrs.get('name').value
+        if attrs.get('description'):
+            self.description = attrs.get('description').value
     def buildChildren(self, child_, nodeName_):
         if child_.nodeType == Node.ELEMENT_NODE and \
-            nodeName_ == 'source':
-            obj_ = contentSourceTypeSourceType.factory()
+            nodeName_ == 'sourceType':
+            obj_ = contentSourceTypeType.factory()
             obj_.build(child_)
-            self.source.append(obj_)
-# end class contentSourceTypeType
+            self.sourceType.append(obj_)
+        elif child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'dataSource':
+            obj_ = dataSourceType.factory()
+            obj_.build(child_)
+            self.dataSource.append(obj_)
+
+    def _getDataSources(self):
+        if self.dataSource is None:
+            return []
+        return self.dataSource
+    dataSources = property(_getDataSources)
+
+    def _getSourceTypes(self):
+        if self.sourceType is None:
+            return []
+        return self.sourceType
+    sourceTypes = property(_getSourceTypes)
+# end class contentProviderType
 
 
-class contentSourceTypeSourceType(GeneratedsSuper):
+class dataSourceType(GeneratedsSuper):
     member_data_items_ = [
         MemberSpec_('name', 'xsd:string', 0),
-        MemberSpec_('label', 'xsd:string', 0),
+        MemberSpec_('description', 'xsd:string', 0),
         MemberSpec_('valueOf_', [], 0),
         ]
     subclass = None
     superclass = None
-    def __init__(self, name=None, label=None, valueOf_=''):
+    def __init__(self, name=None, description=None, valueOf_=''):
         self.name = _cast(None, name)
-        self.label = _cast(None, label)
+        self.description = _cast(None, description)
         self.valueOf_ = valueOf_
     def factory(*args_, **kwargs_):
-        if contentSourceTypeSourceType.subclass:
-            return contentSourceTypeSourceType.subclass(*args_, **kwargs_)
+        if dataSourceType.subclass:
+            return dataSourceType.subclass(*args_, **kwargs_)
         else:
-            return contentSourceTypeSourceType(*args_, **kwargs_)
+            return dataSourceType(*args_, **kwargs_)
     factory = staticmethod(factory)
     def get_name(self): return self.name
     def set_name(self, name): self.name = name
-    def get_label(self): return self.label
-    def set_label(self, label): self.label = label
+    def get_description(self): return self.description
+    def set_description(self, description): self.description = description
     def getValueOf_(self): return self.valueOf_
     def setValueOf_(self, valueOf_): self.valueOf_ = valueOf_
-    def export(self, outfile, level, namespace_='rpd:', name_='contentSourceTypeSourceType', namespacedef_=''):
+    def export(self, outfile, level, namespace_='rpd:', name_='dataSourceType', namespacedef_=''):
         showIndent(outfile, level)
         outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
-        self.exportAttributes(outfile, level, namespace_, name_='contentSourceTypeSourceType')
+        self.exportAttributes(outfile, level, namespace_, name_='dataSourceType')
         if self.hasContent_():
             outfile.write('>')
             self.exportChildren(outfile, level + 1, namespace_, name_)
             outfile.write('</%s%s>\n' % (namespace_, name_))
         else:
             outfile.write('/>\n')
-    def exportAttributes(self, outfile, level, namespace_='rpd:', name_='contentSourceTypeSourceType'):
+    def exportAttributes(self, outfile, level, namespace_='rpd:', name_='dataSourceType'):
         outfile.write(' name=%s' % (self.format_string(quote_attrib(self.name).encode(ExternalEncoding), input_name='name'), ))
-        outfile.write(' label=%s' % (self.format_string(quote_attrib(self.label).encode(ExternalEncoding), input_name='label'), ))
-    def exportChildren(self, outfile, level, namespace_='rpd:', name_='contentSourceTypeSourceType'):
+        outfile.write(' description=%s' % (self.format_string(quote_attrib(self.description).encode(ExternalEncoding), input_name='description'), ))
+    def exportChildren(self, outfile, level, namespace_='rpd:', name_='dataSourceType'):
         if self.valueOf_.find('![CDATA') > -1:
             value=quote_xml('%s' % self.valueOf_)
             value=value.replace('![CDATA','<![CDATA')
@@ -2348,7 +2389,7 @@ class contentSourceTypeSourceType(GeneratedsSuper):
             return True
         else:
             return False
-    def exportLiteral(self, outfile, level, name_='contentSourceTypeSourceType'):
+    def exportLiteral(self, outfile, level, name_='dataSourceType'):
         level += 1
         self.exportLiteralAttributes(outfile, level, name_)
         if self.hasContent_():
@@ -2357,9 +2398,9 @@ class contentSourceTypeSourceType(GeneratedsSuper):
         if self.name is not None:
             showIndent(outfile, level)
             outfile.write('name = %s,\n' % (self.name,))
-        if self.label is not None:
+        if self.description is not None:
             showIndent(outfile, level)
-            outfile.write('label = %s,\n' % (self.label,))
+            outfile.write('description = %s,\n' % (self.description,))
     def exportLiteralChildren(self, outfile, level, name_):
         showIndent(outfile, level)
         outfile.write('valueOf_ = "%s",\n' % (self.valueOf_,))
@@ -2373,14 +2414,101 @@ class contentSourceTypeSourceType(GeneratedsSuper):
     def buildAttributes(self, attrs):
         if attrs.get('name'):
             self.name = attrs.get('name').value
-        if attrs.get('label'):
-            self.label = attrs.get('label').value
+        if attrs.get('description'):
+            self.description = attrs.get('description').value
     def buildChildren(self, child_, nodeName_):
         if child_.nodeType == Node.TEXT_NODE:
             self.valueOf_ += child_.nodeValue
         elif child_.nodeType == Node.CDATA_SECTION_NODE:
             self.valueOf_ += '![CDATA['+child_.nodeValue+']]'
-# end class contentSourceTypeSourceType
+# end class dataSourceType
+
+
+class contentSourceTypeType(GeneratedsSuper):
+    member_data_items_ = [
+        MemberSpec_('name', 'xsd:string', 0),
+        MemberSpec_('description', 'xsd:string', 0),
+        MemberSpec_('valueOf_', [], 0),
+        ]
+    subclass = None
+    superclass = None
+    def __init__(self, name=None, description=None, valueOf_=''):
+        self.name = _cast(None, name)
+        self.description = _cast(None, description)
+        self.valueOf_ = valueOf_
+    def factory(*args_, **kwargs_):
+        if contentSourceTypeType.subclass:
+            return contentSourceTypeType.subclass(*args_, **kwargs_)
+        else:
+            return contentSourceTypeType(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_name(self): return self.name
+    def set_name(self, name): self.name = name
+    def get_description(self): return self.description
+    def set_description(self, description): self.description = description
+    def getValueOf_(self): return self.valueOf_
+    def setValueOf_(self, valueOf_): self.valueOf_ = valueOf_
+    def export(self, outfile, level, namespace_='rpd:', name_='contentSourceTypeType', namespacedef_=''):
+        showIndent(outfile, level)
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        self.exportAttributes(outfile, level, namespace_, name_='contentSourceTypeType')
+        if self.hasContent_():
+            outfile.write('>')
+            self.exportChildren(outfile, level + 1, namespace_, name_)
+            outfile.write('</%s%s>\n' % (namespace_, name_))
+        else:
+            outfile.write('/>\n')
+    def exportAttributes(self, outfile, level, namespace_='rpd:', name_='contentSourceTypeType'):
+        outfile.write(' name=%s' % (self.format_string(quote_attrib(self.name).encode(ExternalEncoding), input_name='name'), ))
+        outfile.write(' description=%s' % (self.format_string(quote_attrib(self.description).encode(ExternalEncoding), input_name='description'), ))
+    def exportChildren(self, outfile, level, namespace_='rpd:', name_='contentSourceTypeType'):
+        if self.valueOf_.find('![CDATA') > -1:
+            value=quote_xml('%s' % self.valueOf_)
+            value=value.replace('![CDATA','<![CDATA')
+            value=value.replace(']]',']]>')
+            outfile.write(value)
+        else:
+            outfile.write(quote_xml('%s' % self.valueOf_))
+    def hasContent_(self):
+        if (
+            self.valueOf_
+            ):
+            return True
+        else:
+            return False
+    def exportLiteral(self, outfile, level, name_='contentSourceTypeType'):
+        level += 1
+        self.exportLiteralAttributes(outfile, level, name_)
+        if self.hasContent_():
+            self.exportLiteralChildren(outfile, level, name_)
+    def exportLiteralAttributes(self, outfile, level, name_):
+        if self.name is not None:
+            showIndent(outfile, level)
+            outfile.write('name = %s,\n' % (self.name,))
+        if self.description is not None:
+            showIndent(outfile, level)
+            outfile.write('description = %s,\n' % (self.description,))
+    def exportLiteralChildren(self, outfile, level, name_):
+        showIndent(outfile, level)
+        outfile.write('valueOf_ = "%s",\n' % (self.valueOf_,))
+    def build(self, node_):
+        attrs = node_.attributes
+        self.buildAttributes(attrs)
+        self.valueOf_ = ''
+        for child_ in node_.childNodes:
+            nodeName_ = child_.nodeName.split(':')[-1]
+            self.buildChildren(child_, nodeName_)
+    def buildAttributes(self, attrs):
+        if attrs.get('name'):
+            self.name = attrs.get('name').value
+        if attrs.get('description'):
+            self.description = attrs.get('description').value
+    def buildChildren(self, child_, nodeName_):
+        if child_.nodeType == Node.TEXT_NODE:
+            self.valueOf_ += child_.nodeValue
+        elif child_.nodeType == Node.CDATA_SECTION_NODE:
+            self.valueOf_ += '![CDATA['+child_.nodeValue+']]'
+# end class contentSourceTypeType
 
 
 class platformType(GeneratedsSuper):
@@ -2390,7 +2518,7 @@ class platformType(GeneratedsSuper):
         MemberSpec_('platformName', 'xsd:string', 0),
         MemberSpec_('platformVersionTrove', 'xsd:string', 0),
         MemberSpec_('baseFlavor', ['flavorStringType', 'xsd:string', 'xsd:string'], 0),
-        MemberSpec_('contentSourceType', 'contentSourceTypeType', 0),
+        MemberSpec_('contentProvider', 'contentProviderType', 0),
         MemberSpec_('searchPaths', 'searchPathListType', 0),
         MemberSpec_('factorySources', 'factorySourceListType', 0),
         MemberSpec_('autoLoadRecipes', 'autoLoadRecipesType', 0),
@@ -2402,13 +2530,13 @@ class platformType(GeneratedsSuper):
         ]
     subclass = None
     superclass = None
-    def __init__(self, sourceTrove=None, useLatest=None, platformName=None, platformVersionTrove=None, baseFlavor=None, contentSourceType=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None):
+    def __init__(self, sourceTrove=None, useLatest=None, platformName=None, platformVersionTrove=None, baseFlavor=None, contentProvider=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None):
         self.sourceTrove = _cast(None, sourceTrove)
         self.useLatest = _cast(bool, useLatest)
         self.platformName = platformName
         self.platformVersionTrove = platformVersionTrove
         self.baseFlavor = baseFlavor
-        self.contentSourceType = contentSourceType
+        self.contentProvider = contentProvider
         self.searchPaths = searchPaths
         self.factorySources = factorySources
         self.autoLoadRecipes = autoLoadRecipes
@@ -2432,8 +2560,8 @@ class platformType(GeneratedsSuper):
     def validate_baseFlavor(self, value):
         # validate type baseFlavor
         pass
-    def get_contentSourceType(self): return self.contentSourceType
-    def set_contentSourceType(self, contentSourceType): self.contentSourceType = contentSourceType
+    def get_contentProvider(self): return self.contentProvider
+    def set_contentProvider(self, contentProvider): self.contentProvider = contentProvider
     def get_searchPaths(self): return self.searchPaths
     def set_searchPaths(self, searchPaths): self.searchPaths = searchPaths
     def get_factorySources(self): return self.factorySources
@@ -2480,8 +2608,8 @@ class platformType(GeneratedsSuper):
         if self.baseFlavor is not None:
             showIndent(outfile, level)
             outfile.write('<%sbaseFlavor>%s</%sbaseFlavor>\n' % (namespace_, self.format_string(quote_xml(self.baseFlavor).encode(ExternalEncoding), input_name='baseFlavor'), namespace_))
-        if self.contentSourceType:
-            self.contentSourceType.export(outfile, level, namespace_, name_='contentSourceType')
+        if self.contentProvider:
+            self.contentProvider.export(outfile, level, namespace_, name_='contentProvider')
         if self.searchPaths:
             self.searchPaths.export(outfile, level, namespace_, name_='searchPaths')
         if self.factorySources:
@@ -2503,7 +2631,7 @@ class platformType(GeneratedsSuper):
             self.platformName is not None or
             self.platformVersionTrove is not None or
             self.baseFlavor is not None or
-            self.contentSourceType is not None or
+            self.contentProvider is not None or
             self.searchPaths is not None or
             self.factorySources is not None or
             self.autoLoadRecipes is not None or
@@ -2535,10 +2663,10 @@ class platformType(GeneratedsSuper):
         outfile.write('platformVersionTrove=%s,\n' % quote_python(self.platformVersionTrove).encode(ExternalEncoding))
         showIndent(outfile, level)
         outfile.write('baseFlavor=%s,\n' % quote_python(self.baseFlavor).encode(ExternalEncoding))
-        if self.contentSourceType:
+        if self.contentProvider:
             showIndent(outfile, level)
-            outfile.write('contentSourceType=model_.contentSourceTypeType(\n')
-            self.contentSourceType.exportLiteral(outfile, level, name_='contentSourceType')
+            outfile.write('contentProvider=model_.contentProviderType(\n')
+            self.contentProvider.exportLiteral(outfile, level, name_='contentProvider')
             showIndent(outfile, level)
             outfile.write('),\n')
         if self.searchPaths:
@@ -2626,10 +2754,10 @@ class platformType(GeneratedsSuper):
             self.baseFlavor = baseFlavor_
             self.validate_baseFlavor(self.baseFlavor)    # validate type baseFlavor
         elif child_.nodeType == Node.ELEMENT_NODE and \
-            nodeName_ == 'contentSourceType':
-            obj_ = contentSourceTypeType.factory()
+            nodeName_ == 'contentProvider':
+            obj_ = contentProviderType.factory()
             obj_.build(child_)
-            self.set_contentSourceType(obj_)
+            self.set_contentProvider(obj_)
         elif child_.nodeType == Node.ELEMENT_NODE and \
             nodeName_ == 'searchPaths':
             obj_ = searchPathListType.factory()

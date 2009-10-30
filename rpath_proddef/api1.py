@@ -1958,22 +1958,31 @@ class BasePlatform(BaseDefinition):
             return []
         return vals.get_autoLoadRecipe()
 
-    def setContentSourceType(self, type, name, sources = None):
+    def setContentProvider(self, name, description,
+            contentSourceTypes = None, dataSources = None):
         xmlsubs = self.xmlFactory()
-        sourceType = xmlsubs.contentSourceTypeSourceTypeSub
-        cst = xmlsubs.contentSourceTypeTypeSub.factory(
-            name = name, type_ = type)
-        for source in (sources or []):
-            assert isinstance(source, sourceType)
-            cst.add_source(source)
-        self._rootObj.contentSourceType = cst
+        dataSourceType = xmlsubs.dataSourceTypeSub
+        contentSourceTypeType = xmlsubs.contentSourceTypeTypeSub
+        cprov = xmlsubs.contentProviderTypeSub.factory(
+            name = name, description = description)
+        for ds in (dataSources or []):
+            assert isinstance(ds, dataSourceType)
+            cprov.add_dataSource(ds)
+        for cst in (contentSourceTypes or []):
+            assert isinstance(cst, contentSourceTypeType)
+            cprov.add_sourceType(cst)
+        self._rootObj.contentProvider = cprov
 
-    def getContentSourceType(self):
-        return self._rootObj.contentSourceType
+    def getContentProvider(self):
+        return self._rootObj.contentProvider
 
-    def newContentSource(self, label, name):
-        return self.xmlFactory().contentSourceTypeSourceTypeSub.factory(
-            name = name, label = label)
+    def newDataSource(self, name, description):
+        return self.xmlFactory().dataSourceTypeSub.factory(
+            name = name, description = description)
+
+    def newContentSourceType(self, name, description):
+        return self.xmlFactory().contentSourceTypeTypeSub.factory(
+            name = name, description = description)
 
 class Platform(BasePlatform):
     ClassFactoryName = 'platformTypeSub'

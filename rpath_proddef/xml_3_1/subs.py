@@ -126,29 +126,36 @@ supermod.promoteMapType.subclass = promoteMapTypeSub
 
 
 class platformDefinitionTypeSub(supermod.platformDefinitionType):
-    def __init__(self, version=None, platformName=None, platformVersionTrove=None, baseFlavor=None, contentSourceType=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None):
-        supermod.platformDefinitionType.__init__(self, version, platformName, platformVersionTrove, baseFlavor, contentSourceType, searchPaths, factorySources, autoLoadRecipes, secondaryLabels, architectures, flavorSets, containerTemplates, buildTemplates)
+    def __init__(self, version=None, platformName=None, platformVersionTrove=None, baseFlavor=None, contentProvider=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None):
+        supermod.platformDefinitionType.__init__(self, version, platformName, platformVersionTrove, baseFlavor, contentProvider, searchPaths, factorySources, autoLoadRecipes, secondaryLabels, architectures, flavorSets, containerTemplates, buildTemplates)
 supermod.platformDefinitionType.subclass = platformDefinitionTypeSub
 # end class platformDefinitionTypeSub
 
 
+class contentProviderTypeSub(supermod.contentProviderType):
+    def __init__(self, name=None, description=None, sourceType=None, dataSource=None):
+        supermod.contentProviderType.__init__(self, name, description, sourceType, dataSource)
+supermod.contentProviderType.subclass = contentProviderTypeSub
+# end class contentProviderTypeSub
+
+
+class dataSourceTypeSub(supermod.dataSourceType):
+    def __init__(self, name=None, description=None, valueOf_=''):
+        supermod.dataSourceType.__init__(self, name, description, valueOf_)
+supermod.dataSourceType.subclass = dataSourceTypeSub
+# end class dataSourceTypeSub
+
+
 class contentSourceTypeTypeSub(supermod.contentSourceTypeType):
-    def __init__(self, type_=None, name=None, source=None):
-        supermod.contentSourceTypeType.__init__(self, type_, name, source)
+    def __init__(self, name=None, description=None, valueOf_=''):
+        supermod.contentSourceTypeType.__init__(self, name, description, valueOf_)
 supermod.contentSourceTypeType.subclass = contentSourceTypeTypeSub
 # end class contentSourceTypeTypeSub
 
 
-class contentSourceTypeSourceTypeSub(supermod.contentSourceTypeSourceType):
-    def __init__(self, name=None, label=None, valueOf_=''):
-        supermod.contentSourceTypeSourceType.__init__(self, name, label, valueOf_)
-supermod.contentSourceTypeSourceType.subclass = contentSourceTypeSourceTypeSub
-# end class contentSourceTypeSourceTypeSub
-
-
 class platformTypeSub(supermod.platformType):
-    def __init__(self, sourceTrove=None, useLatest=None, platformName=None, platformVersionTrove=None, baseFlavor=None, contentSourceType=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None):
-        supermod.platformType.__init__(self, sourceTrove, useLatest, platformName, platformVersionTrove, baseFlavor, contentSourceType, searchPaths, factorySources, autoLoadRecipes, secondaryLabels, architectures, flavorSets, containerTemplates, buildTemplates)
+    def __init__(self, sourceTrove=None, useLatest=None, platformName=None, platformVersionTrove=None, baseFlavor=None, contentProvider=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None):
+        supermod.platformType.__init__(self, sourceTrove, useLatest, platformName, platformVersionTrove, baseFlavor, contentProvider, searchPaths, factorySources, autoLoadRecipes, secondaryLabels, architectures, flavorSets, containerTemplates, buildTemplates)
 supermod.platformType.subclass = platformTypeSub
 # end class platformTypeSub
 

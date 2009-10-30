@@ -191,6 +191,22 @@ nameLabelTypeMethods = MethodSpec('nameLabelTypeMethods',
     class_names = r'^nameLabelType$',
     )
 
+contentProviderTypeMethods = MethodSpec('contentProviderTypeMethods',
+    source = '''
+    def _getDataSources(self):
+        if self.dataSource is None:
+            return []
+        return self.dataSource
+    dataSources = property(_getDataSources)
+
+    def _getSourceTypes(self):
+        if self.sourceType is None:
+            return []
+        return self.sourceType
+    sourceTypes = property(_getSourceTypes)
+''',
+    class_names = r'contentProviderType$',
+    )
 
 METHOD_SPECS = (
     getTroveTup,
@@ -200,6 +216,7 @@ METHOD_SPECS = (
     stageTypeMethods,
     promoteMapTypeMethods,
     nameLabelTypeMethods,
+    contentProviderTypeMethods,
 )
 
 def test():
