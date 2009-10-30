@@ -2337,7 +2337,7 @@ def _convertBuildTemplate(fromObj, proddef, build):
     # we need to use all available information to get our
     # inferences as right as we can. limit our arch and flavorSet
     # guesses to those that are valid in the platform
-    legacyImageTypes = [ x.name for x in build._member_data_items
+    legacyImageTypes = [ x.name for x in build.member_data_items_
         if x.name.endswith('Image') ]
     vals = [ x for x in legacyImageTypes if getattr(build, x, None) ]
     if vals:
@@ -2499,8 +2499,8 @@ class BaseMigration(object):
             return None
 
         toObj = getattr(newModule, fromObj.__class__.__name__)()
-        newMemberItems = set(x.name for x in toObj._member_data_items)
-        for field in fromObj._member_data_items:
+        newMemberItems = set(x.name for x in toObj.member_data_items_)
+        for field in fromObj.member_data_items_:
             fieldName = field.name
             if fieldName not in newMemberItems:
                 # This field does not exist in the destination module, we'll
@@ -2518,10 +2518,10 @@ class BaseMigration(object):
                     # Empty list
                     continue
                 # Lists should be homogenous at this point
-                if hasattr(val[0], '_member_data_items'):
+                if hasattr(val[0], 'member_data_items_'):
                     nval = [ cls.copyFrom(x, newModule) for x in val ]
                     val = [ x for x in nval if x is not None ]
-            elif hasattr(val, '_member_data_items'):
+            elif hasattr(val, 'member_data_items_'):
                 val = cls.copyFrom(val, newModule)
                 if val is None:
                     # This field does not exist in the new schema

@@ -74,7 +74,7 @@ class MethodSpec(object):
 #
 # Provide one or more method specification such as the following.
 # Notes:
-# - Each generated class contains a class variable _member_data_items.
+# - Each generated class contains a class variable member_data_items_.
 #   This variable contains a list of instances of class _MemberSpec.
 #   See the definition of class _MemberSpec near the top of the
 #   generated superclass file and also section "User Methods" in
@@ -112,9 +112,9 @@ imageTypeGetFields = MethodSpec(name='getTroveTup',
     source='''
     def getFields(self):
         fieldNames = [ x.get_name()
-            for x in self._member_data_items ]
+            for x in self.member_data_items_ ]
         fields = ((x, getattr(self, x)) for x in fieldNames
-            if x != 'containerFormat')
+            if x not in ('containerFormat', 'valueOf_'))
         fields = dict((x, y) for (x, y) in fields if y is not None)
         return fields
 
