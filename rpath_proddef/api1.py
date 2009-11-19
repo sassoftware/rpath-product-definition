@@ -701,8 +701,8 @@ class BaseDefinition(object):
             if not paths:
                 continue
             # Prefer the platdef from the highest ranked file
-            pathId, path, fileId, fileVer = min(paths,
-                key = lambda x, m = troveFileNameMap: m[x[1]])
+            _, (pathId, path, fileId, fileVer) = min(
+                (troveFileNameMap[x[1]], x) for x in paths)
 
             # Fetch file from changeset
             fileSpecs = [ (fileId, fileVer) ]
