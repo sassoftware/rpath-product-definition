@@ -1810,7 +1810,8 @@ class ProductDefinitionRecipe(PackageRecipe):
             raise PlatformLabelMissingError()
         nplat = self.toPlatformDefinition()
         nplat.loadFromRepository(client, label)
-        nplat.snapshotVersions(client, platformVersion = platformVersion)
+        if not useLatest:
+            nplat.snapshotVersions(client, platformVersion = platformVersion)
         self._rebase(label, nplat, useLatest = useLatest)
 
     def _rebase(self, label, nplat, useLatest = None):
@@ -2154,6 +2155,7 @@ class PlatformDefinitionRecipe(PackageRecipe):
             # Use the latest version, if for some reason there is more
             # than one in the result set.
             nvf = max(troves[key])
+            sp.label = str(nvf[1].trailingLabel())
             sp.version = str(nvf[1].trailingRevision())
 
     @classmethod
