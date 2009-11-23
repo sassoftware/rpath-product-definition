@@ -125,7 +125,7 @@ class BaseDefinition(object):
 
         if fromStream:
             self.parseStream(fromStream, validate = validate,
-                             schemaDir = schemaDir)
+                             schemaDir = self.schemaDir)
 
     def parseStream(self, fromStream, validate = False, schemaDir = None):
         """
