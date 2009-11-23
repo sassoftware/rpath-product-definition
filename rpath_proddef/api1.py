@@ -304,7 +304,8 @@ class BaseDefinition(object):
         self._rootObj.set_factorySources(None)
 
     def addSearchPath(self, troveName = None, label = None, version = None,
-                      isResolveTrove = True, isGroupSearchPathTrove = True):
+                      isResolveTrove = True, isGroupSearchPathTrove = True,
+                      isPlatformTrove = None):
         """
         Add an search path.
         @param troveName: the trove name for the search path.
@@ -315,8 +316,11 @@ class BaseDefinition(object):
         @param version: C{str} or C{None}
         @param isResolveTrove: set to False if this element should be not
                be returned for getResolveTroves()  (defaults to True)
-        @param isGroupSearchPathTrove: set to False if this element should be 
+        @param isGroupSearchPathTrove: set to False if this element should
                not be returned for getGroupSearchPaths() (defaults to True)
+        @param isPlatformTrove: set to True if this element should
+               be pinned to a specific version as part of a rebase operation
+               that specifies a version (defaults to False)
         """
         assert(isResolveTrove or isGroupSearchPathTrove)
         xmlsubs = self.xmlFactory()
@@ -327,7 +331,8 @@ class BaseDefinition(object):
         self._addSource(troveName, label, version,
                 xmlsubs.searchPathTypeSub.factory, sp.add_searchPath,
                 isResolveTrove = isResolveTrove,
-                isGroupSearchPathTrove = isGroupSearchPathTrove)
+                isGroupSearchPathTrove = isGroupSearchPathTrove,
+                isPlatformTrove = isPlatformTrove)
 
     def addFactorySource(self, troveName = None, label = None, version = None):
         """
@@ -626,6 +631,17 @@ class BaseDefinition(object):
         except RuntimeError, e:
             raise ProductDefinitionError(str(e))
 
+    @classmethod
+    def labelFromString(cls, verstr):
+        if verstr.startswith('/'):
+            vfs = conaryVersions.VersionFromString(verstr)
+            if isinstance(vfs, conaryVersions.Version):
+                label = vfs.trailingLabel()
+            else:
+                label = vfs.label()
+            return str(label)
+        return verstr.split('/', 1)[0]
+
     def _addSource(self, troveName, label, version, factory, addMethod, **kwargs):
         "Internal function for adding a Source"
         if label is not None:
@@ -647,7 +663,7 @@ class BaseDefinition(object):
         pathDict = {
             "%s.recipe" % self._troveName : filetypes.RegularFile(
                 contents = recipe, config=True),
-            self._troveFileName : filetypes.RegularFile(
+            self._troveFileNames[0] : filetypes.RegularFile(
                 contents = stream.getvalue(), config=True),
         }
         cLog = changelog.ChangeLog(name = conaryClient.cfg.name,
@@ -678,23 +694,34 @@ class BaseDefinition(object):
         nvfs = troves[troveSpec]
         n,v,f = nvfs[0]
         if hasattr(repos, 'getFileContentsFromTrove'):
-            try:
-                contents = repos.getFileContentsFromTrove(n,v,f,
-                                              [self._troveFileName])[0]
-            except repositoryErrors.PathsNotFound:
+            contents = None
+            for troveFileName in self._troveFileNames:
+                try:
+                    contents = repos.getFileContentsFromTrove(n,v,f,
+                                                  [troveFileName])[0]
+                    break
+                except repositoryErrors.PathsNotFound:
+                    pass
+            if contents is None:
                 raise ProductDefinitionFileNotFoundError()
             return contents.get(), (n,v,f)
 
         trvCsSpec = (n, (None, None), (v, f), True)
         cs = conaryClient.createChangeSet([ trvCsSpec ], withFiles = True,
                                           withFileContents = True)
+        troveFileNameMap = dict((x, i)
+            for (i, x) in enumerate(self._troveFileNames))
         for thawTrvCs in cs.iterNewTroveList():
             paths = [ x for x in thawTrvCs.getNewFileList()
-                      if x[1] == self._troveFileName ]
+                if x[1] in troveFileNameMap ]
             if not paths:
                 continue
+            # Prefer the platdef from the highest ranked file
+            _, (pathId, path, fileId, fileVer) = min(
+                (troveFileNameMap[x[1]], x) for x in paths)
+
             # Fetch file from changeset
-            fileSpecs = [ (fId, fVer) for (_, _, fId, fVer) in paths ]
+            fileSpecs = [ (fileId, fileVer) ]
             fileContents = repos.getFileContents(fileSpecs)
             return fileContents[0].get(), thawTrvCs.getNewNameVersionFlavor()
 
@@ -739,7 +766,9 @@ class ProductDefinition(BaseDefinition):
     RootNode = 'productDefinition'
 
     _troveName = 'product-definition'
-    _troveFileName = 'product-definition.xml'
+    _troveFileNames = [
+        'product-definition.xml',
+    ]
 
     _recipe = '''
 #
@@ -1751,7 +1780,23 @@ class ProductDefinitionRecipe(PackageRecipe):
         label = self.getProductDefinitionLabel()
         nplat.saveToRepository(client, label, message = message)
 
-    def rebase(self, client, label = None, useLatest = None):
+    def rebase(self, client, label = None, useLatest = None,
+            platformVersion = None):
+        """
+        @param label: A label string pointing to the new platform to be used
+        as a base for this product definition.
+        @type label: C{str}
+        @param useLatest: If set, the value from the upstream platform is
+        copied verbatim here, with no snapshotting to a specific version.
+        This essentially caches the upstream platform.
+        @type useLatest: C{bool}
+        @param platformVersion: A version string (like 1.2-3) to be used for
+        platform trove search path elements.
+        @type platformVersion: C{str}
+        """
+        if useLatest and platformVersion:
+            raise ProductDefinitionError("Conflicting arguments useLatest and "
+                "platformVersion specified")
         if label is None:
             troveSpec = self.getPlatformSourceTrove()
             if troveSpec:
@@ -1765,7 +1810,8 @@ class ProductDefinitionRecipe(PackageRecipe):
             raise PlatformLabelMissingError()
         nplat = self.toPlatformDefinition()
         nplat.loadFromRepository(client, label)
-        nplat.snapshotVersions(client)
+        if not useLatest:
+            nplat.snapshotVersions(client, platformVersion = platformVersion)
         self._rebase(label, nplat, useLatest = useLatest)
 
     def _rebase(self, label, nplat, useLatest = None):
@@ -1992,6 +2038,32 @@ class BasePlatform(BaseDefinition):
             return []
         return vals.get_autoLoadRecipe()
 
+    def setContentProvider(self, name, description,
+            contentSourceTypes = None, dataSources = None):
+        xmlsubs = self.xmlFactory()
+        dataSourceType = xmlsubs.dataSourceTypeSub
+        contentSourceTypeType = xmlsubs.contentSourceTypeTypeSub
+        cprov = xmlsubs.contentProviderTypeSub.factory(
+            name = name, description = description)
+        for ds in (dataSources or []):
+            assert isinstance(ds, dataSourceType)
+            cprov.add_dataSource(ds)
+        for cst in (contentSourceTypes or []):
+            assert isinstance(cst, contentSourceTypeType)
+            cprov.add_contentSourceType(cst)
+        self._rootObj.contentProvider = cprov
+
+    def getContentProvider(self):
+        return self._rootObj.contentProvider
+
+    def newDataSource(self, name, description):
+        return self.xmlFactory().dataSourceTypeSub.factory(
+            name = name, description = description)
+
+    def newContentSourceType(self, name, description, isSingleton = None):
+        return self.xmlFactory().contentSourceTypeTypeSub.factory(
+            name = name, description = description, isSingleton = isSingleton)
+
 class Platform(BasePlatform):
     ClassFactoryName = 'platformTypeSub'
     RootNode = 'platform'
@@ -2035,7 +2107,12 @@ class PlatformDefinition(BasePlatform):
     RootNode = 'platformDefinition'
 
     _troveName = 'platform-definition'
-    _troveFileName = 'platform-definition.xml'
+
+    # list of files to search for in the trove, ordered by priority.
+    _troveFileNames = [
+        'platform-definition-4.0.xml',
+        'platform-definition.xml',
+    ]
 
     _recipe = '''
 #
@@ -2082,19 +2159,22 @@ class PlatformDefinitionRecipe(PackageRecipe):
         # Set the source trove version we used
         self._sourceTrove = "%s=%s" % (self._troveName, nvf[1])
 
-    def snapshotVersions(self, conaryClient):
+    def snapshotVersions(self, conaryClient, platformVersion = None):
         """
         For each search path or factory source from this platform definition,
         query the repositories for the latest versions and record them.
         @param conaryClient: A Conary client object
         @type conaryClient: C{conaryclient.ConaryClient}
+        @param platformVersion: A version string (like 1.2-3) to be used for
+        platform trove search path elements.
+        @type platformVersion: C{str}
         """
         repos = conaryClient.getRepos()
         troveSpecs = set()
         # XXX We are ignoring the flavors for now.
         for sp in itertools.chain(self.getSearchPaths(),
                                   self.getFactorySources()):
-            troveSpecs.add(sp.getTroveTup(template=True))
+            troveSpecs.add(self._getTroveTup(sp, platformVersion))
         troveSpecs = sorted(troveSpecs)
         try:
             troves = repos.findTroves(None, troveSpecs, allowMissing = True)
@@ -2103,13 +2183,21 @@ class PlatformDefinitionRecipe(PackageRecipe):
 
         for sp in itertools.chain(self.getSearchPaths(),
                                   self.getFactorySources()):
-            key = sp.getTroveTup(template=True)
+            key = self._getTroveTup(sp, platformVersion)
             if key not in troves:
                 raise ProductDefinitionTroveNotFoundError("%s=%s" % key[:2])
             # Use the latest version, if for some reason there is more
             # than one in the result set.
             nvf = max(troves[key])
+            sp.label = str(nvf[1].trailingLabel())
             sp.version = str(nvf[1].trailingRevision())
+
+    @classmethod
+    def _getTroveTup(cls, searchPath, platformVersion):
+        n, v, f = searchPath.getTroveTup(template = True)
+        if searchPath.isPlatformTrove and platformVersion is not None:
+            v = "%s/%s" % (cls.labelFromString(v), platformVersion)
+        return (n, v, f)
 
     # sourceTrove is set when we load the trove from the repository. It is not
     # part of the XML stream, so we set it separately in this object.
@@ -2670,3 +2758,13 @@ class Migrate_20_30(BaseMigration):
         self._migrateBuildDefinitions(fromObj, toObj)
 
 MigrationManager.register(Migrate_20_30)
+
+class Migrate_30_31(BaseMigration):
+    fromVersion = '3.0'
+    toVersion = '3.1'
+MigrationManager.register(Migrate_30_31)
+
+class Migrate_31_40(BaseMigration):
+    fromVersion = '3.1'
+    toVersion = '4.0'
+MigrationManager.register(Migrate_31_40)
