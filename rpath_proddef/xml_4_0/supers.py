@@ -963,6 +963,7 @@ class imageType(GeneratedsSuper):
         MemberSpec_('vmSnapshots', 'xsd:boolean', 0),
         MemberSpec_('swapSize', 'xsd:nonNegativeInteger', 0),
         MemberSpec_('betaNag', 'xsd:boolean', 0),
+        MemberSpec_('buildOVF10', 'xsd:boolean', 0),
         MemberSpec_('anacondaTemplatesTrove', 'rpd:troveSpecType', 0),
         MemberSpec_('vmMemory', 'xsd:nonNegativeInteger', 0),
         MemberSpec_('installLabelPath', 'xsd:string', 0),
@@ -978,7 +979,7 @@ class imageType(GeneratedsSuper):
         ]
     subclass = None
     superclass = None
-    def __init__(self, autoResolve=None, maxIsoSize=None, bugsUrl=None, natNetworking=None, vhdDiskType=None, anacondaCustomTrove=None, mediaTemplateTrove=None, baseFileName=None, vmSnapshots=None, swapSize=None, betaNag=None, anacondaTemplatesTrove=None, vmMemory=None, installLabelPath=None, unionfs=None, containerFormat=None, freespace=None, name=None, zisofs=None, diskAdapter=None, amiHugeDiskMountpoint=None, showMediaCheck=None, valueOf_=''):
+    def __init__(self, autoResolve=None, maxIsoSize=None, bugsUrl=None, natNetworking=None, vhdDiskType=None, anacondaCustomTrove=None, mediaTemplateTrove=None, baseFileName=None, vmSnapshots=None, swapSize=None, betaNag=None, buildOVF10=None, anacondaTemplatesTrove=None, vmMemory=None, installLabelPath=None, unionfs=None, containerFormat=None, freespace=None, name=None, zisofs=None, diskAdapter=None, amiHugeDiskMountpoint=None, showMediaCheck=None, valueOf_=''):
         self.autoResolve = _cast(bool, autoResolve)
         self.maxIsoSize = _cast(int, maxIsoSize)
         self.bugsUrl = _cast(None, bugsUrl)
@@ -990,6 +991,7 @@ class imageType(GeneratedsSuper):
         self.vmSnapshots = _cast(bool, vmSnapshots)
         self.swapSize = _cast(int, swapSize)
         self.betaNag = _cast(bool, betaNag)
+        self.buildOVF10 = _cast(bool, buildOVF10)
         self.anacondaTemplatesTrove = _cast(None, anacondaTemplatesTrove)
         self.vmMemory = _cast(int, vmMemory)
         self.installLabelPath = _cast(None, installLabelPath)
@@ -1030,6 +1032,8 @@ class imageType(GeneratedsSuper):
     def set_swapSize(self, swapSize): self.swapSize = swapSize
     def get_betaNag(self): return self.betaNag
     def set_betaNag(self, betaNag): self.betaNag = betaNag
+    def get_buildOVF10(self): return self.buildOVF10
+    def set_buildOVF10(self, buildOVF10): self.buildOVF10 = buildOVF10
     def get_anacondaTemplatesTrove(self): return self.anacondaTemplatesTrove
     def set_anacondaTemplatesTrove(self, anacondaTemplatesTrove): self.anacondaTemplatesTrove = anacondaTemplatesTrove
     def get_vmMemory(self): return self.vmMemory
@@ -1087,6 +1091,8 @@ class imageType(GeneratedsSuper):
             outfile.write(' swapSize="%s"' % self.format_integer(self.swapSize, input_name='swapSize'))
         if self.betaNag is not None:
             outfile.write(' betaNag="%s"' % self.format_boolean(str_lower(str(self.betaNag)), input_name='betaNag'))
+        if self.buildOVF10 is not None:
+            outfile.write(' buildOVF10="%s"' % self.format_boolean(str_lower(str(self.buildOVF10)), input_name='buildOVF10'))
         if self.anacondaTemplatesTrove is not None:
             outfile.write(' anacondaTemplatesTrove=%s' % (quote_attrib(self.anacondaTemplatesTrove), ))
         if self.vmMemory is not None:
@@ -1163,6 +1169,9 @@ class imageType(GeneratedsSuper):
         if self.betaNag is not None:
             showIndent(outfile, level)
             outfile.write('betaNag = %s,\n' % (self.betaNag,))
+        if self.buildOVF10 is not None:
+            showIndent(outfile, level)
+            outfile.write('buildOVF10 = %s,\n' % (self.buildOVF10,))
         if self.anacondaTemplatesTrove is not None:
             showIndent(outfile, level)
             outfile.write('anacondaTemplatesTrove = "%s",\n' % (self.anacondaTemplatesTrove,))
@@ -1259,6 +1268,13 @@ class imageType(GeneratedsSuper):
                 self.betaNag = False
             else:
                 raise ValueError('Bad boolean attribute (betaNag)')
+        if attrs.get('buildOVF10'):
+            if attrs.get('buildOVF10').value in ('true', '1'):
+                self.buildOVF10 = True
+            elif attrs.get('buildOVF10').value in ('false', '0'):
+                self.buildOVF10 = False
+            else:
+                raise ValueError('Bad boolean attribute (buildOVF10)')
         if attrs.get('anacondaTemplatesTrove'):
             self.anacondaTemplatesTrove = attrs.get('anacondaTemplatesTrove').value
         if attrs.get('vmMemory'):
