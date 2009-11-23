@@ -1878,10 +1878,44 @@ class ProductDefinitionRecipe(PackageRecipe):
             build.buildFlavor = self._getFlavorByRefs(build.flavorSetRef,
                 build.architectureRef, None, None)
             build.containerTemplateFields = self._getBuildContainerTemplateFields(build.containerTemplateRef)
+            # Fix up vhdDiskType
+            self._fixupBuildImage(build.image)
 
         # Adding the platform was part of the migration from 1.3 to 2.0
         if self.platform:
             self._addPlatformDefaults()
+        # Empty list objects are nullified
+        listObjects = [
+            ('autoLoadRecipes', 'get_autoLoadRecipe'),
+            ('buildDefinition', 'get_build'),
+            ('searchPaths', 'get_searchPath'),
+            ('factorySources', 'get_factorySource'),
+            ('secondaryLabels', 'get_secondaryLabel'),
+            ('containerTemplates', 'get_image'),
+        ]
+        for listObj, listObjMethodName in listObjects:
+            obj = getattr(self._rootObj, listObj)
+            if obj is None:
+                continue
+            if getattr(obj, listObjMethodName)():
+                continue
+            setattr(self._rootObj, listObj, None)
+
+    @classmethod
+    def _fixupBuildImage(cls, image):
+        if image is None:
+            return
+        if image.diskAdapter == 'scsi':
+            image.diskAdapter = 'lsilogic'
+
+        vhdDiskType = image.vhdDiskType
+        if vhdDiskType not in ['ide', 'scsi']:
+            return
+        if vhdDiskType == 'ide':
+            image.diskAdapter = vhdDiskType
+        else:
+            image.diskAdapter = 'lsilogic'
+        image.vhdDiskType = None
 
     def _addPlatformDefaults(self):
         fields = ['containerTemplates', 'architectures',

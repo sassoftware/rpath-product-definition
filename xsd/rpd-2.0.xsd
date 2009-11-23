@@ -152,6 +152,7 @@
         <xsd:attribute name="baseFileName" type="xsd:string" />
         <xsd:attribute name="betaNag" type="xsd:boolean" />
         <xsd:attribute name="bugsUrl" type="xsd:string" />
+        <xsd:attribute name="buildOVF10" type="xsd:boolean" />
         <xsd:attribute name="freespace" type="xsd:nonNegativeInteger" />
         <xsd:attribute name="installLabelPath" type="xsd:string" />
         <xsd:attribute name="maxIsoSize" type="xsd:positiveInteger" />
