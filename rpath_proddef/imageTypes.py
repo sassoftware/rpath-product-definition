@@ -30,9 +30,9 @@ class Image(module.imageTypeSub):
         'rpd:troveSpecType' : str,
         'xsd:nonNegativeInteger' : int,
     }
-    _attributes = dict([ (x.name, _schemaToPythonTypeMap[x.data_type])
-        for x in module.imageTypeSub._member_data_items
-            if x.name != 'containerFormat'])
+    _attributes = dict([(x.name, _schemaToPythonTypeMap[x.data_type])
+        for x in module.imageTypeSub.member_data_items_
+            if x.name not in ('containerFormat', 'valueOf_')])
 
     def __init__(self, fields):
         module.imageTypeSub.__init__(self, **fields)

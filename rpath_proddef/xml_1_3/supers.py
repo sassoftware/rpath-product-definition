@@ -166,7 +166,7 @@ class MixedContainer:
             outfile.write(')\n')
 
 
-class _MemberSpec(object):
+class MemberSpec_(object):
     def __init__(self, name='', data_type='', container=0):
         self.name = name
         self.data_type = data_type
@@ -174,7 +174,15 @@ class _MemberSpec(object):
     def set_name(self, name): self.name = name
     def get_name(self): return self.name
     def set_data_type(self, data_type): self.data_type = data_type
-    def get_data_type(self): return self.data_type
+    def get_data_type_chain(self): return self.data_type
+    def get_data_type(self):
+        if isinstance(self.data_type, list):
+            if len(self.data_type) > 0:
+                return self.data_type[-1]
+            else:
+                return 'xs:string'
+        else:
+            return self.data_type
     def set_container(self, container): self.container = container
     def get_container(self): return self.container
 
@@ -188,10 +196,10 @@ def _cast(typ, value):
 #
 
 class stageType(GeneratedsSuper):
-    _member_data_items = [
-        _MemberSpec('labelSuffix', 'xsd:string', 0),
-        _MemberSpec('name', 'xsd:string', 0),
-        _MemberSpec('promoteMaps', 'promoteMapsType', 0),
+    member_data_items_ = [
+        MemberSpec_('labelSuffix', 'xsd:string', 0),
+        MemberSpec_('name', 'xsd:string', 0),
+        MemberSpec_('promoteMaps', 'promoteMapsType', 0),
         ]
     subclass = None
     superclass = None
@@ -281,8 +289,8 @@ class stageType(GeneratedsSuper):
 
 
 class stageListType(GeneratedsSuper):
-    _member_data_items = [
-        _MemberSpec('stage', 'stageType', 1),
+    member_data_items_ = [
+        MemberSpec_('stage', 'stageType', 1),
         ]
     subclass = None
     superclass = None
@@ -362,9 +370,10 @@ class stageListType(GeneratedsSuper):
 
 
 class nameLabelType(GeneratedsSuper):
-    _member_data_items = [
-        _MemberSpec('troveName', 'xsd:string', 0),
-        _MemberSpec('label', 'xsd:string', 0),
+    member_data_items_ = [
+        MemberSpec_('troveName', 'xsd:string', 0),
+        MemberSpec_('label', 'xsd:string', 0),
+        MemberSpec_('valueOf_', [], 0),
         ]
     subclass = None
     superclass = None
@@ -400,7 +409,7 @@ class nameLabelType(GeneratedsSuper):
         if self.label is not None:
             outfile.write(' label=%s' % (self.format_string(quote_attrib(self.label).encode(ExternalEncoding), input_name='label'), ))
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='nameLabelType'):
-        if self.valueOf_.find('![CDATA')>-1:
+        if self.valueOf_.find('![CDATA') > -1:
             value=quote_xml('%s' % self.valueOf_)
             value=value.replace('![CDATA','<![CDATA')
             value=value.replace(']]',']]>')
@@ -453,10 +462,11 @@ class nameLabelType(GeneratedsSuper):
 
 
 class searchPathType(GeneratedsSuper):
-    _member_data_items = [
-        _MemberSpec('troveName', 'xsd:string', 0),
-        _MemberSpec('version', 'xsd:string', 0),
-        _MemberSpec('label', 'xsd:string', 0),
+    member_data_items_ = [
+        MemberSpec_('troveName', 'xsd:string', 0),
+        MemberSpec_('version', 'xsd:string', 0),
+        MemberSpec_('label', 'xsd:string', 0),
+        MemberSpec_('valueOf_', [], 0),
         ]
     subclass = None
     superclass = None
@@ -497,7 +507,7 @@ class searchPathType(GeneratedsSuper):
         if self.label is not None:
             outfile.write(' label=%s' % (self.format_string(quote_attrib(self.label).encode(ExternalEncoding), input_name='label'), ))
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='searchPathType'):
-        if self.valueOf_.find('![CDATA')>-1:
+        if self.valueOf_.find('![CDATA') > -1:
             value=quote_xml('%s' % self.valueOf_)
             value=value.replace('![CDATA','<![CDATA')
             value=value.replace(']]',']]>')
@@ -569,8 +579,8 @@ class searchPathType(GeneratedsSuper):
 
 
 class searchPathListType(GeneratedsSuper):
-    _member_data_items = [
-        _MemberSpec('searchPath', 'searchPathType', 1),
+    member_data_items_ = [
+        MemberSpec_('searchPath', 'searchPathType', 1),
         ]
     subclass = None
     superclass = None
@@ -650,8 +660,8 @@ class searchPathListType(GeneratedsSuper):
 
 
 class factorySourceListType(GeneratedsSuper):
-    _member_data_items = [
-        _MemberSpec('factorySource', 'searchPathType', 1),
+    member_data_items_ = [
+        MemberSpec_('factorySource', 'searchPathType', 1),
         ]
     subclass = None
     superclass = None
@@ -731,8 +741,8 @@ class factorySourceListType(GeneratedsSuper):
 
 
 class autoLoadRecipesType(GeneratedsSuper):
-    _member_data_items = [
-        _MemberSpec('autoLoadRecipe', 'nameLabelType', 1),
+    member_data_items_ = [
+        MemberSpec_('autoLoadRecipe', 'nameLabelType', 1),
         ]
     subclass = None
     superclass = None
@@ -812,13 +822,14 @@ class autoLoadRecipesType(GeneratedsSuper):
 
 
 class amiImageType(GeneratedsSuper):
-    _member_data_items = [
-        _MemberSpec('autoResolve', 'xsd:boolean', 0),
-        _MemberSpec('freespace', 'xsd:nonNegativeInteger', 0),
-        _MemberSpec('name', 'xsd:string', 0),
-        _MemberSpec('baseFileName', 'xsd:string', 0),
-        _MemberSpec('installLabelPath', 'xsd:string', 0),
-        _MemberSpec('amiHugeDiskMountpoint', 'xsd:string', 0),
+    member_data_items_ = [
+        MemberSpec_('autoResolve', 'xsd:boolean', 0),
+        MemberSpec_('freespace', 'xsd:nonNegativeInteger', 0),
+        MemberSpec_('name', 'xsd:string', 0),
+        MemberSpec_('baseFileName', 'xsd:string', 0),
+        MemberSpec_('installLabelPath', 'xsd:string', 0),
+        MemberSpec_('amiHugeDiskMountpoint', 'xsd:string', 0),
+        MemberSpec_('valueOf_', [], 0),
         ]
     subclass = None
     superclass = None
@@ -874,7 +885,7 @@ class amiImageType(GeneratedsSuper):
         if self.amiHugeDiskMountpoint is not None:
             outfile.write(' amiHugeDiskMountpoint=%s' % (self.format_string(quote_attrib(self.amiHugeDiskMountpoint).encode(ExternalEncoding), input_name='amiHugeDiskMountpoint'), ))
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='amiImageType'):
-        if self.valueOf_.find('![CDATA')>-1:
+        if self.valueOf_.find('![CDATA') > -1:
             value=quote_xml('%s' % self.valueOf_)
             value=value.replace('![CDATA','<![CDATA')
             value=value.replace(']]',']]>')
@@ -954,18 +965,19 @@ class amiImageType(GeneratedsSuper):
 
 
 class applianceIsoImageType(GeneratedsSuper):
-    _member_data_items = [
-        _MemberSpec('maxIsoSize', 'xsd:positiveInteger', 0),
-        _MemberSpec('autoResolve', 'xsd:boolean', 0),
-        _MemberSpec('bugsUrl', 'xsd:string', 0),
-        _MemberSpec('name', 'xsd:string', 0),
-        _MemberSpec('anacondaCustomTrove', 'rpd:troveSpecType', 0),
-        _MemberSpec('betaNag', 'xsd:boolean', 0),
-        _MemberSpec('mediaTemplateTrove', 'rpd:troveSpecType', 0),
-        _MemberSpec('installLabelPath', 'xsd:string', 0),
-        _MemberSpec('anacondaTemplatesTrove', 'rpd:troveSpecType', 0),
-        _MemberSpec('baseFileName', 'xsd:string', 0),
-        _MemberSpec('showMediaCheck', 'xsd:boolean', 0),
+    member_data_items_ = [
+        MemberSpec_('maxIsoSize', 'xsd:positiveInteger', 0),
+        MemberSpec_('autoResolve', 'xsd:boolean', 0),
+        MemberSpec_('bugsUrl', 'xsd:string', 0),
+        MemberSpec_('name', 'xsd:string', 0),
+        MemberSpec_('anacondaCustomTrove', 'rpd:troveSpecType', 0),
+        MemberSpec_('betaNag', 'xsd:boolean', 0),
+        MemberSpec_('mediaTemplateTrove', 'rpd:troveSpecType', 0),
+        MemberSpec_('installLabelPath', 'xsd:string', 0),
+        MemberSpec_('anacondaTemplatesTrove', 'rpd:troveSpecType', 0),
+        MemberSpec_('baseFileName', 'xsd:string', 0),
+        MemberSpec_('showMediaCheck', 'xsd:boolean', 0),
+        MemberSpec_('valueOf_', [], 0),
         ]
     subclass = None
     superclass = None
@@ -1046,7 +1058,7 @@ class applianceIsoImageType(GeneratedsSuper):
         if self.showMediaCheck is not None:
             outfile.write(' showMediaCheck="%s"' % self.format_boolean(str_lower(str(self.showMediaCheck)), input_name='showMediaCheck'))
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='applianceIsoImageType'):
-        if self.valueOf_.find('![CDATA')>-1:
+        if self.valueOf_.find('![CDATA') > -1:
             value=quote_xml('%s' % self.valueOf_)
             value=value.replace('![CDATA','<![CDATA')
             value=value.replace(']]',']]>')
@@ -1161,18 +1173,19 @@ class applianceIsoImageType(GeneratedsSuper):
 
 
 class installableIsoImageType(GeneratedsSuper):
-    _member_data_items = [
-        _MemberSpec('maxIsoSize', 'xsd:positiveInteger', 0),
-        _MemberSpec('autoResolve', 'xsd:boolean', 0),
-        _MemberSpec('bugsUrl', 'xsd:string', 0),
-        _MemberSpec('name', 'xsd:string', 0),
-        _MemberSpec('anacondaCustomTrove', 'rpd:troveSpecType', 0),
-        _MemberSpec('betaNag', 'xsd:boolean', 0),
-        _MemberSpec('mediaTemplateTrove', 'rpd:troveSpecType', 0),
-        _MemberSpec('installLabelPath', 'xsd:string', 0),
-        _MemberSpec('anacondaTemplatesTrove', 'rpd:troveSpecType', 0),
-        _MemberSpec('baseFileName', 'xsd:string', 0),
-        _MemberSpec('showMediaCheck', 'xsd:boolean', 0),
+    member_data_items_ = [
+        MemberSpec_('maxIsoSize', 'xsd:positiveInteger', 0),
+        MemberSpec_('autoResolve', 'xsd:boolean', 0),
+        MemberSpec_('bugsUrl', 'xsd:string', 0),
+        MemberSpec_('name', 'xsd:string', 0),
+        MemberSpec_('anacondaCustomTrove', 'rpd:troveSpecType', 0),
+        MemberSpec_('betaNag', 'xsd:boolean', 0),
+        MemberSpec_('mediaTemplateTrove', 'rpd:troveSpecType', 0),
+        MemberSpec_('installLabelPath', 'xsd:string', 0),
+        MemberSpec_('anacondaTemplatesTrove', 'rpd:troveSpecType', 0),
+        MemberSpec_('baseFileName', 'xsd:string', 0),
+        MemberSpec_('showMediaCheck', 'xsd:boolean', 0),
+        MemberSpec_('valueOf_', [], 0),
         ]
     subclass = None
     superclass = None
@@ -1253,7 +1266,7 @@ class installableIsoImageType(GeneratedsSuper):
         if self.showMediaCheck is not None:
             outfile.write(' showMediaCheck="%s"' % self.format_boolean(str_lower(str(self.showMediaCheck)), input_name='showMediaCheck'))
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='installableIsoImageType'):
-        if self.valueOf_.find('![CDATA')>-1:
+        if self.valueOf_.find('![CDATA') > -1:
             value=quote_xml('%s' % self.valueOf_)
             value=value.replace('![CDATA','<![CDATA')
             value=value.replace(']]',']]>')
@@ -1368,13 +1381,14 @@ class installableIsoImageType(GeneratedsSuper):
 
 
 class liveIsoImageType(GeneratedsSuper):
-    _member_data_items = [
-        _MemberSpec('autoResolve', 'xsd:boolean', 0),
-        _MemberSpec('name', 'xsd:string', 0),
-        _MemberSpec('zisofs', 'xsd:boolean', 0),
-        _MemberSpec('baseFileName', 'xsd:string', 0),
-        _MemberSpec('unionfs', 'xsd:boolean', 0),
-        _MemberSpec('installLabelPath', 'xsd:string', 0),
+    member_data_items_ = [
+        MemberSpec_('autoResolve', 'xsd:boolean', 0),
+        MemberSpec_('name', 'xsd:string', 0),
+        MemberSpec_('zisofs', 'xsd:boolean', 0),
+        MemberSpec_('baseFileName', 'xsd:string', 0),
+        MemberSpec_('unionfs', 'xsd:boolean', 0),
+        MemberSpec_('installLabelPath', 'xsd:string', 0),
+        MemberSpec_('valueOf_', [], 0),
         ]
     subclass = None
     superclass = None
@@ -1430,7 +1444,7 @@ class liveIsoImageType(GeneratedsSuper):
         if self.installLabelPath is not None:
             outfile.write(' installLabelPath=%s' % (self.format_string(quote_attrib(self.installLabelPath).encode(ExternalEncoding), input_name='installLabelPath'), ))
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='liveIsoImageType'):
-        if self.valueOf_.find('![CDATA')>-1:
+        if self.valueOf_.find('![CDATA') > -1:
             value=quote_xml('%s' % self.valueOf_)
             value=value.replace('![CDATA','<![CDATA')
             value=value.replace(']]',']]>')
@@ -1515,11 +1529,12 @@ class liveIsoImageType(GeneratedsSuper):
 
 
 class netbootImageType(GeneratedsSuper):
-    _member_data_items = [
-        _MemberSpec('autoResolve', 'xsd:boolean', 0),
-        _MemberSpec('baseFileName', 'xsd:string', 0),
-        _MemberSpec('installLabelPath', 'xsd:string', 0),
-        _MemberSpec('name', 'xsd:string', 0),
+    member_data_items_ = [
+        MemberSpec_('autoResolve', 'xsd:boolean', 0),
+        MemberSpec_('baseFileName', 'xsd:string', 0),
+        MemberSpec_('installLabelPath', 'xsd:string', 0),
+        MemberSpec_('name', 'xsd:string', 0),
+        MemberSpec_('valueOf_', [], 0),
         ]
     subclass = None
     superclass = None
@@ -1565,7 +1580,7 @@ class netbootImageType(GeneratedsSuper):
         if self.name is not None:
             outfile.write(' name=%s' % (self.format_string(quote_attrib(self.name).encode(ExternalEncoding), input_name='name'), ))
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='netbootImageType'):
-        if self.valueOf_.find('![CDATA')>-1:
+        if self.valueOf_.find('![CDATA') > -1:
             value=quote_xml('%s' % self.valueOf_)
             value=value.replace('![CDATA','<![CDATA')
             value=value.replace(']]',']]>')
@@ -1630,13 +1645,14 @@ class netbootImageType(GeneratedsSuper):
 
 
 class rawFsImageType(GeneratedsSuper):
-    _member_data_items = [
-        _MemberSpec('autoResolve', 'xsd:boolean', 0),
-        _MemberSpec('freespace', 'xsd:nonNegativeInteger', 0),
-        _MemberSpec('name', 'xsd:string', 0),
-        _MemberSpec('swapSize', 'xsd:nonNegativeInteger', 0),
-        _MemberSpec('baseFileName', 'xsd:string', 0),
-        _MemberSpec('installLabelPath', 'xsd:string', 0),
+    member_data_items_ = [
+        MemberSpec_('autoResolve', 'xsd:boolean', 0),
+        MemberSpec_('freespace', 'xsd:nonNegativeInteger', 0),
+        MemberSpec_('name', 'xsd:string', 0),
+        MemberSpec_('swapSize', 'xsd:nonNegativeInteger', 0),
+        MemberSpec_('baseFileName', 'xsd:string', 0),
+        MemberSpec_('installLabelPath', 'xsd:string', 0),
+        MemberSpec_('valueOf_', [], 0),
         ]
     subclass = None
     superclass = None
@@ -1692,7 +1708,7 @@ class rawFsImageType(GeneratedsSuper):
         if self.installLabelPath is not None:
             outfile.write(' installLabelPath=%s' % (self.format_string(quote_attrib(self.installLabelPath).encode(ExternalEncoding), input_name='installLabelPath'), ))
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='rawFsImageType'):
-        if self.valueOf_.find('![CDATA')>-1:
+        if self.valueOf_.find('![CDATA') > -1:
             value=quote_xml('%s' % self.valueOf_)
             value=value.replace('![CDATA','<![CDATA')
             value=value.replace(']]',']]>')
@@ -1777,13 +1793,14 @@ class rawFsImageType(GeneratedsSuper):
 
 
 class rawHdImageType(GeneratedsSuper):
-    _member_data_items = [
-        _MemberSpec('autoResolve', 'xsd:boolean', 0),
-        _MemberSpec('freespace', 'xsd:nonNegativeInteger', 0),
-        _MemberSpec('name', 'xsd:string', 0),
-        _MemberSpec('swapSize', 'xsd:nonNegativeInteger', 0),
-        _MemberSpec('baseFileName', 'xsd:string', 0),
-        _MemberSpec('installLabelPath', 'xsd:string', 0),
+    member_data_items_ = [
+        MemberSpec_('autoResolve', 'xsd:boolean', 0),
+        MemberSpec_('freespace', 'xsd:nonNegativeInteger', 0),
+        MemberSpec_('name', 'xsd:string', 0),
+        MemberSpec_('swapSize', 'xsd:nonNegativeInteger', 0),
+        MemberSpec_('baseFileName', 'xsd:string', 0),
+        MemberSpec_('installLabelPath', 'xsd:string', 0),
+        MemberSpec_('valueOf_', [], 0),
         ]
     subclass = None
     superclass = None
@@ -1839,7 +1856,7 @@ class rawHdImageType(GeneratedsSuper):
         if self.installLabelPath is not None:
             outfile.write(' installLabelPath=%s' % (self.format_string(quote_attrib(self.installLabelPath).encode(ExternalEncoding), input_name='installLabelPath'), ))
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='rawHdImageType'):
-        if self.valueOf_.find('![CDATA')>-1:
+        if self.valueOf_.find('![CDATA') > -1:
             value=quote_xml('%s' % self.valueOf_)
             value=value.replace('![CDATA','<![CDATA')
             value=value.replace(']]',']]>')
@@ -1924,12 +1941,13 @@ class rawHdImageType(GeneratedsSuper):
 
 
 class tarballImageType(GeneratedsSuper):
-    _member_data_items = [
-        _MemberSpec('autoResolve', 'xsd:boolean', 0),
-        _MemberSpec('baseFileName', 'xsd:string', 0),
-        _MemberSpec('installLabelPath', 'xsd:string', 0),
-        _MemberSpec('name', 'xsd:string', 0),
-        _MemberSpec('swapSize', 'xsd:nonNegativeInteger', 0),
+    member_data_items_ = [
+        MemberSpec_('autoResolve', 'xsd:boolean', 0),
+        MemberSpec_('baseFileName', 'xsd:string', 0),
+        MemberSpec_('installLabelPath', 'xsd:string', 0),
+        MemberSpec_('name', 'xsd:string', 0),
+        MemberSpec_('swapSize', 'xsd:nonNegativeInteger', 0),
+        MemberSpec_('valueOf_', [], 0),
         ]
     subclass = None
     superclass = None
@@ -1980,7 +1998,7 @@ class tarballImageType(GeneratedsSuper):
         if self.swapSize is not None:
             outfile.write(' swapSize="%s"' % self.format_integer(self.swapSize, input_name='swapSize'))
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='tarballImageType'):
-        if self.valueOf_.find('![CDATA')>-1:
+        if self.valueOf_.find('![CDATA') > -1:
             value=quote_xml('%s' % self.valueOf_)
             value=value.replace('![CDATA','<![CDATA')
             value=value.replace(']]',']]>')
@@ -2055,9 +2073,10 @@ class tarballImageType(GeneratedsSuper):
 
 
 class updateIsoImageType(GeneratedsSuper):
-    _member_data_items = [
-        _MemberSpec('mediaTemplateTrove', 'xsd:string', 0),
-        _MemberSpec('baseFileName', 'xsd:string', 0),
+    member_data_items_ = [
+        MemberSpec_('mediaTemplateTrove', 'xsd:string', 0),
+        MemberSpec_('baseFileName', 'xsd:string', 0),
+        MemberSpec_('valueOf_', [], 0),
         ]
     subclass = None
     superclass = None
@@ -2093,7 +2112,7 @@ class updateIsoImageType(GeneratedsSuper):
         if self.baseFileName is not None:
             outfile.write(' baseFileName=%s' % (self.format_string(quote_attrib(self.baseFileName).encode(ExternalEncoding), input_name='baseFileName'), ))
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='updateIsoImageType'):
-        if self.valueOf_.find('![CDATA')>-1:
+        if self.valueOf_.find('![CDATA') > -1:
             value=quote_xml('%s' % self.valueOf_)
             value=value.replace('![CDATA','<![CDATA')
             value=value.replace(']]',']]>')
@@ -2143,14 +2162,15 @@ class updateIsoImageType(GeneratedsSuper):
 
 
 class vhdImageType(GeneratedsSuper):
-    _member_data_items = [
-        _MemberSpec('autoResolve', 'xsd:boolean', 0),
-        _MemberSpec('freespace', 'xsd:nonNegativeInteger', 0),
-        _MemberSpec('name', 'xsd:string', 0),
-        _MemberSpec('vhdDiskType', 'xsd:string', 0),
-        _MemberSpec('swapSize', 'xsd:nonNegativeInteger', 0),
-        _MemberSpec('baseFileName', 'xsd:string', 0),
-        _MemberSpec('installLabelPath', 'xsd:string', 0),
+    member_data_items_ = [
+        MemberSpec_('autoResolve', 'xsd:boolean', 0),
+        MemberSpec_('freespace', 'xsd:nonNegativeInteger', 0),
+        MemberSpec_('name', 'xsd:string', 0),
+        MemberSpec_('vhdDiskType', 'xsd:string', 0),
+        MemberSpec_('swapSize', 'xsd:nonNegativeInteger', 0),
+        MemberSpec_('baseFileName', 'xsd:string', 0),
+        MemberSpec_('installLabelPath', 'xsd:string', 0),
+        MemberSpec_('valueOf_', [], 0),
         ]
     subclass = None
     superclass = None
@@ -2211,7 +2231,7 @@ class vhdImageType(GeneratedsSuper):
         if self.installLabelPath is not None:
             outfile.write(' installLabelPath=%s' % (self.format_string(quote_attrib(self.installLabelPath).encode(ExternalEncoding), input_name='installLabelPath'), ))
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='vhdImageType'):
-        if self.valueOf_.find('![CDATA')>-1:
+        if self.valueOf_.find('![CDATA') > -1:
             value=quote_xml('%s' % self.valueOf_)
             value=value.replace('![CDATA','<![CDATA')
             value=value.replace(']]',']]>')
@@ -2301,14 +2321,15 @@ class vhdImageType(GeneratedsSuper):
 
 
 class virtualIronImageType(GeneratedsSuper):
-    _member_data_items = [
-        _MemberSpec('autoResolve', 'xsd:boolean', 0),
-        _MemberSpec('freespace', 'xsd:nonNegativeInteger', 0),
-        _MemberSpec('name', 'xsd:string', 0),
-        _MemberSpec('vhdDiskType', 'xsd:string', 0),
-        _MemberSpec('swapSize', 'xsd:nonNegativeInteger', 0),
-        _MemberSpec('baseFileName', 'xsd:string', 0),
-        _MemberSpec('installLabelPath', 'xsd:string', 0),
+    member_data_items_ = [
+        MemberSpec_('autoResolve', 'xsd:boolean', 0),
+        MemberSpec_('freespace', 'xsd:nonNegativeInteger', 0),
+        MemberSpec_('name', 'xsd:string', 0),
+        MemberSpec_('vhdDiskType', 'xsd:string', 0),
+        MemberSpec_('swapSize', 'xsd:nonNegativeInteger', 0),
+        MemberSpec_('baseFileName', 'xsd:string', 0),
+        MemberSpec_('installLabelPath', 'xsd:string', 0),
+        MemberSpec_('valueOf_', [], 0),
         ]
     subclass = None
     superclass = None
@@ -2369,7 +2390,7 @@ class virtualIronImageType(GeneratedsSuper):
         if self.installLabelPath is not None:
             outfile.write(' installLabelPath=%s' % (self.format_string(quote_attrib(self.installLabelPath).encode(ExternalEncoding), input_name='installLabelPath'), ))
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='virtualIronImageType'):
-        if self.valueOf_.find('![CDATA')>-1:
+        if self.valueOf_.find('![CDATA') > -1:
             value=quote_xml('%s' % self.valueOf_)
             value=value.replace('![CDATA','<![CDATA')
             value=value.replace(']]',']]>')
@@ -2459,15 +2480,16 @@ class virtualIronImageType(GeneratedsSuper):
 
 
 class vmwareEsxImageType(GeneratedsSuper):
-    _member_data_items = [
-        _MemberSpec('autoResolve', 'xsd:boolean', 0),
-        _MemberSpec('freespace', 'xsd:nonNegativeInteger', 0),
-        _MemberSpec('name', 'xsd:string', 0),
-        _MemberSpec('natNetworking', 'xsd:boolean', 0),
-        _MemberSpec('vmMemory', 'xsd:nonNegativeInteger', 0),
-        _MemberSpec('swapSize', 'xsd:nonNegativeInteger', 0),
-        _MemberSpec('installLabelPath', 'xsd:string', 0),
-        _MemberSpec('baseFileName', 'xsd:string', 0),
+    member_data_items_ = [
+        MemberSpec_('autoResolve', 'xsd:boolean', 0),
+        MemberSpec_('freespace', 'xsd:nonNegativeInteger', 0),
+        MemberSpec_('name', 'xsd:string', 0),
+        MemberSpec_('natNetworking', 'xsd:boolean', 0),
+        MemberSpec_('vmMemory', 'xsd:nonNegativeInteger', 0),
+        MemberSpec_('swapSize', 'xsd:nonNegativeInteger', 0),
+        MemberSpec_('installLabelPath', 'xsd:string', 0),
+        MemberSpec_('baseFileName', 'xsd:string', 0),
+        MemberSpec_('valueOf_', [], 0),
         ]
     subclass = None
     superclass = None
@@ -2533,7 +2555,7 @@ class vmwareEsxImageType(GeneratedsSuper):
         if self.baseFileName is not None:
             outfile.write(' baseFileName=%s' % (self.format_string(quote_attrib(self.baseFileName).encode(ExternalEncoding), input_name='baseFileName'), ))
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='vmwareEsxImageType'):
-        if self.valueOf_.find('![CDATA')>-1:
+        if self.valueOf_.find('![CDATA') > -1:
             value=quote_xml('%s' % self.valueOf_)
             value=value.replace('![CDATA','<![CDATA')
             value=value.replace(']]',']]>')
@@ -2638,17 +2660,18 @@ class vmwareEsxImageType(GeneratedsSuper):
 
 
 class vmwareImageType(GeneratedsSuper):
-    _member_data_items = [
-        _MemberSpec('autoResolve', 'xsd:boolean', 0),
-        _MemberSpec('freespace', 'xsd:nonNegativeInteger', 0),
-        _MemberSpec('name', 'xsd:string', 0),
-        _MemberSpec('natNetworking', 'xsd:boolean', 0),
-        _MemberSpec('vmMemory', 'xsd:nonNegativeInteger', 0),
-        _MemberSpec('swapSize', 'xsd:nonNegativeInteger', 0),
-        _MemberSpec('diskAdapter', 'xsd:string', 0),
-        _MemberSpec('installLabelPath', 'xsd:string', 0),
-        _MemberSpec('baseFileName', 'xsd:string', 0),
-        _MemberSpec('vmSnapshots', 'xsd:boolean', 0),
+    member_data_items_ = [
+        MemberSpec_('autoResolve', 'xsd:boolean', 0),
+        MemberSpec_('freespace', 'xsd:nonNegativeInteger', 0),
+        MemberSpec_('name', 'xsd:string', 0),
+        MemberSpec_('natNetworking', 'xsd:boolean', 0),
+        MemberSpec_('vmMemory', 'xsd:nonNegativeInteger', 0),
+        MemberSpec_('swapSize', 'xsd:nonNegativeInteger', 0),
+        MemberSpec_('diskAdapter', 'xsd:string', 0),
+        MemberSpec_('installLabelPath', 'xsd:string', 0),
+        MemberSpec_('baseFileName', 'xsd:string', 0),
+        MemberSpec_('vmSnapshots', 'xsd:boolean', 0),
+        MemberSpec_('valueOf_', [], 0),
         ]
     subclass = None
     superclass = None
@@ -2724,7 +2747,7 @@ class vmwareImageType(GeneratedsSuper):
         if self.vmSnapshots is not None:
             outfile.write(' vmSnapshots="%s"' % self.format_boolean(str_lower(str(self.vmSnapshots)), input_name='vmSnapshots'))
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='vmwareImageType'):
-        if self.valueOf_.find('![CDATA')>-1:
+        if self.valueOf_.find('![CDATA') > -1:
             value=quote_xml('%s' % self.valueOf_)
             value=value.replace('![CDATA','<![CDATA')
             value=value.replace(']]',']]>')
@@ -2844,14 +2867,15 @@ class vmwareImageType(GeneratedsSuper):
 
 
 class xenOvaImageType(GeneratedsSuper):
-    _member_data_items = [
-        _MemberSpec('autoResolve', 'xsd:boolean', 0),
-        _MemberSpec('freespace', 'xsd:nonNegativeInteger', 0),
-        _MemberSpec('name', 'xsd:string', 0),
-        _MemberSpec('vmMemory', 'xsd:nonNegativeInteger', 0),
-        _MemberSpec('swapSize', 'xsd:nonNegativeInteger', 0),
-        _MemberSpec('baseFileName', 'xsd:string', 0),
-        _MemberSpec('installLabelPath', 'xsd:string', 0),
+    member_data_items_ = [
+        MemberSpec_('autoResolve', 'xsd:boolean', 0),
+        MemberSpec_('freespace', 'xsd:nonNegativeInteger', 0),
+        MemberSpec_('name', 'xsd:string', 0),
+        MemberSpec_('vmMemory', 'xsd:nonNegativeInteger', 0),
+        MemberSpec_('swapSize', 'xsd:nonNegativeInteger', 0),
+        MemberSpec_('baseFileName', 'xsd:string', 0),
+        MemberSpec_('installLabelPath', 'xsd:string', 0),
+        MemberSpec_('valueOf_', [], 0),
         ]
     subclass = None
     superclass = None
@@ -2912,7 +2936,7 @@ class xenOvaImageType(GeneratedsSuper):
         if self.installLabelPath is not None:
             outfile.write(' installLabelPath=%s' % (self.format_string(quote_attrib(self.installLabelPath).encode(ExternalEncoding), input_name='installLabelPath'), ))
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='xenOvaImageType'):
-        if self.valueOf_.find('![CDATA')>-1:
+        if self.valueOf_.find('![CDATA') > -1:
             value=quote_xml('%s' % self.valueOf_)
             value=value.replace('![CDATA','<![CDATA')
             value=value.replace(']]',']]>')
@@ -3007,8 +3031,8 @@ class xenOvaImageType(GeneratedsSuper):
 
 
 class buildDefinitionType(GeneratedsSuper):
-    _member_data_items = [
-        _MemberSpec('build_', 'buildType', 1),
+    member_data_items_ = [
+        MemberSpec_('build_', 'buildType', 1),
         ]
     subclass = None
     superclass = None
@@ -3088,28 +3112,28 @@ class buildDefinitionType(GeneratedsSuper):
 
 
 class buildType(GeneratedsSuper):
-    _member_data_items = [
-        _MemberSpec('baseFlavor', 'rpd:flavorStringType', 0),
-        _MemberSpec('flavor', 'rpd:flavorStringType', 0),
-        _MemberSpec('architectureRef', 'xsd:string', 0),
-        _MemberSpec('imageTemplateRef', 'xsd:string', 0),
-        _MemberSpec('name', 'xsd:string', 0),
-        _MemberSpec('amiImage', 'amiImageType', 0),
-        _MemberSpec('applianceIsoImage', 'applianceIsoImageType', 0),
-        _MemberSpec('installableIsoImage', 'installableIsoImageType', 0),
-        _MemberSpec('liveIsoImage', 'liveIsoImageType', 0),
-        _MemberSpec('netbootImage', 'netbootImageType', 0),
-        _MemberSpec('rawFsImage', 'rawFsImageType', 0),
-        _MemberSpec('rawHdImage', 'rawHdImageType', 0),
-        _MemberSpec('tarballImage', 'tarballImageType', 0),
-        _MemberSpec('updateIsoImage', 'updateIsoImageType', 0),
-        _MemberSpec('vhdImage', 'vhdImageType', 0),
-        _MemberSpec('virtualIronImage', 'virtualIronImageType', 0),
-        _MemberSpec('vmwareImage', 'vmwareImageType', 0),
-        _MemberSpec('vmwareEsxImage', 'vmwareEsxImageType', 0),
-        _MemberSpec('xenOvaImage', 'xenOvaImageType', 0),
-        _MemberSpec('stage', 'stage', 1),
-        _MemberSpec('imageGroup', 'xsd:string', 0),
+    member_data_items_ = [
+        MemberSpec_('baseFlavor', 'rpd:flavorStringType', 0),
+        MemberSpec_('flavor', 'rpd:flavorStringType', 0),
+        MemberSpec_('architectureRef', 'xsd:string', 0),
+        MemberSpec_('imageTemplateRef', 'xsd:string', 0),
+        MemberSpec_('name', 'xsd:string', 0),
+        MemberSpec_('amiImage', 'amiImageType', 0),
+        MemberSpec_('applianceIsoImage', 'applianceIsoImageType', 0),
+        MemberSpec_('installableIsoImage', 'installableIsoImageType', 0),
+        MemberSpec_('liveIsoImage', 'liveIsoImageType', 0),
+        MemberSpec_('netbootImage', 'netbootImageType', 0),
+        MemberSpec_('rawFsImage', 'rawFsImageType', 0),
+        MemberSpec_('rawHdImage', 'rawHdImageType', 0),
+        MemberSpec_('tarballImage', 'tarballImageType', 0),
+        MemberSpec_('updateIsoImage', 'updateIsoImageType', 0),
+        MemberSpec_('vhdImage', 'vhdImageType', 0),
+        MemberSpec_('virtualIronImage', 'virtualIronImageType', 0),
+        MemberSpec_('vmwareImage', 'vmwareImageType', 0),
+        MemberSpec_('vmwareEsxImage', 'vmwareEsxImageType', 0),
+        MemberSpec_('xenOvaImage', 'xenOvaImageType', 0),
+        MemberSpec_('stage', 'stage', 1),
+        MemberSpec_('imageGroup', ['troveSpecType', 'xsd:string'], 0),
         ]
     subclass = None
     superclass = None
@@ -3518,8 +3542,9 @@ class buildType(GeneratedsSuper):
 
 
 class stage(GeneratedsSuper):
-    _member_data_items = [
-        _MemberSpec('ref', 'xsd:string', 0),
+    member_data_items_ = [
+        MemberSpec_('ref', 'xsd:string', 0),
+        MemberSpec_('valueOf_', [], 0),
         ]
     subclass = None
     superclass = None
@@ -3549,7 +3574,7 @@ class stage(GeneratedsSuper):
     def exportAttributes(self, outfile, level, namespace_='rpd:', name_='stage'):
         outfile.write(' ref=%s' % (self.format_string(quote_attrib(self.ref).encode(ExternalEncoding), input_name='ref'), ))
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='stage'):
-        if self.valueOf_.find('![CDATA')>-1:
+        if self.valueOf_.find('![CDATA') > -1:
             value=quote_xml('%s' % self.valueOf_)
             value=value.replace('![CDATA','<![CDATA')
             value=value.replace(']]',']]>')
@@ -3594,8 +3619,8 @@ class stage(GeneratedsSuper):
 
 
 class secondaryLabelsType(GeneratedsSuper):
-    _member_data_items = [
-        _MemberSpec('secondaryLabel', 'secondaryLabel', 1),
+    member_data_items_ = [
+        MemberSpec_('secondaryLabel', 'xsd:string', 1),
         ]
     subclass = None
     superclass = None
@@ -3675,8 +3700,9 @@ class secondaryLabelsType(GeneratedsSuper):
 
 
 class secondaryLabel(GeneratedsSuper):
-    _member_data_items = [
-        _MemberSpec('name', 'xsd:string', 0),
+    member_data_items_ = [
+        MemberSpec_('name', 'xsd:string', 0),
+        MemberSpec_('valueOf_', 'xsd:string', 0),
         ]
     subclass = None
     superclass = None
@@ -3706,7 +3732,7 @@ class secondaryLabel(GeneratedsSuper):
     def exportAttributes(self, outfile, level, namespace_='rpd:', name_='secondaryLabel'):
         outfile.write(' name=%s' % (self.format_string(quote_attrib(self.name).encode(ExternalEncoding), input_name='name'), ))
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='secondaryLabel'):
-        if self.valueOf_.find('![CDATA')>-1:
+        if self.valueOf_.find('![CDATA') > -1:
             value=quote_xml('%s' % self.valueOf_)
             value=value.replace('![CDATA','<![CDATA')
             value=value.replace(']]',']]>')
@@ -3756,8 +3782,8 @@ class secondaryLabel(GeneratedsSuper):
 
 
 class promoteMapsType(GeneratedsSuper):
-    _member_data_items = [
-        _MemberSpec('promoteMap', 'promoteMapType', 1),
+    member_data_items_ = [
+        MemberSpec_('promoteMap', 'promoteMapType', 1),
         ]
     subclass = None
     superclass = None
@@ -3837,9 +3863,10 @@ class promoteMapsType(GeneratedsSuper):
 
 
 class promoteMapType(GeneratedsSuper):
-    _member_data_items = [
-        _MemberSpec('name', 'xsd:string', 0),
-        _MemberSpec('label', 'xsd:string', 0),
+    member_data_items_ = [
+        MemberSpec_('name', 'xsd:string', 0),
+        MemberSpec_('label', 'xsd:string', 0),
+        MemberSpec_('valueOf_', [], 0),
         ]
     subclass = None
     superclass = None
@@ -3873,7 +3900,7 @@ class promoteMapType(GeneratedsSuper):
         outfile.write(' name=%s' % (self.format_string(quote_attrib(self.name).encode(ExternalEncoding), input_name='name'), ))
         outfile.write(' label=%s' % (self.format_string(quote_attrib(self.label).encode(ExternalEncoding), input_name='label'), ))
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='promoteMapType'):
-        if self.valueOf_.find('![CDATA')>-1:
+        if self.valueOf_.find('![CDATA') > -1:
             value=quote_xml('%s' % self.valueOf_)
             value=value.replace('![CDATA','<![CDATA')
             value=value.replace(']]',']]>')
@@ -3926,16 +3953,16 @@ class promoteMapType(GeneratedsSuper):
 
 
 class platformDefinitionType(GeneratedsSuper):
-    _member_data_items = [
-        _MemberSpec('version', 'xsd:string', 0),
-        _MemberSpec('platformName', 'xsd:string', 0),
-        _MemberSpec('platformVersionTrove', 'xsd:string', 0),
-        _MemberSpec('baseFlavor', 'xsd:string', 0),
-        _MemberSpec('searchPaths', 'searchPathListType', 0),
-        _MemberSpec('factorySources', 'factorySourceListType', 0),
-        _MemberSpec('autoLoadRecipes', 'autoLoadRecipesType', 0),
-        _MemberSpec('architectures', 'architecturesType', 0),
-        _MemberSpec('imageTemplates', 'imageTemplatesType', 0),
+    member_data_items_ = [
+        MemberSpec_('version', 'xsd:string', 0),
+        MemberSpec_('platformName', 'xsd:string', 0),
+        MemberSpec_('platformVersionTrove', 'xsd:string', 0),
+        MemberSpec_('baseFlavor', ['flavorStringType', 'xsd:string'], 0),
+        MemberSpec_('searchPaths', 'searchPathListType', 0),
+        MemberSpec_('factorySources', 'factorySourceListType', 0),
+        MemberSpec_('autoLoadRecipes', 'autoLoadRecipesType', 0),
+        MemberSpec_('architectures', 'architecturesType', 0),
+        MemberSpec_('imageTemplates', 'imageTemplatesType', 0),
         ]
     subclass = None
     superclass = None
@@ -4128,17 +4155,17 @@ class platformDefinitionType(GeneratedsSuper):
 
 
 class platformType(GeneratedsSuper):
-    _member_data_items = [
-        _MemberSpec('sourceTrove', 'xsd:string', 0),
-        _MemberSpec('useLatest', 'xsd:boolean', 0),
-        _MemberSpec('platformName', 'xsd:string', 0),
-        _MemberSpec('platformVersionTrove', 'xsd:string', 0),
-        _MemberSpec('baseFlavor', 'xsd:string', 0),
-        _MemberSpec('searchPaths', 'searchPathListType', 0),
-        _MemberSpec('factorySources', 'factorySourceListType', 0),
-        _MemberSpec('autoLoadRecipes', 'autoLoadRecipesType', 0),
-        _MemberSpec('architectures', 'architecturesType', 0),
-        _MemberSpec('imageTemplates', 'imageTemplatesType', 0),
+    member_data_items_ = [
+        MemberSpec_('sourceTrove', 'xsd:string', 0),
+        MemberSpec_('useLatest', 'xsd:boolean', 0),
+        MemberSpec_('platformName', 'xsd:string', 0),
+        MemberSpec_('platformVersionTrove', 'xsd:string', 0),
+        MemberSpec_('baseFlavor', ['flavorStringType', 'xsd:string'], 0),
+        MemberSpec_('searchPaths', 'searchPathListType', 0),
+        MemberSpec_('factorySources', 'factorySourceListType', 0),
+        MemberSpec_('autoLoadRecipes', 'autoLoadRecipesType', 0),
+        MemberSpec_('architectures', 'architecturesType', 0),
+        MemberSpec_('imageTemplates', 'imageTemplatesType', 0),
         ]
     subclass = None
     superclass = None
@@ -4346,9 +4373,10 @@ class platformType(GeneratedsSuper):
 
 
 class nameFlavorType(GeneratedsSuper):
-    _member_data_items = [
-        _MemberSpec('flavor', 'xsd:string', 0),
-        _MemberSpec('name', 'xsd:string', 0),
+    member_data_items_ = [
+        MemberSpec_('flavor', 'xsd:string', 0),
+        MemberSpec_('name', 'xsd:string', 0),
+        MemberSpec_('valueOf_', [], 0),
         ]
     subclass = None
     superclass = None
@@ -4382,7 +4410,7 @@ class nameFlavorType(GeneratedsSuper):
         outfile.write(' flavor=%s' % (self.format_string(quote_attrib(self.flavor).encode(ExternalEncoding), input_name='flavor'), ))
         outfile.write(' name=%s' % (self.format_string(quote_attrib(self.name).encode(ExternalEncoding), input_name='name'), ))
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='nameFlavorType'):
-        if self.valueOf_.find('![CDATA')>-1:
+        if self.valueOf_.find('![CDATA') > -1:
             value=quote_xml('%s' % self.valueOf_)
             value=value.replace('![CDATA','<![CDATA')
             value=value.replace(']]',']]>')
@@ -4432,8 +4460,8 @@ class nameFlavorType(GeneratedsSuper):
 
 
 class architecturesType(GeneratedsSuper):
-    _member_data_items = [
-        _MemberSpec('architecture', 'nameFlavorType', 1),
+    member_data_items_ = [
+        MemberSpec_('architecture', 'nameFlavorType', 1),
         ]
     subclass = None
     superclass = None
@@ -4513,8 +4541,8 @@ class architecturesType(GeneratedsSuper):
 
 
 class imageTemplatesType(GeneratedsSuper):
-    _member_data_items = [
-        _MemberSpec('imageTemplate', 'nameFlavorType', 1),
+    member_data_items_ = [
+        MemberSpec_('imageTemplate', 'nameFlavorType', 1),
         ]
     subclass = None
     superclass = None
@@ -4594,26 +4622,26 @@ class imageTemplatesType(GeneratedsSuper):
 
 
 class productDefinition(GeneratedsSuper):
-    _member_data_items = [
-        _MemberSpec('version', 'xsd:string', 0),
-        _MemberSpec('productName', 'xsd:string', 0),
-        _MemberSpec('productShortname', 'xsd:string', 0),
-        _MemberSpec('productDescription', 'xsd:string', 0),
-        _MemberSpec('productVersion', 'xsd:string', 0),
-        _MemberSpec('productVersionDescription', 'xsd:string', 0),
-        _MemberSpec('conaryRepositoryHostname', 'xsd:string', 0),
-        _MemberSpec('conaryNamespace', 'xsd:string', 0),
-        _MemberSpec('imageGroup', 'xsd:string', 0),
-        _MemberSpec('baseLabel', 'xsd:string', 0),
-        _MemberSpec('baseFlavor', 'xsd:string', 0),
-        _MemberSpec('stages', 'stageListType', 0),
-        _MemberSpec('searchPaths', 'searchPathListType', 0),
-        _MemberSpec('factorySources', 'factorySourceListType', 0),
-        _MemberSpec('architectures', 'architecturesType', 0),
-        _MemberSpec('imageTemplates', 'imageTemplatesType', 0),
-        _MemberSpec('secondaryLabels', 'secondaryLabelsType', 0),
-        _MemberSpec('buildDefinition', 'buildDefinitionType', 0),
-        _MemberSpec('platform', 'platformType', 0),
+    member_data_items_ = [
+        MemberSpec_('version', 'xsd:string', 0),
+        MemberSpec_('productName', 'xsd:string', 0),
+        MemberSpec_('productShortname', 'xsd:string', 0),
+        MemberSpec_('productDescription', 'xsd:string', 0),
+        MemberSpec_('productVersion', 'xsd:string', 0),
+        MemberSpec_('productVersionDescription', 'xsd:string', 0),
+        MemberSpec_('conaryRepositoryHostname', 'xsd:string', 0),
+        MemberSpec_('conaryNamespace', 'xsd:string', 0),
+        MemberSpec_('imageGroup', ['troveSpecType', 'xsd:string'], 0),
+        MemberSpec_('baseLabel', 'xsd:string', 0),
+        MemberSpec_('baseFlavor', ['flavorStringType', 'xsd:string'], 0),
+        MemberSpec_('stages', 'stageListType', 0),
+        MemberSpec_('searchPaths', 'searchPathListType', 0),
+        MemberSpec_('factorySources', 'factorySourceListType', 0),
+        MemberSpec_('architectures', 'architecturesType', 0),
+        MemberSpec_('imageTemplates', 'imageTemplatesType', 0),
+        MemberSpec_('secondaryLabels', 'secondaryLabelsType', 0),
+        MemberSpec_('buildDefinition', 'buildDefinitionType', 0),
+        MemberSpec_('platform', 'platformType', 0),
         ]
     subclass = None
     superclass = None
@@ -4967,8 +4995,6 @@ class productDefinition(GeneratedsSuper):
 
 USAGE_TEXT = """
 Usage: python <Parser>.py [ -s ] <in_xml_file>
-Options:
-    -s        Use the SAX parser, not the minidom parser.
 """
 
 def usage():
@@ -5025,7 +5051,6 @@ def main():
 
 
 if __name__ == '__main__':
+    #import pdb; pdb.set_trace()
     main()
-    #import pdb
-    #pdb.run('main()')
 

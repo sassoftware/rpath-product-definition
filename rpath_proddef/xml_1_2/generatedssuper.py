@@ -13,9 +13,9 @@ class GeneratedsSuper(object):
     def __eq__(self, obj):
         if not isinstance(obj, self.__class__):
             return False
-        if len(self._member_data_items) != len(obj._member_data_items):
+        if len(self.member_data_items_) != len(obj.member_data_items_):
             return False
-        fields = (x.name for x in self._member_data_items)
+        fields = (x.name for x in self.member_data_items_)
         for field in fields:
             objL = getattr(self, field)
             objR = getattr(obj, field)
