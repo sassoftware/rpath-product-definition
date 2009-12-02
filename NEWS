@@ -4,6 +4,7 @@ Changes in @NEW@:
     * The API is now available under the rpath_proddef module. The
       rpath_common interface will remain available for some time.
       (RPCL-63)
+    * The package version now follows the XML schema version.
 
   o Bug Fixes:
     * Use the faster getFileContentsFromTrove Conary interface, when
