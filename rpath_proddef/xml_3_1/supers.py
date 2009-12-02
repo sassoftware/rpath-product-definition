@@ -1329,6 +1329,7 @@ class buildType(GeneratedsSuper):
         MemberSpec_('containerTemplateRef', 'xsd:string', 0),
         MemberSpec_('architectureRef', 'xsd:string', 0),
         MemberSpec_('name', 'xsd:string', 0),
+        MemberSpec_('flavor', 'rpd:flavorStringType', 0),
         MemberSpec_('flavorSetRef', 'xsd:string', 0),
         MemberSpec_('image', 'imageType', 0),
         MemberSpec_('stage', 'stage', 1),
@@ -1337,10 +1338,11 @@ class buildType(GeneratedsSuper):
         ]
     subclass = None
     superclass = None
-    def __init__(self, containerTemplateRef=None, architectureRef=None, name=None, flavorSetRef=None, image=None, stage=None, imageGroup=None, sourceGroup=None):
+    def __init__(self, containerTemplateRef=None, architectureRef=None, name=None, flavor=None, flavorSetRef=None, image=None, stage=None, imageGroup=None, sourceGroup=None):
         self.containerTemplateRef = _cast(None, containerTemplateRef)
         self.architectureRef = _cast(None, architectureRef)
         self.name = _cast(None, name)
+        self.flavor = _cast(None, flavor)
         self.flavorSetRef = _cast(None, flavorSetRef)
         self.image = image
         if stage is None:
@@ -1377,6 +1379,8 @@ class buildType(GeneratedsSuper):
     def set_architectureRef(self, architectureRef): self.architectureRef = architectureRef
     def get_name(self): return self.name
     def set_name(self, name): self.name = name
+    def get_flavor(self): return self.flavor
+    def set_flavor(self, flavor): self.flavor = flavor
     def get_flavorSetRef(self): return self.flavorSetRef
     def set_flavorSetRef(self, flavorSetRef): self.flavorSetRef = flavorSetRef
     def export(self, outfile, level, namespace_='rpd:', name_='buildType', namespacedef_=''):
@@ -1396,6 +1400,8 @@ class buildType(GeneratedsSuper):
         if self.architectureRef is not None:
             outfile.write(' architectureRef=%s' % (self.format_string(quote_attrib(self.architectureRef).encode(ExternalEncoding), input_name='architectureRef'), ))
         outfile.write(' name=%s' % (self.format_string(quote_attrib(self.name).encode(ExternalEncoding), input_name='name'), ))
+        if self.flavor is not None:
+            outfile.write(' flavor=%s' % (quote_attrib(self.flavor), ))
         if self.flavorSetRef is not None:
             outfile.write(' flavorSetRef=%s' % (self.format_string(quote_attrib(self.flavorSetRef).encode(ExternalEncoding), input_name='flavorSetRef'), ))
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='buildType'):
@@ -1434,6 +1440,9 @@ class buildType(GeneratedsSuper):
         if self.name is not None:
             showIndent(outfile, level)
             outfile.write('name = %s,\n' % (self.name,))
+        if self.flavor is not None:
+            showIndent(outfile, level)
+            outfile.write('flavor = "%s",\n' % (self.flavor,))
         if self.flavorSetRef is not None:
             showIndent(outfile, level)
             outfile.write('flavorSetRef = %s,\n' % (self.flavorSetRef,))
@@ -1473,6 +1482,8 @@ class buildType(GeneratedsSuper):
             self.architectureRef = attrs.get('architectureRef').value
         if attrs.get('name'):
             self.name = attrs.get('name').value
+        if attrs.get('flavor'):
+            self.flavor = attrs.get('flavor').value
         if attrs.get('flavorSetRef'):
             self.flavorSetRef = attrs.get('flavorSetRef').value
     def buildChildren(self, child_, nodeName_):
