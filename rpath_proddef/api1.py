@@ -1268,6 +1268,7 @@ class ProductDefinitionRecipe(PackageRecipe):
                 flavorSetRef = flavorSetRef)
         obj.parentImageGroup = self.getImageGroup()
         obj.parentSourceGroup = self.getSourceGroup()
+        obj.flavor = flavor
         obj.buildFlavor = self._getFlavorByRefs(flavorSetRef,
             architectureRef, buildTemplateRef, flavor)
         obj.containerTemplateFields = self._getBuildContainerTemplateFields(
@@ -1876,7 +1877,7 @@ class ProductDefinitionRecipe(PackageRecipe):
             build.parentImageGroup = self.getImageGroup()
             build.parentSourceGroup = self.getSourceGroup()
             build.buildFlavor = self._getFlavorByRefs(build.flavorSetRef,
-                build.architectureRef, None, None)
+                build.architectureRef, None, build.flavor)
             build.containerTemplateFields = self._getBuildContainerTemplateFields(build.containerTemplateRef)
             # Fix up vhdDiskType
             self._fixupBuildImage(build.image)

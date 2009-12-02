@@ -84,8 +84,8 @@ supermod.imageType.subclass = imageTypeSub
 
 
 class buildTypeSub(supermod.buildType):
-    def __init__(self, containerTemplateRef=None, architectureRef=None, name=None, flavorSetRef=None, image=None, stage=None, imageGroup=None, sourceGroup=None):
-        supermod.buildType.__init__(self, containerTemplateRef, architectureRef, name, flavorSetRef, image, stage, imageGroup, sourceGroup)
+    def __init__(self, containerTemplateRef=None, architectureRef=None, name=None, flavor=None, flavorSetRef=None, image=None, stage=None, imageGroup=None, sourceGroup=None):
+        supermod.buildType.__init__(self, containerTemplateRef, architectureRef, name, flavor, flavorSetRef, image, stage, imageGroup, sourceGroup)
 supermod.buildType.subclass = buildTypeSub
 # end class buildTypeSub
 

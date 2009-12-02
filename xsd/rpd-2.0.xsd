@@ -185,6 +185,7 @@
         <xsd:attribute name="architectureRef" type="xsd:string" />
         <xsd:attribute name="flavorSetRef" type="xsd:string" />
         <xsd:attribute name="containerTemplateRef" type="xsd:string" />
+        <xsd:attribute name="flavor" type="rpd:flavorStringType" />
     </xsd:complexType>
 
     <xsd:complexType name="secondaryLabelsType">
