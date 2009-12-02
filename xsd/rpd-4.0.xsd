@@ -80,6 +80,7 @@
                 <xsd:restriction base="xsd:string">
                     <xsd:enumeration value="amiImage" />
                     <xsd:enumeration value="applianceIsoImage" />
+                    <xsd:enumeration value="imageless" />
                     <xsd:enumeration value="installableIsoImage" />
                     <xsd:enumeration value="liveIsoImage" />
                     <xsd:enumeration value="netbootImage" />
