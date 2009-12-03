@@ -1,3 +1,8 @@
+Changes in @NEW@:
+  o Bug Fixes:
+    * The compatibility interfaces created for RPCL-63 are now
+      compiled. (RPCL-64)
+
 Changes in 4.0:
   o New Feature:
     * rpath-xmllib is no longer used. XML schema files are used in
