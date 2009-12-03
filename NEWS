@@ -1,10 +1,22 @@
-Changes in @NEW@:
+Changes in 4.0:
   o New Feature:
+    * rpath-xmllib is no longer used. XML schema files are used in
+      conjunction with generateDS to produce the XML data binding.
+      (RBL-5082)
     * Added support for versioned platform-defintions (RBL-5007).
     * The API is now available under the rpath_proddef module. The
       rpath_common interface will remain available for some time.
       (RPCL-63)
     * The package version now follows the XML schema version.
+    * Platform definitions define content source types. (RBL-5300)
+    * Content source types can use isSingleton to specify they
+      can only be added once. (RBL-5421)
+    * A new element, isPlatformTrove, was added to search path
+      elements. This controls rebase operations to a specific version
+      of platform groups; all other group search paths will be rebased
+      to the latest version. This allows for pulling the latest Conary
+      even on capsule-based platforms where a specific version of the
+      platform group is intended to be used. (RBL-5426)
 
   o Bug Fixes:
     * Use the faster getFileContentsFromTrove Conary interface, when
