@@ -1824,6 +1824,7 @@ class ProductDefinitionRecipe(PackageRecipe):
             sourceTrove = nplat.getPlatformSourceTrove(),
             useLatest = useLatest,
             platformName = uroot.get_platformName(),
+            platformUsageTerms = uroot.get_platformUsageTerms(),
             platformVersionTrove = uroot.get_platformVersionTrove(),
             baseFlavor = uroot.get_baseFlavor(),
             contentProvider = uroot.get_contentProvider(),
@@ -1996,6 +1997,21 @@ class BasePlatform(BaseDefinition):
         @type platformName: C{str}
         """
         return self._rootObj.set_platformName(platformName)
+
+    def getPlatformUsageTerms(self):
+        """
+        @return: The platform usage terms.
+        @rtype: C{str}
+        """
+        return self._rootObj.get_platformUsageTerms()
+
+    def setPlatformUsageTerms(self, platformUsageTerms):
+        """
+        Set the platform usage terms.
+        @param platformUsageTerms: The platform terms of use.
+        @type platformUsageTerms: C{str}
+        """
+        return self._rootObj.set_platformUsageTerms(platformUsageTerms)
 
     def getPlatformVersionTrove(self):
         """

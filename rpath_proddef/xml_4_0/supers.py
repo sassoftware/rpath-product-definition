@@ -1971,6 +1971,7 @@ class platformDefinitionType(GeneratedsSuper):
     member_data_items_ = [
         MemberSpec_('version', 'xsd:string', 0),
         MemberSpec_('platformName', 'xsd:string', 0),
+        MemberSpec_('platformUsageTerms', 'xsd:string', 0),
         MemberSpec_('platformVersionTrove', 'xsd:string', 0),
         MemberSpec_('baseFlavor', ['flavorStringType', 'xsd:string', 'xsd:string'], 0),
         MemberSpec_('contentProvider', 'contentProviderType', 0),
@@ -1985,9 +1986,10 @@ class platformDefinitionType(GeneratedsSuper):
         ]
     subclass = None
     superclass = None
-    def __init__(self, version=None, platformName=None, platformVersionTrove=None, baseFlavor=None, contentProvider=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None):
+    def __init__(self, version=None, platformName=None, platformUsageTerms=None, platformVersionTrove=None, baseFlavor=None, contentProvider=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None):
         self.version = _cast(None, version)
         self.platformName = platformName
+        self.platformUsageTerms = platformUsageTerms
         self.platformVersionTrove = platformVersionTrove
         self.baseFlavor = baseFlavor
         self.contentProvider = contentProvider
@@ -2007,6 +2009,8 @@ class platformDefinitionType(GeneratedsSuper):
     factory = staticmethod(factory)
     def get_platformName(self): return self.platformName
     def set_platformName(self, platformName): self.platformName = platformName
+    def get_platformUsageTerms(self): return self.platformUsageTerms
+    def set_platformUsageTerms(self, platformUsageTerms): self.platformUsageTerms = platformUsageTerms
     def get_platformVersionTrove(self): return self.platformVersionTrove
     def set_platformVersionTrove(self, platformVersionTrove): self.platformVersionTrove = platformVersionTrove
     def get_baseFlavor(self): return self.baseFlavor
@@ -2052,6 +2056,9 @@ class platformDefinitionType(GeneratedsSuper):
         if self.platformName is not None:
             showIndent(outfile, level)
             outfile.write('<%splatformName>%s</%splatformName>\n' % (namespace_, self.format_string(quote_xml(self.platformName).encode(ExternalEncoding), input_name='platformName'), namespace_))
+        if self.platformUsageTerms is not None:
+            showIndent(outfile, level)
+            outfile.write('<%splatformUsageTerms>%s</%splatformUsageTerms>\n' % (namespace_, self.format_string(quote_xml(self.platformUsageTerms).encode(ExternalEncoding), input_name='platformUsageTerms'), namespace_))
         if self.platformVersionTrove is not None:
             showIndent(outfile, level)
             outfile.write('<%splatformVersionTrove>%s</%splatformVersionTrove>\n' % (namespace_, self.format_string(quote_xml(self.platformVersionTrove).encode(ExternalEncoding), input_name='platformVersionTrove'), namespace_))
@@ -2079,6 +2086,7 @@ class platformDefinitionType(GeneratedsSuper):
     def hasContent_(self):
         if (
             self.platformName is not None or
+            self.platformUsageTerms is not None or
             self.platformVersionTrove is not None or
             self.baseFlavor is not None or
             self.contentProvider is not None or
@@ -2106,6 +2114,8 @@ class platformDefinitionType(GeneratedsSuper):
     def exportLiteralChildren(self, outfile, level, name_):
         showIndent(outfile, level)
         outfile.write('platformName=%s,\n' % quote_python(self.platformName).encode(ExternalEncoding))
+        showIndent(outfile, level)
+        outfile.write('platformUsageTerms=%s,\n' % quote_python(self.platformUsageTerms).encode(ExternalEncoding))
         showIndent(outfile, level)
         outfile.write('platformVersionTrove=%s,\n' % quote_python(self.platformVersionTrove).encode(ExternalEncoding))
         showIndent(outfile, level)
@@ -2180,6 +2190,12 @@ class platformDefinitionType(GeneratedsSuper):
             for text__content_ in child_.childNodes:
                 platformName_ += text__content_.nodeValue
             self.platformName = platformName_
+        elif child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'platformUsageTerms':
+            platformUsageTerms_ = ''
+            for text__content_ in child_.childNodes:
+                platformUsageTerms_ += text__content_.nodeValue
+            self.platformUsageTerms = platformUsageTerms_
         elif child_.nodeType == Node.ELEMENT_NODE and \
             nodeName_ == 'platformVersionTrove':
             platformVersionTrove_ = ''
@@ -2575,6 +2591,7 @@ class platformType(GeneratedsSuper):
         MemberSpec_('sourceTrove', 'xsd:string', 0),
         MemberSpec_('useLatest', 'xsd:boolean', 0),
         MemberSpec_('platformName', 'xsd:string', 0),
+        MemberSpec_('platformUsageTerms', 'xsd:string', 0),
         MemberSpec_('platformVersionTrove', 'xsd:string', 0),
         MemberSpec_('baseFlavor', ['flavorStringType', 'xsd:string', 'xsd:string'], 0),
         MemberSpec_('contentProvider', 'contentProviderType', 0),
@@ -2589,10 +2606,11 @@ class platformType(GeneratedsSuper):
         ]
     subclass = None
     superclass = None
-    def __init__(self, sourceTrove=None, useLatest=None, platformName=None, platformVersionTrove=None, baseFlavor=None, contentProvider=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None):
+    def __init__(self, sourceTrove=None, useLatest=None, platformName=None, platformUsageTerms=None, platformVersionTrove=None, baseFlavor=None, contentProvider=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None):
         self.sourceTrove = _cast(None, sourceTrove)
         self.useLatest = _cast(bool, useLatest)
         self.platformName = platformName
+        self.platformUsageTerms = platformUsageTerms
         self.platformVersionTrove = platformVersionTrove
         self.baseFlavor = baseFlavor
         self.contentProvider = contentProvider
@@ -2612,6 +2630,8 @@ class platformType(GeneratedsSuper):
     factory = staticmethod(factory)
     def get_platformName(self): return self.platformName
     def set_platformName(self, platformName): self.platformName = platformName
+    def get_platformUsageTerms(self): return self.platformUsageTerms
+    def set_platformUsageTerms(self, platformUsageTerms): self.platformUsageTerms = platformUsageTerms
     def get_platformVersionTrove(self): return self.platformVersionTrove
     def set_platformVersionTrove(self, platformVersionTrove): self.platformVersionTrove = platformVersionTrove
     def get_baseFlavor(self): return self.baseFlavor
@@ -2661,6 +2681,9 @@ class platformType(GeneratedsSuper):
         if self.platformName is not None:
             showIndent(outfile, level)
             outfile.write('<%splatformName>%s</%splatformName>\n' % (namespace_, self.format_string(quote_xml(self.platformName).encode(ExternalEncoding), input_name='platformName'), namespace_))
+        if self.platformUsageTerms is not None:
+            showIndent(outfile, level)
+            outfile.write('<%splatformUsageTerms>%s</%splatformUsageTerms>\n' % (namespace_, self.format_string(quote_xml(self.platformUsageTerms).encode(ExternalEncoding), input_name='platformUsageTerms'), namespace_))
         if self.platformVersionTrove is not None:
             showIndent(outfile, level)
             outfile.write('<%splatformVersionTrove>%s</%splatformVersionTrove>\n' % (namespace_, self.format_string(quote_xml(self.platformVersionTrove).encode(ExternalEncoding), input_name='platformVersionTrove'), namespace_))
@@ -2688,6 +2711,7 @@ class platformType(GeneratedsSuper):
     def hasContent_(self):
         if (
             self.platformName is not None or
+            self.platformUsageTerms is not None or
             self.platformVersionTrove is not None or
             self.baseFlavor is not None or
             self.contentProvider is not None or
@@ -2718,6 +2742,8 @@ class platformType(GeneratedsSuper):
     def exportLiteralChildren(self, outfile, level, name_):
         showIndent(outfile, level)
         outfile.write('platformName=%s,\n' % quote_python(self.platformName).encode(ExternalEncoding))
+        showIndent(outfile, level)
+        outfile.write('platformUsageTerms=%s,\n' % quote_python(self.platformUsageTerms).encode(ExternalEncoding))
         showIndent(outfile, level)
         outfile.write('platformVersionTrove=%s,\n' % quote_python(self.platformVersionTrove).encode(ExternalEncoding))
         showIndent(outfile, level)
@@ -2799,6 +2825,12 @@ class platformType(GeneratedsSuper):
             for text__content_ in child_.childNodes:
                 platformName_ += text__content_.nodeValue
             self.platformName = platformName_
+        elif child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'platformUsageTerms':
+            platformUsageTerms_ = ''
+            for text__content_ in child_.childNodes:
+                platformUsageTerms_ += text__content_.nodeValue
+            self.platformUsageTerms = platformUsageTerms_
         elif child_.nodeType == Node.ELEMENT_NODE and \
             nodeName_ == 'platformVersionTrove':
             platformVersionTrove_ = ''
