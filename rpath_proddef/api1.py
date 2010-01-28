@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2008 rPath, Inc.
+# Copyright (c) 2008-2010 rPath, Inc.
 #
 # This program is distributed under the terms of the Common Public License,
 # version 1.0. A copy of this license should have been distributed with this
@@ -18,21 +18,6 @@ All interfaces in this modules that do not start with a C{_}
 character are public interfaces.
 """
 
-__all__ = [ 'MissingInformationError',
-            'ProductDefinition',
-            'ProductDefinitionError',
-            'StageNotFoundError',
-            'ProductDefinitionTroveNotFoundError',
-            'ProductDefinitionFileNotFoundError',
-            'RepositoryError',
-            'PlatformLabelMissingError',
-            'ArchitectureNotFoundError',
-            'FlavorSetNotFoundError',
-            'ContainerTemplateNotFoundError',
-            'BuildTemplateNotFoundError',
-            'InvalidSchemaVersionError',
-            'SchemaValidationError',
-            ]
 
 import itertools
 import os
@@ -2787,3 +2772,15 @@ class Migrate_31_40(BaseMigration):
     fromVersion = '3.1'
     toVersion = '4.0'
 MigrationManager.register(Migrate_31_40)
+
+
+# export all things that do not have a leading underscore and aren't imported
+# from another module.
+import inspect
+__all__ = []
+for name, obj in locals().items():
+    if (name.startswith('_') or inspect.ismodule(obj) or
+            getattr(obj, '__module__', __name__) != __name__):
+        continue
+    __all__.append(name)
+del inspect
