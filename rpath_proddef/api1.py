@@ -676,7 +676,7 @@ class BaseDefinition(object):
         except conaryErrors.TroveNotFound:
             raise ProductDefinitionTroveNotFoundError("%s=%s" % (troveName, label))
         except conaryErrors.RepositoryError, e:
-            raise RepositoryError(str(e))
+            raise RepositoryError(str(e)), None, sys.exc_info()[2]
         # At this point, troveSpec is in troves and its value should not be
         # the empty list.
         nvfs = troves[troveSpec]
