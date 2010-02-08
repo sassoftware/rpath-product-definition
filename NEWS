@@ -4,6 +4,9 @@ Changes in @NEW@:
       compiled. (RPCL-64)
     * The api1 module now properly sets __all__ to include all public
       interfaces.
+    * The preMigrateVersion property now reflects the version of the
+      product definition as found in the serialized XML representation
+      prior to applying all migrations. (RPCL-66)
 
 Changes in 4.0:
   o New Feature:

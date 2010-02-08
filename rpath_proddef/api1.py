@@ -22,6 +22,7 @@ character are public interfaces.
 import itertools
 import os
 import StringIO
+import sys
 from lxml import etree
 
 from conary import changelog
@@ -136,6 +137,7 @@ class BaseDefinition(object):
         else:
             # XXX default to the current version, hope for the best
             version = self.version
+        self._preMigrateVersion = version
         xmlns = rootNode.attributes.get('xmlns')
 
         module = self.loadModule(version)
@@ -175,6 +177,10 @@ class BaseDefinition(object):
         if not schema.validate(tree):
             raise SchemaValidationError(str(schema.error_log))
         return tree
+
+    @property
+    def preMigrateVersion(self):
+        return self._preMigrateVersion
 
     def serialize(self, stream, validate = True):
         """
@@ -721,6 +727,7 @@ class BaseDefinition(object):
         self._rootObj = getattr(xmlsubs, self.ClassFactoryName)()
         if self.Versioned:
             self._rootObj.set_version(self.version)
+        self._preMigrateVersion = None
 
     def _postinit(self):
         pass
