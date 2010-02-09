@@ -147,7 +147,7 @@ class BaseDefinition(object):
         doc.unlink()
         if version != self.version:
             migr = MigrationManager(version)
-            rootObj = migr.migrate(rootObj)
+            rootObj = migr.migrateForward(rootObj)
         self._rootObj = rootObj
         self._postinit()
 
@@ -182,7 +182,7 @@ class BaseDefinition(object):
     def preMigrateVersion(self):
         return self._preMigrateVersion
 
-    def serialize(self, stream, validate = True):
+    def serialize(self, stream, validate = True, version = None):
         """
         Serialize the current object as an XML stream.
         @param stream: stream to write the serialized object
@@ -195,15 +195,24 @@ class BaseDefinition(object):
         ]
         namespacedef = ' '.join('%s="%s"' % a for a in attrs)
 
+        if version is None or version == self._rootObj.get_version():
+            rootObj = self._rootObj
+        else:
+            migr = MigrationManager(version)
+            rootObj = migr.migrateBack(self._rootObj)
+            # We should probably do a smarter job than simple string
+            # replacement here
+            namespacedef = namespacedef.replace(
+                "rpd-%s" % self.version, "rpd-%s" % version)
+
         # Write to a temporary file. We are paranoid and want to verify that
         # the output we produce doesn't break lxml
         bsio = util.BoundedStringIO()
-        self._rootObj.export(bsio, 0, namespace_ = '', name_ = self.RootNode,
+        rootObj.export(bsio, 0, namespace_ = '', name_ = self.RootNode,
             namespacedef_ = namespacedef)
         bsio.seek(0)
         if validate and os.path.exists(self.schemaDir):
-            tree = self.validate(bsio, self.schemaDir,
-                self._rootObj.get_version())
+            tree = self.validate(bsio, self.schemaDir, rootObj.get_version())
         elif validate:
             import sys
             sys.stderr.write("Warning: unable to validate schema: directory %s missing"
@@ -642,15 +651,18 @@ class BaseDefinition(object):
                 **kwargs)
         addMethod(obj)
 
-    def _saveToRepository(self, conaryClient, label, message = None):
+    def _saveToRepository(self, conaryClient, label, message = None,
+                          version = None):
         if message is None:
             message = "Automatic checkin\n"
+        if version is None:
+            version = self.__class__.version
 
         recipe = self._recipe.replace('@NAME@', self._troveName)
-        recipe = recipe.replace('@VERSION@', self.__class__.version)
+        recipe = recipe.replace('@VERSION@', version)
 
         stream = StringIO.StringIO()
-        self.serialize(stream)
+        self.serialize(stream, version = version)
         pathDict = {
             "%s.recipe" % self._troveName : filetypes.RegularFile(
                 contents = recipe, config=True),
@@ -662,7 +674,7 @@ class BaseDefinition(object):
                                    message = message)
         troveName = '%s:source' % self._troveName
         cs = conaryClient.createSourceTrove(troveName, str(label),
-            self.__class__.version, pathDict, cLog)
+            version, pathDict, cLog)
 
         repos = conaryClient.getRepos()
         repos.commitChangeSet(cs)
@@ -805,16 +817,19 @@ class ProductDefinitionRecipe(PackageRecipe):
         return ProductDefinition(inStr, schemaDir = self.schemaDir,
             validate = self._validate)
 
-    def saveToRepository(self, client, message = None):
+    def saveToRepository(self, client, message = None, version = None):
         """
         Save a C{ProductDefinition} object to a Conary repository.
         @param client: A Conary client object
         @type client: C{conaryclient.ConaryClient}
         @param message: An optional commit message
         @type message: C{str}
+        @param version: An optional version of product definition XML to write
+        @type version: C{str}
         """
         label = self.getProductDefinitionLabel()
-        return self._saveToRepository(client, label, message = message)
+        return self._saveToRepository(client, label, message = message,
+            version = version)
 
     def loadFromRepository(self, client):
         """
@@ -2143,7 +2158,7 @@ class PlatformDefinitionRecipe(PackageRecipe):
         """
 '''
 
-    def saveToRepository(self, client, label, message = None):
+    def saveToRepository(self, client, label, message = None, version = None):
         """
         Save a C{PlatformDefinition} object to a Conary repository.
         @param client: A Conary client object
@@ -2152,8 +2167,11 @@ class PlatformDefinitionRecipe(PackageRecipe):
         @type message: C{str}
         @param label: Label where the representation will be saved
         @type label: C{str}
+        @param version: An optional version of product definition XML to write
+        @type version: C{str}
         """
-        return self._saveToRepository(client, label, message = message)
+        return self._saveToRepository(client, label, message = message,
+            version = version)
 
     def loadFromRepository(self, client, label):
         """
@@ -2566,21 +2584,38 @@ class MigrationManager(object):
         self._version = version
         self._path = path
 
-    def migrate(self, rootObj):
+    def migrateForward(self, rootObj):
         if self._version == self.CurrentVersion:
             return rootObj
-        v = self._path.pop(0)
+        transPath = self._path[:]
+        v = transPath.pop(0)
         className = rootObj.__class__.__name__
-        while self._path:
-            nv = self._path.pop(0)
+        while transPath:
+            nv = transPath.pop(0)
             transitions = self._transitions[v][nv]
             for MigrateClass in transitions:
                 module = BaseDefinition.loadModule(nv)
-                rootObj = MigrateClass().migrate(rootObj, module)
-                rootObj.version = nv
+                rootObj = MigrateClass().migrateForward(rootObj, module)
+            rootObj.version = nv
             v = nv
         return rootObj
 
+    def migrateBack(self, rootObj):
+        if self._version == self.CurrentVersion:
+            return rootObj
+        transPath = self._path[:]
+        nv = transPath.pop()
+        while transPath:
+            cv = transPath.pop()
+            transitions = self._transitions[cv][nv]
+            for MigrateClass in transitions:
+                module = BaseDefinition.loadModule(cv)
+                rootObj = MigrateClass().migrateBack(rootObj, module)
+                if rootObj is None:
+                    raise RuntimeError("Unable to migrate")
+            rootObj.version = cv
+            nv = cv
+        return rootObj
 
 class BaseMigration(object):
     fromVersion = None
@@ -2589,13 +2624,27 @@ class BaseMigration(object):
     skipFields = set()
     reinitFields = set()
 
-    def migrate(self, fromObj, newModule):
+    CanMigrateBack = False
+
+    def migrateForward(self, fromObj, newModule):
         toObj = self.copyFrom(fromObj, newModule)
         if fromObj.__class__.__name__ == 'platformDefinitionTypeSub':
             method = self.migratePlatform
         else:
             method = self.migrateProduct
         self.migrateCommon(fromObj, toObj, newModule)
+        method(fromObj, toObj, newModule)
+        return toObj
+
+    def migrateBack(self, fromObj, newModule):
+        if not self.CanMigrateBack:
+            return None
+        toObj = self.copyFrom(fromObj, newModule)
+        if fromObj.__class__.__name__ == 'platformDefinitionTypeSub':
+            mFalseethod = self.migrateBackPlatform
+        else:
+            method = self.migrateBackProduct
+        self.migrateBackCommon(fromObj, toObj, newModule)
         method(fromObj, toObj, newModule)
         return toObj
 
@@ -2606,6 +2655,15 @@ class BaseMigration(object):
         pass
 
     def migrateProduct(self, fromObj, toObj, newModule):
+        pass
+
+    def migrateBackCommon(self, fromObj, toObj, newModule):
+        pass
+
+    def migrateBackPlatform(self, fromObj, toObj, newModule):
+        pass
+
+    def migrateBackProduct(self, fromObj, toObj, newModule):
         pass
 
     @classmethod
@@ -2733,6 +2791,7 @@ MigrationManager.register(Migrate_13_20)
 class Migrate_20_30(BaseMigration):
     fromVersion = '2.0'
     toVersion = '3.0'
+    CanMigrateBack = True
 
     def _migrateContainerTemplates(self, fromObj, toObj):
         containerTemplates = fromObj.get_containerTemplates()
@@ -2740,24 +2799,49 @@ class Migrate_20_30(BaseMigration):
             return
         cTemplFrom = containerTemplates.get_image()
         cTemplTo = toObj.get_containerTemplates().get_image()
+        replaceMap = [
+            ('amiHugeDiskMountPoint', 'amiHugeDiskMountpoint'),
+            ('vhdDisktype', 'vhdDiskType')
+        ]
+
         for oldImg, newImg in zip(cTemplFrom, cTemplTo):
-            obsoleteVal = oldImg.amiHugeDiskMountPoint
-            if obsoleteVal and not newImg.amiHugeDiskMountpoint:
-                newImg.amiHugeDiskMountpoint = obsoleteVal
-            obsoleteVal = oldImg.vhdDisktype
-            if obsoleteVal and not newImg.vhdDiskType:
-                newImg.vhdDiskType = obsoleteVal
+            for obsoleteProperty, newProperty in replaceMap:
+                obsoleteVal = getattr(oldImg, obsoleteProperty)
+                newVal = getattr(newImg, newProperty)
+                if obsoleteVal and not newVal:
+                    setattr(newImg, newProperty, obsoleteVal)
+                    setattr(newImg, obsoleteProperty, None)
+                if newImg.containerFormat == 'netBootImage':
+                    newImg.containerFormat = 'netbootImage'
 
     def _migrateBuildDefinitions(self, fromObj, toObj):
         buildDefinitions = toObj.get_buildDefinition()
-        if not buildDefinitions:
-            return
-        buildDefinitions = buildDefinitions.get_build()
+        if buildDefinitions:
+            buildDefinitions = buildDefinitions.get_build()
+        else:
+            buildDefinitions = []
+        replaceMap = [ ('netBootImage', 'netbootImage') ]
+
         for bd in buildDefinitions:
-            if bd.containerTemplateRef == 'netBootImage':
-                bd.containerTemplateRef = 'netbootImage'
+            for obsoleteVal, newVal in replaceMap:
+                if bd.containerTemplateRef == obsoleteVal:
+                    bd.containerTemplateRef = newVal
             if bd.image and bd.image.vhdDiskType == '':
                 bd.image.vhdDiskType = None
+
+        # I think this was mostly an artifact of the testsuite blindly
+        # replacing netbootImage with netBootImage - but changing build
+        # templates nonetheless
+        buildTemplates = toObj.get_buildTemplates()
+        if buildTemplates:
+            buildTemplates = buildTemplates.get_buildTemplate()
+        else:
+            buildTemplates = []
+
+        for bt in buildTemplates:
+            for obsoleteVal, newVal in replaceMap:
+                if bt.containerTemplateRef == obsoleteVal:
+                    bt.containerTemplateRef = newVal
 
     def migrateCommon(self, fromObj, toObj, newModule):
         self._migrateContainerTemplates(fromObj, toObj)
@@ -2773,11 +2857,13 @@ MigrationManager.register(Migrate_20_30)
 class Migrate_30_31(BaseMigration):
     fromVersion = '3.0'
     toVersion = '3.1'
+    CanMigrateBack = True
 MigrationManager.register(Migrate_30_31)
 
 class Migrate_31_40(BaseMigration):
     fromVersion = '3.1'
     toVersion = '4.0'
+    CanMigrateBack = True
 MigrationManager.register(Migrate_31_40)
 
 
