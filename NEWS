@@ -1,4 +1,4 @@
-Changes in @NEW@:
+Changes in 4.0.1:
   o Bug Fixes:
     * The compatibility interfaces created for RPCL-63 are now
       compiled. (RPCL-64)
