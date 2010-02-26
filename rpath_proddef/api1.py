@@ -26,7 +26,9 @@ import sys
 from lxml import etree
 
 from conary import changelog
+from conary import conarycfg
 from conary import errors as conaryErrors
+from conary import trove
 from conary import versions as conaryVersions
 from conary.conaryclient import filetypes, cmdline
 from conary.deps import deps as conaryDeps
@@ -675,6 +677,16 @@ class BaseDefinition(object):
         troveName = '%s:source' % self._troveName
         cs = conaryClient.createSourceTrove(troveName, str(label),
             version, pathDict, cLog)
+
+        # If there is a key for this label in the conary configuration, sign
+        # the source trove (RPCL-68)
+        fingerprint = conarycfg.selectSignatureKey(conaryClient.cfg, label)
+        if fingerprint:
+            for trvCs in [ x for x in cs.iterNewTroveList() ]:
+                trv = trove.Trove(trvCs)
+                trv.addDigitalSignature(fingerprint)
+                newTrvCs = trv.diff(None, absolute = 1)[0]
+                cs.newTrove(newTrvCs)
 
         repos = conaryClient.getRepos()
         repos.commitChangeSet(cs)
