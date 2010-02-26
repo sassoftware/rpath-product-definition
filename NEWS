@@ -2,6 +2,10 @@ Changes in @NEW@:
   o Bug Fixes:
     * Use the faster getFileContentsFromTrove Conary interface, when
       available, for getting product definitions from repositories.
+    * If the Conary client object is configured to require signatures
+      for the label on which the product definition trove lives,
+      the source trove for the package definition will now be signed.
+      (RPCL-68)
 
 Changes in 1.0:
   o General Availability
