@@ -48,6 +48,7 @@ from conary.conaryclient import filetypes, cmdline
 from conary.deps import deps as conaryDeps
 from conary.lib import util
 from conary.repository import errors as repositoryErrors
+from conary.repository import changeset
 
 from rpath_proddef import _xmlConstants
 
@@ -637,21 +638,52 @@ class BaseDefinition(object):
                 **kwargs)
         addMethod(obj)
 
+    def _getTroveContents(self, repos, trvTup):
+        pathDict = {}
+        csSpec = [ (trvTup[0], (None, None), (trvTup[1], trvTup[2]), True) ]
+        cs = repos.createChangeSet(csSpec, withFileContents = True)
+        fileSpecs = []
+        for trvCs in cs.iterNewTroveList():
+            fileSpecs.extend(f for f in trvCs.getNewFileList())
+        # Sort by path id, otherwise grabbing file contents may break
+        fileSpecs.sort(key = lambda x: x[0])
+        fileContents =  [ cs.getFileContents(f[0], f[2])[1].get()
+            for f in fileSpecs ]
+        for (pathId, path, fileId, fileVersion), fileConts in zip(
+                fileSpecs, fileContents):
+            fileStream = cs.getFileChange(None, fileId)
+            fileObj = changeset.files.ThawFile(fileStream, pathId)
+            # Only preserve regular files for now
+            if not isinstance(fileObj, changeset.files.RegularFile):
+                continue
+            pathDict[path] = filetypes.RegularFile(
+                contents = fileConts, config = fileObj.flags.isConfig())
+        return pathDict
+
     def _saveToRepository(self, conaryClient, label, message = None):
         if message is None:
             message = "Automatic checkin\n"
+
+        repos = conaryClient.getRepos()
+
+        # Get the previous version of the trove
+        pathDict = {}
+        trvTup = self._getTroveTupFromRepository(conaryClient, str(label),
+            allowMissing = True)
+        if trvTup:
+            pathDict.update(self._getTroveContents(repos, trvTup))
 
         recipe = self._recipe.replace('@NAME@', self._troveName)
         recipe = recipe.replace('@VERSION@', self.__class__.version)
 
         stream = StringIO.StringIO()
         self.serialize(stream)
-        pathDict = {
+        pathDict.update({
             "%s.recipe" % self._troveName : filetypes.RegularFile(
                 contents = recipe, config=True),
             self._troveFileName : filetypes.RegularFile(
                 contents = stream.getvalue(), config=True),
-        }
+        })
         cLog = changelog.ChangeLog(name = conaryClient.cfg.name,
                                    contact = conaryClient.cfg.contact,
                                    message = message)
@@ -669,26 +701,29 @@ class BaseDefinition(object):
                 newTrvCs = trv.diff(None, absolute = 1)[0]
                 cs.newTrove(newTrvCs)
 
-        repos = conaryClient.getRepos()
         repos.commitChangeSet(cs)
 
-    def _getStreamFromRepository(self, conaryClient, label):
+    def _getTroveTupFromRepository(self, conaryClient, label,
+            allowMissing = True):
         repos = conaryClient.getRepos()
         troveName = '%s:source' % self._troveName
         troveSpec = (troveName, label, None)
-        try:
-            troves = repos.findTroves(None, [ troveSpec ])
-        except conaryErrors.TroveNotFound:
+        ret = repos.findTroves(None, [ troveSpec ], allowMissing = True)
+        if troveSpec not in ret:
+            if allowMissing:
+                return None
             raise ProductDefinitionTroveNotFoundError("%s=%s" % (troveName, label))
+        return ret[troveSpec][0]
+
+    def _getStreamFromRepository(self, conaryClient, label):
+        repos = conaryClient.getRepos()
+        try:
+            trvTup = self._getTroveTupFromRepository(conaryClient, label,
+                allowMissing = False)
         except conaryErrors.RepositoryError, e:
             raise RepositoryError(str(e))
-        # At this point, troveSpec is in troves and its value should not be
-        # the empty list.
-        nvfs = troves[troveSpec]
-        #if not nvfs:
-        #    raise ProductDefinitionTroveNotFoundError("%s=%s" % (troveName, label))
-        nvfs = troves[troveSpec]
-        n,v,f = nvfs[0]
+
+        n,v,f = trvTup
         if hasattr(repos, 'getFileContentsFromTrove'):
             try:
                 contents = repos.getFileContentsFromTrove(n,v,f,
