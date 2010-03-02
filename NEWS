@@ -1,13 +1,44 @@
 Changes in @NEW@:
   o Bug Fixes:
-    * Use the faster getFileContentsFromTrove Conary interface, when
-      available, for getting product definitions from repositories.
+    * The compatibility interfaces created for RPCL-63 are now
+      compiled. (RPCL-64)
+    * The api1 module now properly sets __all__ to include all public
+      interfaces.
+    * The preMigrateVersion property now reflects the version of the
+      product definition as found in the serialized XML representation
+      prior to applying all migrations. (RPCL-66)
+    * Older versions of product definition XML data can now be saved.
+      (RPCL-67)
     * If the Conary client object is configured to require signatures
       for the label on which the product definition trove lives,
       the source trove for the package definition will now be signed.
       (RPCL-68)
     * Saving the product definition to the repository now preserves
       additional files that were published in the trove. (RPCL-69)
+
+Changes in 4.0:
+  o New Feature:
+    * rpath-xmllib is no longer used. XML schema files are used in
+      conjunction with generateDS to produce the XML data binding.
+      (RBL-5082)
+    * Added support for versioned platform-defintions (RBL-5007).
+    * The API is now available under the rpath_proddef module. The
+      rpath_common interface will remain available for some time.
+      (RPCL-63)
+    * The package version now follows the XML schema version.
+    * Platform definitions define content source types. (RBL-5300)
+    * Content source types can use isSingleton to specify they
+      can only be added once. (RBL-5421)
+    * A new element, isPlatformTrove, was added to search path
+      elements. This controls rebase operations to a specific version
+      of platform groups; all other group search paths will be rebased
+      to the latest version. This allows for pulling the latest Conary
+      even on capsule-based platforms where a specific version of the
+      platform group is intended to be used. (RBL-5426)
+
+  o Bug Fixes:
+    * Use the faster getFileContentsFromTrove Conary interface, when
+      available, for getting product definitions from repositories.
 
 Changes in 1.0:
   o General Availability

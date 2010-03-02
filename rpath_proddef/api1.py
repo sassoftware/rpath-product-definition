@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2008 rPath, Inc.
+# Copyright (c) 2008-2010 rPath, Inc.
 #
 # This program is distributed under the terms of the Common Public License,
 # version 1.0. A copy of this license should have been distributed with this
@@ -18,25 +18,11 @@ All interfaces in this modules that do not start with a C{_}
 character are public interfaces.
 """
 
-__all__ = [ 'MissingInformationError',
-            'ProductDefinition',
-            'ProductDefinitionError',
-            'StageNotFoundError',
-            'ProductDefinitionTroveNotFoundError',
-            'ProductDefinitionFileNotFoundError',
-            'RepositoryError',
-            'PlatformLabelMissingError',
-            'ArchitectureNotFoundError',
-            'FlavorSetNotFoundError',
-            'ContainerTemplateNotFoundError',
-            'BuildTemplateNotFoundError',
-            'InvalidSchemaVersionError',
-            'SchemaValidationError',
-            ]
 
 import itertools
 import os
 import StringIO
+import sys
 from lxml import etree
 
 from conary import changelog
@@ -154,6 +140,7 @@ class BaseDefinition(object):
         else:
             # XXX default to the current version, hope for the best
             version = self.version
+        self._preMigrateVersion = version
         xmlns = rootNode.attributes.get('xmlns')
 
         module = self.loadModule(version)
@@ -163,7 +150,7 @@ class BaseDefinition(object):
         doc.unlink()
         if version != self.version:
             migr = MigrationManager(version)
-            rootObj = migr.migrate(rootObj)
+            rootObj = migr.migrateForward(rootObj)
         self._rootObj = rootObj
         self._postinit()
 
@@ -194,7 +181,11 @@ class BaseDefinition(object):
             raise SchemaValidationError(str(schema.error_log))
         return tree
 
-    def serialize(self, stream, validate = True):
+    @property
+    def preMigrateVersion(self):
+        return self._preMigrateVersion
+
+    def serialize(self, stream, validate = True, version = None):
         """
         Serialize the current object as an XML stream.
         @param stream: stream to write the serialized object
@@ -207,15 +198,24 @@ class BaseDefinition(object):
         ]
         namespacedef = ' '.join('%s="%s"' % a for a in attrs)
 
+        if version is None or version == self._rootObj.get_version():
+            rootObj = self._rootObj
+        else:
+            migr = MigrationManager(version)
+            rootObj = migr.migrateBack(self._rootObj)
+            # We should probably do a smarter job than simple string
+            # replacement here
+            namespacedef = namespacedef.replace(
+                "rpd-%s" % self.version, "rpd-%s" % version)
+
         # Write to a temporary file. We are paranoid and want to verify that
         # the output we produce doesn't break lxml
         bsio = util.BoundedStringIO()
-        self._rootObj.export(bsio, 0, namespace_ = '', name_ = self.RootNode,
+        rootObj.export(bsio, 0, namespace_ = '', name_ = self.RootNode,
             namespacedef_ = namespacedef)
         bsio.seek(0)
         if validate and os.path.exists(self.schemaDir):
-            tree = self.validate(bsio, self.schemaDir,
-                self._rootObj.get_version())
+            tree = self.validate(bsio, self.schemaDir, rootObj.get_version())
         elif validate:
             import sys
             sys.stderr.write("Warning: unable to validate schema: directory %s missing"
@@ -307,7 +307,8 @@ class BaseDefinition(object):
         self._rootObj.set_factorySources(None)
 
     def addSearchPath(self, troveName = None, label = None, version = None,
-                      isResolveTrove = True, isGroupSearchPathTrove = True):
+                      isResolveTrove = True, isGroupSearchPathTrove = True,
+                      isPlatformTrove = None):
         """
         Add an search path.
         @param troveName: the trove name for the search path.
@@ -318,8 +319,11 @@ class BaseDefinition(object):
         @param version: C{str} or C{None}
         @param isResolveTrove: set to False if this element should be not
                be returned for getResolveTroves()  (defaults to True)
-        @param isGroupSearchPathTrove: set to False if this element should be 
+        @param isGroupSearchPathTrove: set to False if this element should
                not be returned for getGroupSearchPaths() (defaults to True)
+        @param isPlatformTrove: set to True if this element should
+               be pinned to a specific version as part of a rebase operation
+               that specifies a version (defaults to False)
         """
         assert(isResolveTrove or isGroupSearchPathTrove)
         xmlsubs = self.xmlFactory()
@@ -330,7 +334,8 @@ class BaseDefinition(object):
         self._addSource(troveName, label, version,
                 xmlsubs.searchPathTypeSub.factory, sp.add_searchPath,
                 isResolveTrove = isResolveTrove,
-                isGroupSearchPathTrove = isGroupSearchPathTrove)
+                isGroupSearchPathTrove = isGroupSearchPathTrove,
+                isPlatformTrove = isPlatformTrove)
 
     def addFactorySource(self, troveName = None, label = None, version = None):
         """
@@ -629,6 +634,17 @@ class BaseDefinition(object):
         except RuntimeError, e:
             raise ProductDefinitionError(str(e))
 
+    @classmethod
+    def labelFromString(cls, verstr):
+        if verstr.startswith('/'):
+            vfs = conaryVersions.VersionFromString(verstr)
+            if isinstance(vfs, conaryVersions.Version):
+                label = vfs.trailingLabel()
+            else:
+                label = vfs.label()
+            return str(label)
+        return verstr.split('/', 1)[0]
+
     def _addSource(self, troveName, label, version, factory, addMethod, **kwargs):
         "Internal function for adding a Source"
         if label is not None:
@@ -660,9 +676,12 @@ class BaseDefinition(object):
                 contents = fileConts, config = fileObj.flags.isConfig())
         return pathDict
 
-    def _saveToRepository(self, conaryClient, label, message = None):
+    def _saveToRepository(self, conaryClient, label, message = None,
+                          version = None):
         if message is None:
             message = "Automatic checkin\n"
+        if version is None:
+            version = self.__class__.version
 
         repos = conaryClient.getRepos()
 
@@ -674,14 +693,14 @@ class BaseDefinition(object):
             pathDict.update(self._getTroveContents(repos, trvTup))
 
         recipe = self._recipe.replace('@NAME@', self._troveName)
-        recipe = recipe.replace('@VERSION@', self.__class__.version)
+        recipe = recipe.replace('@VERSION@', version)
 
         stream = StringIO.StringIO()
-        self.serialize(stream)
+        self.serialize(stream, version = version)
         pathDict.update({
             "%s.recipe" % self._troveName : filetypes.RegularFile(
                 contents = recipe, config=True),
-            self._troveFileName : filetypes.RegularFile(
+            self._troveFileNames[0] : filetypes.RegularFile(
                 contents = stream.getvalue(), config=True),
         })
         cLog = changelog.ChangeLog(name = conaryClient.cfg.name,
@@ -689,7 +708,7 @@ class BaseDefinition(object):
                                    message = message)
         troveName = '%s:source' % self._troveName
         cs = conaryClient.createSourceTrove(troveName, str(label),
-            self.__class__.version, pathDict, cLog)
+            version, pathDict, cLog)
 
         # If there is a key for this label in the conary configuration, sign
         # the source trove (RPCL-68)
@@ -721,27 +740,38 @@ class BaseDefinition(object):
             trvTup = self._getTroveTupFromRepository(conaryClient, label,
                 allowMissing = False)
         except conaryErrors.RepositoryError, e:
-            raise RepositoryError(str(e))
+            raise RepositoryError(str(e)), None, sys.exc_info()[2]
 
         n,v,f = trvTup
         if hasattr(repos, 'getFileContentsFromTrove'):
-            try:
-                contents = repos.getFileContentsFromTrove(n,v,f,
-                                              [self._troveFileName])[0]
-            except repositoryErrors.PathsNotFound:
+            contents = None
+            for troveFileName in self._troveFileNames:
+                try:
+                    contents = repos.getFileContentsFromTrove(n,v,f,
+                                                  [troveFileName])[0]
+                    break
+                except repositoryErrors.PathsNotFound:
+                    pass
+            if contents is None:
                 raise ProductDefinitionFileNotFoundError()
             return contents.get(), (n,v,f)
 
         trvCsSpec = (n, (None, None), (v, f), True)
         cs = conaryClient.createChangeSet([ trvCsSpec ], withFiles = True,
                                           withFileContents = True)
+        troveFileNameMap = dict((x, i)
+            for (i, x) in enumerate(self._troveFileNames))
         for thawTrvCs in cs.iterNewTroveList():
             paths = [ x for x in thawTrvCs.getNewFileList()
-                      if x[1] == self._troveFileName ]
+                if x[1] in troveFileNameMap ]
             if not paths:
                 continue
+            # Prefer the platdef from the highest ranked file
+            _, (pathId, path, fileId, fileVer) = min(
+                (troveFileNameMap[x[1]], x) for x in paths)
+
             # Fetch file from changeset
-            fileSpecs = [ (fId, fVer) for (_, _, fId, fVer) in paths ]
+            fileSpecs = [ (fileId, fileVer) ]
             fileContents = repos.getFileContents(fileSpecs)
             return fileContents[0].get(), thawTrvCs.getNewNameVersionFlavor()
 
@@ -756,6 +786,7 @@ class BaseDefinition(object):
         self._rootObj = getattr(xmlsubs, self.ClassFactoryName)()
         if self.Versioned:
             self._rootObj.set_version(self.version)
+        self._preMigrateVersion = None
 
     def _postinit(self):
         pass
@@ -786,7 +817,9 @@ class ProductDefinition(BaseDefinition):
     RootNode = 'productDefinition'
 
     _troveName = 'product-definition'
-    _troveFileName = 'product-definition.xml'
+    _troveFileNames = [
+        'product-definition.xml',
+    ]
 
     _recipe = '''
 #
@@ -831,16 +864,19 @@ class ProductDefinitionRecipe(PackageRecipe):
         return ProductDefinition(inStr, schemaDir = self.schemaDir,
             validate = self._validate)
 
-    def saveToRepository(self, client, message = None):
+    def saveToRepository(self, client, message = None, version = None):
         """
         Save a C{ProductDefinition} object to a Conary repository.
         @param client: A Conary client object
         @type client: C{conaryclient.ConaryClient}
         @param message: An optional commit message
         @type message: C{str}
+        @param version: An optional version of product definition XML to write
+        @type version: C{str}
         """
         label = self.getProductDefinitionLabel()
-        return self._saveToRepository(client, label, message = message)
+        return self._saveToRepository(client, label, message = message,
+            version = version)
 
     def loadFromRepository(self, client):
         """
@@ -1799,7 +1835,23 @@ class ProductDefinitionRecipe(PackageRecipe):
         label = self.getProductDefinitionLabel()
         nplat.saveToRepository(client, label, message = message)
 
-    def rebase(self, client, label = None, useLatest = None):
+    def rebase(self, client, label = None, useLatest = None,
+            platformVersion = None):
+        """
+        @param label: A label string pointing to the new platform to be used
+        as a base for this product definition.
+        @type label: C{str}
+        @param useLatest: If set, the value from the upstream platform is
+        copied verbatim here, with no snapshotting to a specific version.
+        This essentially caches the upstream platform.
+        @type useLatest: C{bool}
+        @param platformVersion: A version string (like 1.2-3) to be used for
+        platform trove search path elements.
+        @type platformVersion: C{str}
+        """
+        if useLatest and platformVersion:
+            raise ProductDefinitionError("Conflicting arguments useLatest and "
+                "platformVersion specified")
         if label is None:
             troveSpec = self.getPlatformSourceTrove()
             if troveSpec:
@@ -1813,7 +1865,8 @@ class ProductDefinitionRecipe(PackageRecipe):
             raise PlatformLabelMissingError()
         nplat = self.toPlatformDefinition()
         nplat.loadFromRepository(client, label)
-        nplat.snapshotVersions(client)
+        if not useLatest:
+            nplat.snapshotVersions(client, platformVersion = platformVersion)
         self._rebase(label, nplat, useLatest = useLatest)
 
     def _rebase(self, label, nplat, useLatest = None):
@@ -1822,14 +1875,17 @@ class ProductDefinitionRecipe(PackageRecipe):
         self.platform = Platform()
         uroot = nplat._rootObj
         platobj = xmlsubs.platformTypeSub.factory(
-            platformName = uroot.get_platformName(),
-            platformVersionTrove = uroot.get_platformVersionTrove(),
             sourceTrove = nplat.getPlatformSourceTrove(),
             useLatest = useLatest,
+            platformName = uroot.get_platformName(),
+            platformUsageTerms = uroot.get_platformUsageTerms(),
+            platformVersionTrove = uroot.get_platformVersionTrove(),
             baseFlavor = uroot.get_baseFlavor(),
+            contentProvider = uroot.get_contentProvider(),
             searchPaths = uroot.get_searchPaths(),
             factorySources = uroot.get_factorySources(),
             autoLoadRecipes = uroot.get_autoLoadRecipes(),
+            secondaryLabels = uroot.get_secondaryLabels(),
             architectures = uroot.get_architectures(),
             flavorSets = uroot.get_flavorSets(),
             containerTemplates = uroot.get_containerTemplates(),
@@ -1996,6 +2052,21 @@ class BasePlatform(BaseDefinition):
         """
         return self._rootObj.set_platformName(platformName)
 
+    def getPlatformUsageTerms(self):
+        """
+        @return: The platform usage terms.
+        @rtype: C{str}
+        """
+        return self._rootObj.get_platformUsageTerms()
+
+    def setPlatformUsageTerms(self, platformUsageTerms):
+        """
+        Set the platform usage terms.
+        @param platformUsageTerms: The platform terms of use.
+        @type platformUsageTerms: C{str}
+        """
+        return self._rootObj.set_platformUsageTerms(platformUsageTerms)
+
     def getPlatformVersionTrove(self):
         """
         @return: the platform version trove.
@@ -2040,6 +2111,32 @@ class BasePlatform(BaseDefinition):
             return []
         return vals.get_autoLoadRecipe()
 
+    def setContentProvider(self, name, description,
+            contentSourceTypes = None, dataSources = None):
+        xmlsubs = self.xmlFactory()
+        dataSourceType = xmlsubs.dataSourceTypeSub
+        contentSourceTypeType = xmlsubs.contentSourceTypeTypeSub
+        cprov = xmlsubs.contentProviderTypeSub.factory(
+            name = name, description = description)
+        for ds in (dataSources or []):
+            assert isinstance(ds, dataSourceType)
+            cprov.add_dataSource(ds)
+        for cst in (contentSourceTypes or []):
+            assert isinstance(cst, contentSourceTypeType)
+            cprov.add_contentSourceType(cst)
+        self._rootObj.contentProvider = cprov
+
+    def getContentProvider(self):
+        return self._rootObj.contentProvider
+
+    def newDataSource(self, name, description):
+        return self.xmlFactory().dataSourceTypeSub.factory(
+            name = name, description = description)
+
+    def newContentSourceType(self, name, description, isSingleton = None):
+        return self.xmlFactory().contentSourceTypeTypeSub.factory(
+            name = name, description = description, isSingleton = isSingleton)
+
 class Platform(BasePlatform):
     ClassFactoryName = 'platformTypeSub'
     RootNode = 'platform'
@@ -2083,7 +2180,12 @@ class PlatformDefinition(BasePlatform):
     RootNode = 'platformDefinition'
 
     _troveName = 'platform-definition'
-    _troveFileName = 'platform-definition.xml'
+
+    # list of files to search for in the trove, ordered by priority.
+    _troveFileNames = [
+        'platform-definition-4.0.xml',
+        'platform-definition.xml',
+    ]
 
     _recipe = '''
 #
@@ -2103,7 +2205,7 @@ class PlatformDefinitionRecipe(PackageRecipe):
         """
 '''
 
-    def saveToRepository(self, client, label, message = None):
+    def saveToRepository(self, client, label, message = None, version = None):
         """
         Save a C{PlatformDefinition} object to a Conary repository.
         @param client: A Conary client object
@@ -2112,8 +2214,11 @@ class PlatformDefinitionRecipe(PackageRecipe):
         @type message: C{str}
         @param label: Label where the representation will be saved
         @type label: C{str}
+        @param version: An optional version of product definition XML to write
+        @type version: C{str}
         """
-        return self._saveToRepository(client, label, message = message)
+        return self._saveToRepository(client, label, message = message,
+            version = version)
 
     def loadFromRepository(self, client, label):
         """
@@ -2130,19 +2235,22 @@ class PlatformDefinitionRecipe(PackageRecipe):
         # Set the source trove version we used
         self._sourceTrove = "%s=%s" % (self._troveName, nvf[1])
 
-    def snapshotVersions(self, conaryClient):
+    def snapshotVersions(self, conaryClient, platformVersion = None):
         """
         For each search path or factory source from this platform definition,
         query the repositories for the latest versions and record them.
         @param conaryClient: A Conary client object
         @type conaryClient: C{conaryclient.ConaryClient}
+        @param platformVersion: A version string (like 1.2-3) to be used for
+        platform trove search path elements.
+        @type platformVersion: C{str}
         """
         repos = conaryClient.getRepos()
         troveSpecs = set()
         # XXX We are ignoring the flavors for now.
         for sp in itertools.chain(self.getSearchPaths(),
                                   self.getFactorySources()):
-            troveSpecs.add(sp.getTroveTup(template=True))
+            troveSpecs.add(self._getTroveTup(sp, platformVersion))
         troveSpecs = sorted(troveSpecs)
         try:
             troves = repos.findTroves(None, troveSpecs, allowMissing = True)
@@ -2151,13 +2259,21 @@ class PlatformDefinitionRecipe(PackageRecipe):
 
         for sp in itertools.chain(self.getSearchPaths(),
                                   self.getFactorySources()):
-            key = sp.getTroveTup(template=True)
+            key = self._getTroveTup(sp, platformVersion)
             if key not in troves:
                 raise ProductDefinitionTroveNotFoundError("%s=%s" % key[:2])
             # Use the latest version, if for some reason there is more
             # than one in the result set.
             nvf = max(troves[key])
+            sp.label = str(nvf[1].trailingLabel())
             sp.version = str(nvf[1].trailingRevision())
+
+    @classmethod
+    def _getTroveTup(cls, searchPath, platformVersion):
+        n, v, f = searchPath.getTroveTup(template = True)
+        if searchPath.isPlatformTrove and platformVersion is not None:
+            v = "%s/%s" % (cls.labelFromString(v), platformVersion)
+        return (n, v, f)
 
     # sourceTrove is set when we load the trove from the repository. It is not
     # part of the XML stream, so we set it separately in this object.
@@ -2515,21 +2631,38 @@ class MigrationManager(object):
         self._version = version
         self._path = path
 
-    def migrate(self, rootObj):
+    def migrateForward(self, rootObj):
         if self._version == self.CurrentVersion:
             return rootObj
-        v = self._path.pop(0)
+        transPath = self._path[:]
+        v = transPath.pop(0)
         className = rootObj.__class__.__name__
-        while self._path:
-            nv = self._path.pop(0)
+        while transPath:
+            nv = transPath.pop(0)
             transitions = self._transitions[v][nv]
             for MigrateClass in transitions:
                 module = BaseDefinition.loadModule(nv)
-                rootObj = MigrateClass().migrate(rootObj, module)
-                rootObj.version = nv
+                rootObj = MigrateClass().migrateForward(rootObj, module)
+            rootObj.version = nv
             v = nv
         return rootObj
 
+    def migrateBack(self, rootObj):
+        if self._version == self.CurrentVersion:
+            return rootObj
+        transPath = self._path[:]
+        nv = transPath.pop()
+        while transPath:
+            cv = transPath.pop()
+            transitions = self._transitions[cv][nv]
+            for MigrateClass in transitions:
+                module = BaseDefinition.loadModule(cv)
+                rootObj = MigrateClass().migrateBack(rootObj, module)
+                if rootObj is None:
+                    raise RuntimeError("Unable to migrate")
+            rootObj.version = cv
+            nv = cv
+        return rootObj
 
 class BaseMigration(object):
     fromVersion = None
@@ -2538,13 +2671,27 @@ class BaseMigration(object):
     skipFields = set()
     reinitFields = set()
 
-    def migrate(self, fromObj, newModule):
+    CanMigrateBack = False
+
+    def migrateForward(self, fromObj, newModule):
         toObj = self.copyFrom(fromObj, newModule)
         if fromObj.__class__.__name__ == 'platformDefinitionTypeSub':
             method = self.migratePlatform
         else:
             method = self.migrateProduct
         self.migrateCommon(fromObj, toObj, newModule)
+        method(fromObj, toObj, newModule)
+        return toObj
+
+    def migrateBack(self, fromObj, newModule):
+        if not self.CanMigrateBack:
+            return None
+        toObj = self.copyFrom(fromObj, newModule)
+        if fromObj.__class__.__name__ == 'platformDefinitionTypeSub':
+            mFalseethod = self.migrateBackPlatform
+        else:
+            method = self.migrateBackProduct
+        self.migrateBackCommon(fromObj, toObj, newModule)
         method(fromObj, toObj, newModule)
         return toObj
 
@@ -2555,6 +2702,15 @@ class BaseMigration(object):
         pass
 
     def migrateProduct(self, fromObj, toObj, newModule):
+        pass
+
+    def migrateBackCommon(self, fromObj, toObj, newModule):
+        pass
+
+    def migrateBackPlatform(self, fromObj, toObj, newModule):
+        pass
+
+    def migrateBackProduct(self, fromObj, toObj, newModule):
         pass
 
     @classmethod
@@ -2682,6 +2838,7 @@ MigrationManager.register(Migrate_13_20)
 class Migrate_20_30(BaseMigration):
     fromVersion = '2.0'
     toVersion = '3.0'
+    CanMigrateBack = True
 
     def _migrateContainerTemplates(self, fromObj, toObj):
         containerTemplates = fromObj.get_containerTemplates()
@@ -2689,24 +2846,49 @@ class Migrate_20_30(BaseMigration):
             return
         cTemplFrom = containerTemplates.get_image()
         cTemplTo = toObj.get_containerTemplates().get_image()
+        replaceMap = [
+            ('amiHugeDiskMountPoint', 'amiHugeDiskMountpoint'),
+            ('vhdDisktype', 'vhdDiskType')
+        ]
+
         for oldImg, newImg in zip(cTemplFrom, cTemplTo):
-            obsoleteVal = oldImg.amiHugeDiskMountPoint
-            if obsoleteVal and not newImg.amiHugeDiskMountpoint:
-                newImg.amiHugeDiskMountpoint = obsoleteVal
-            obsoleteVal = oldImg.vhdDisktype
-            if obsoleteVal and not newImg.vhdDiskType:
-                newImg.vhdDiskType = obsoleteVal
+            for obsoleteProperty, newProperty in replaceMap:
+                obsoleteVal = getattr(oldImg, obsoleteProperty)
+                newVal = getattr(newImg, newProperty)
+                if obsoleteVal and not newVal:
+                    setattr(newImg, newProperty, obsoleteVal)
+                    setattr(newImg, obsoleteProperty, None)
+                if newImg.containerFormat == 'netBootImage':
+                    newImg.containerFormat = 'netbootImage'
 
     def _migrateBuildDefinitions(self, fromObj, toObj):
         buildDefinitions = toObj.get_buildDefinition()
-        if not buildDefinitions:
-            return
-        buildDefinitions = buildDefinitions.get_build()
+        if buildDefinitions:
+            buildDefinitions = buildDefinitions.get_build()
+        else:
+            buildDefinitions = []
+        replaceMap = [ ('netBootImage', 'netbootImage') ]
+
         for bd in buildDefinitions:
-            if bd.containerTemplateRef == 'netBootImage':
-                bd.containerTemplateRef = 'netbootImage'
+            for obsoleteVal, newVal in replaceMap:
+                if bd.containerTemplateRef == obsoleteVal:
+                    bd.containerTemplateRef = newVal
             if bd.image and bd.image.vhdDiskType == '':
                 bd.image.vhdDiskType = None
+
+        # I think this was mostly an artifact of the testsuite blindly
+        # replacing netbootImage with netBootImage - but changing build
+        # templates nonetheless
+        buildTemplates = toObj.get_buildTemplates()
+        if buildTemplates:
+            buildTemplates = buildTemplates.get_buildTemplate()
+        else:
+            buildTemplates = []
+
+        for bt in buildTemplates:
+            for obsoleteVal, newVal in replaceMap:
+                if bt.containerTemplateRef == obsoleteVal:
+                    bt.containerTemplateRef = newVal
 
     def migrateCommon(self, fromObj, toObj, newModule):
         self._migrateContainerTemplates(fromObj, toObj)
@@ -2718,3 +2900,27 @@ class Migrate_20_30(BaseMigration):
         self._migrateBuildDefinitions(fromObj, toObj)
 
 MigrationManager.register(Migrate_20_30)
+
+class Migrate_30_31(BaseMigration):
+    fromVersion = '3.0'
+    toVersion = '3.1'
+    CanMigrateBack = True
+MigrationManager.register(Migrate_30_31)
+
+class Migrate_31_40(BaseMigration):
+    fromVersion = '3.1'
+    toVersion = '4.0'
+    CanMigrateBack = True
+MigrationManager.register(Migrate_31_40)
+
+
+# export all things that do not have a leading underscore and aren't imported
+# from another module.
+import inspect
+__all__ = []
+for name, obj in locals().items():
+    if (name.startswith('_') or inspect.ismodule(obj) or
+            getattr(obj, '__module__', __name__) != __name__):
+        continue
+    __all__.append(name)
+del inspect

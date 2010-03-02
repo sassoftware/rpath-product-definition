@@ -30,9 +30,19 @@ dist_files = $(extra_files)
 
 subdirs: default-subdirs
 
-install: install-subdirs
+install: install-subdirs install-compat
 
 clean: clean-subdirs default-clean
+
+
+
+install-compat:
+	# Compatibility stubs for old rbuild (RPCL-63)
+	mkdir -p $(DESTDIR)$(sitedir)rpath_common/proddef
+	echo "from rpath_proddef.api1 import *" >$(DESTDIR)$(sitedir)rpath_common/proddef/__init__.py
+	echo "from rpath_proddef.api1 import *" >$(DESTDIR)$(sitedir)rpath_common/proddef/api1.py
+	python -c "from compileall import *; compile_dir('$(DESTDIR)$(sitedir)rpath_common/proddef', 10, '$(sitedir)rpath_common/proddef')"
+	python -O -c "from compileall import *; compile_dir('$(DESTDIR)$(sitedir)rpath_common/proddef', 10, '$(sitedir)rpath_common/proddef')"
 
 dist:
 	if ! grep "^Changes in $(VERSION)" NEWS > /dev/null 2>&1; then \
