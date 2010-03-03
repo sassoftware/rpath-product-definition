@@ -1,4 +1,6 @@
 Changes in @NEW@:
+
+Changes in 4.0.1:
   o Bug Fixes:
     * The compatibility interfaces created for RPCL-63 are now
       compiled. (RPCL-64)
@@ -13,6 +15,8 @@ Changes in @NEW@:
       for the label on which the product definition trove lives,
       the source trove for the package definition will now be signed.
       (RPCL-68)
+    * Saving the product definition to the repository now preserves
+      additional files that were published in the trove. (RPCL-69)
 
 Changes in 4.0:
   o New Feature:
