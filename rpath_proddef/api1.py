@@ -69,6 +69,11 @@ class ProductDefinitionTroveNotFoundError(ProductDefinitionError):
     be found in the repository
     """
 
+class SearchPathTroveNotFoundError(ProductDefinitionError):
+    """
+    Raised when one of the troves in the search path could not be found
+    """
+
 class ProductDefinitionFileNotFoundError(ProductDefinitionError):
     "Raised when the product definition file was not found in the repository"
 
@@ -2261,7 +2266,7 @@ class PlatformDefinitionRecipe(PackageRecipe):
                                   self.getFactorySources()):
             key = self._getTroveTup(sp, platformVersion)
             if key not in troves:
-                raise ProductDefinitionTroveNotFoundError("%s=%s" % key[:2])
+                raise SearchPathTroveNotFoundError("%s=%s" % key[:2])
             # Use the latest version, if for some reason there is more
             # than one in the result set.
             nvf = max(troves[key])
