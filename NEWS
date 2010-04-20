@@ -6,6 +6,9 @@ Changes in @NEW@:
       (RPCL-68)
     * Saving the product definition to the repository now preserves
       additional files that were published in the trove. (RPCL-69)
+    * ProductDefinition.toPlatformDefinition handles the copying of
+      important bits from the product and platform into the new
+      platform (RBL-6125)
 
 Changes in 4.0.1:
   o Bug Fixes:
