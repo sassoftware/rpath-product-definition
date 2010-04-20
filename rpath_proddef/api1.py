@@ -372,6 +372,9 @@ class BaseDefinition(object):
 
     architectures = property(getArchitectures)
 
+    def iterAllArchitectures(self):
+        return self.getArchitectures()
+
     def hasArchitecture(self, name):
         """
         @param name: architecture name
@@ -390,8 +393,7 @@ class BaseDefinition(object):
         @raises C{ArchitectureNotFoundError}: if architecture is not found, and
         no default was specified.
         """
-        arches = self.getArchitectures()
-        for arch in arches:
+        for arch in self.iterAllArchitectures():
             if arch.name == name:
                 return arch
         if default != -1:
@@ -409,21 +411,25 @@ class BaseDefinition(object):
         @type flavor: C{str}
         """
         xmlsubs = self.xmlFactory()
-        # Replace architecture with the same name
-        arches = self._rootObj.get_architectures()
-        if arches is None:
-            arches = []
-        else:
-            arches = arches.get_architecture()
-        narches = xmlsubs.architecturesTypeSub.factory()
-        for arch in (arches or []):
-            if arch.get_name() == name:
-                continue
-            narches.add_architecture(arch)
         newVal = xmlsubs.nameFlavorTypeSub.factory(name = name,
             displayName = displayName, flavor = flavor)
-        narches.add_architecture(newVal)
-        self._rootObj.set_architectures(narches)
+        self.addArchitectures([ newVal ])
+
+    def addArchitectures(self, architectures):
+        if not architectures:
+            return
+        xmlsubs = self.xmlFactory()
+        oldArches = self._rootObj.get_architectures()
+        if oldArches is None:
+            oldArches = []
+        else:
+            oldArches = oldArches.get_architecture() or []
+
+        architecturesNode = xmlsubs.architecturesTypeSub.factory()
+        self._rootObj.set_architectures(architecturesNode)
+
+        self._addCollection(architecturesNode.add_architecture,
+            oldArches, architectures, xmlsubs.nameFlavorTypeSub, [ 'name' ])
 
     def clearArchitectures(self):
         """
@@ -443,6 +449,9 @@ class BaseDefinition(object):
 
     flavorSets = property(getFlavorSets)
 
+    def iterAllFlavorSets(self):
+        return self.getFlavorSets()
+
     def getFlavorSet(self, name, default = -1):
         """
         @param name: flavor set name
@@ -454,8 +463,7 @@ class BaseDefinition(object):
         @raises C{FlavorSetNotFoundError}: if flavor set is not found, and
         no default was specified.
         """
-        flavorSets = self.getFlavorSets()
-        for fs in flavorSets:
+        for fs in self.iterAllFlavorSets():
             if fs.name == name:
                 return fs
         if default != -1:
@@ -473,17 +481,26 @@ class BaseDefinition(object):
         @type flavor: C{str}
         """
         xmlsubs = self.xmlFactory()
-        # Replace flavor sets with the same name
-        fsets = self._rootObj.get_flavorSets()
-        nfsets = xmlsubs.flavorSetsTypeSub.factory()
-        for fset in ((fsets and fsets.get_flavorSet()) or []):
-            if fset.get_name() == name:
-                continue
-            nfsets.add_flavorSet(fset)
         newVal = xmlsubs.nameFlavorTypeSub.factory(name = name,
             displayName = displayName, flavor = flavor)
-        nfsets.add_flavorSet(newVal)
-        self._rootObj.set_flavorSets(nfsets)
+        self.addFlavorSets([ newVal ])
+
+    def addFlavorSets(self, flavorSets):
+        if not flavorSets:
+            return
+        xmlsubs = self.xmlFactory()
+
+        oldFlvSets = self._rootObj.get_flavorSets()
+        if oldFlvSets is None:
+            oldFlvSets = []
+        else:
+            oldFlvSets = oldFlvSets.get_flavorSet() or []
+
+        flavorSetsNode = xmlsubs.flavorSetsTypeSub.factory()
+        self._rootObj.set_flavorSets(flavorSetsNode)
+
+        self._addCollection(flavorSetsNode.add_flavorSet, oldFlvSets,
+            flavorSets, xmlsubs.nameFlavorTypeSub, [ 'name' ])
 
     def clearFlavorSets(self):
         """
@@ -503,6 +520,9 @@ class BaseDefinition(object):
 
     containerTemplates = property(getContainerTemplates)
 
+    def iterAllContainerTemplates(self):
+        return self.getContainerTemplates()
+
     def getContainerTemplate(self, containerFormat, default = -1):
         """
         @param containerFormat: container template containerFormat
@@ -514,7 +534,7 @@ class BaseDefinition(object):
         @raises C{ContainerTemplateNotFoundError}: if container template is not found, and
         no default was specified.
         """
-        containerTemplates = self.getContainerTemplates()
+        containerTemplates = self.iterAllContainerTemplates()
         for tmpl in containerTemplates:
             if tmpl.containerFormat == containerFormat:
                 return tmpl
@@ -524,16 +544,27 @@ class BaseDefinition(object):
 
     def addContainerTemplate(self, image):
         """
-        dd a container template.
+        Add a container template.
         @param image: Image
         @type image: C{imageTypes.Image}
         """
+        self.addContainerTemplates([ image ])
+
+    def addContainerTemplates(self, images):
+        if not images:
+            return
         xmlsubs = self.xmlFactory()
-        vals = self._rootObj.get_containerTemplates()
-        if vals is None:
-            vals = xmlsubs.containerTemplatesTypeSub.factory()
-            self._rootObj.set_containerTemplates(vals)
-        vals.add_image(image)
+        oldImages = self._rootObj.get_containerTemplates()
+        if oldImages is None:
+            oldImages = []
+        else:
+            oldImages = oldImages.get_image() or []
+
+        containerTemplatesNode = xmlsubs.containerTemplatesTypeSub.factory()
+        self._rootObj.set_containerTemplates(containerTemplatesNode)
+
+        self._addCollection(containerTemplatesNode.add_image,
+            oldImages, images, xmlsubs.imageTypeSub, [ 'containerFormat' ])
 
     def clearContainerTemplates(self):
         """
@@ -553,6 +584,9 @@ class BaseDefinition(object):
 
     buildTemplates = property(getBuildTemplates)
 
+    def iterAllBuildTemplates(self):
+        return self.getBuildTemplates()
+
     def getBuildTemplate(self, name, default = -1):
         """
         @param name: build template name
@@ -564,8 +598,7 @@ class BaseDefinition(object):
         @raises C{BuildTemplateNotFoundError}: if build template is not found, and
         no default was specified.
         """
-        buildTemplates = self.getBuildTemplates()
-        for tmpl in buildTemplates:
+        for tmpl in self.iterAllBuildTemplates():
             if tmpl.name == name:
                 return tmpl
         if default != -1:
@@ -588,24 +621,24 @@ class BaseDefinition(object):
         @type flavorSetRef: C{str}
         """
         xmlsubs = self.xmlFactory()
-        # Replace architecture with the same name
-        values = self._rootObj.get_buildTemplates()
-        if values is not None:
-            values = values.get_buildTemplate()
-        nvalues = xmlsubs.buildTemplatesTypeSub.factory()
-        for val in (values or []):
-            # XXX
-            # Don't remove already existing templates, we did not enforce
-            # name uniqueness before
-            #if arch.get_name() == name:
-            #    continue
-            nvalues.add_buildTemplate(val)
         newVal = xmlsubs.buildTemplateTypeSub.factory(name = name,
             displayName = displayName, architectureRef = architectureRef,
             containerTemplateRef = containerTemplateRef,
             flavorSetRef = flavorSetRef)
-        nvalues.add_buildTemplate(newVal)
-        self._rootObj.set_buildTemplates(nvalues)
+        self.addBuildTemplates([ newVal ])
+
+    def addBuildTemplates(self, objList):
+        if not objList:
+            return
+        xmlsubs = self.xmlFactory()
+        buildTemplatesNode = self._rootObj.get_buildTemplates()
+        if buildTemplatesNode is None:
+            buildTemplatesNode = xmlsubs.buildTemplatesTypeSub.factory()
+            self._rootObj.set_buildTemplates(buildTemplatesNode)
+        for obj in objList:
+            if not isinstance(obj, xmlsubs.buildTemplateTypeSub):
+                raise ProductDefinitionError("Unexpected object %s" % obj)
+            buildTemplatesNode.add_buildTemplate(obj)
 
     def clearBuildTemplates(self):
         """
@@ -805,6 +838,41 @@ class BaseDefinition(object):
         setter = getattr(self._rootObj, 'set_%s' % field)
         setter(vals)
         return vals
+
+    @classmethod
+    def _objectToKey(cls, obj, keyList):
+        return tuple(getattr(obj, field) for field in keyList)
+
+    @classmethod
+    def _addCollection(cls, collectorMethod, oldObjects, newObjects,
+            objectClass, keyList):
+        """
+        Generic object de-duplication function
+        Given a sequence of old and new objects, remove items that are
+        duplicated in the old and new list (with keys in keyList), preferring
+        the new objects over the old ones.
+        """
+        uniqueSet = set(cls._objectToKey(x, keyList) for x in newObjects)
+
+        for obj in oldObjects:
+            objKey = cls._objectToKey(obj, keyList)
+            if objKey in uniqueSet:
+                # Either previously defined, or will get overwritten by new obj
+                continue
+            collectorMethod(obj)
+            uniqueSet.add(objKey)
+
+        # Now add the new objects.
+        for obj in newObjects:
+            if not isinstance(obj, objectClass):
+                raise ProductDefinitionError(obj)
+            objKey = cls._objectToKey(obj, keyList)
+            if objKey not in uniqueSet:
+                # We know uniqueSet initially had the key in it; this means
+                # duplicate new values were presented
+                continue
+            collectorMethod(obj)
+            uniqueSet.remove(objKey)
 
 class ProductDefinition(BaseDefinition):
     """
@@ -1374,6 +1442,39 @@ class ProductDefinitionRecipe(PackageRecipe):
         """
         self._rootObj.set_buildDefinition(None)
 
+    def iterAllArchitectures(self):
+        vSet = set()
+        arches = BaseDefinition.iterAllArchitectures(self)
+        platformArches = (self.platform is not None and
+            self.platform.iterAllArchitectures()) or []
+        for arch in itertools.chain(arches, platformArches):
+            if arch.name in vSet:
+                continue
+            vSet.add(arch.name)
+            yield arch
+
+    def iterAllFlavorSets(self):
+        vSet = set()
+        flvSets = BaseDefinition.iterAllFlavorSets(self)
+        platformFlvSets = (self.platform is not None and
+            self.platform.iterAllFlavorSets()) or []
+        for f in itertools.chain(flvSets, platformFlvSets):
+            if f.name in vSet:
+                continue
+            vSet.add(f.name)
+            yield f
+
+    def iterAllContainerTemplates(self):
+        vSet = set()
+        images = BaseDefinition.iterAllContainerTemplates(self)
+        platformImages = (self.platform is not None and
+            self.platform.iterAllContainerTemplates()) or []
+        for ct in itertools.chain(images, platformImages):
+            if ct.containerFormat in vSet:
+                continue
+            vSet.add(ct.name)
+            yield ct
+
     def getPlatformSearchPaths(self):
         """
         @return: the search paths from this product definition
@@ -1758,11 +1859,18 @@ class ProductDefinitionRecipe(PackageRecipe):
         labelSuffix = stageObj.labelSuffix or '' # this can be blank
         return str(prefix + labelSuffix)
 
-    def toPlatformDefinition(self):
-        "Create a PlatformDefinition object from this ProductDefinition"
+    def toPlatformDefinition(self, copyAll = False):
+        """
+        Create a PlatformDefinition object from this ProductDefinition.
+        If copyAll is set to True, all architectures, flavor sets, container
+        templates and build templates are copied from the existing product
+        definition (as well as its platform) into the new platform.
+        Otherwise, only architectures, flavor sets, container templates and
+        build templates referenced from this product's build definitions are
+        copied into the new platform.
+        """
         nplat = PlatformDefinition()
-        baseFlavor = self.getBaseFlavor()
-        nplat.setBaseFlavor(baseFlavor)
+        nplat.setBaseFlavor(self.getBaseFlavor())
 
         # Factory sources defined in the product defintion take precedence
         fSources = self.getFactorySources()
@@ -1775,14 +1883,37 @@ class ProductDefinitionRecipe(PackageRecipe):
         sPathsList = []
         sPathsSet = set()
 
+        archRefs = set()
+        containerTemplateRefs = set()
+        flavorSetRefs = set()
+        buildTemplateRefs = set()
+
         # Iterate over all builds, and add the image group
         for build in self.buildDefinition:
+            archRefs.add(build.architectureRef)
+            containerTemplateRefs.add(build.containerTemplateRef)
+            if build.flavorSetRef is not None:
+                flavorSetRefs.add(build.flavorSetRef)
+            buildTemplateRefs.add((build.architectureRef,
+                build.containerTemplateRef, build.flavorSetRef))
             if not build.imageGroup:
                 continue
             key = (build.imageGroup, label, tuple())
             if key not in sPathsSet:
                 sPathsList.append(key)
                 sPathsSet.add(key)
+
+        if not archRefs or copyAll:
+            # No build definition in the product. Copy everything from current
+            # product
+            archRefs = set(x.name for x in self.iterAllArchitectures())
+            containerTemplateRefs = set(x.containerFormat
+                for x in self.iterAllContainerTemplates())
+            flavorSetRefs = set(x.name for x in self.iterAllFlavorSets())
+            buildTemplateRefs = set(
+                (x.architectureRef, x.containerTemplateRef, x.flavorSetRef)
+                for x in self.iterAllBuildTemplates())
+
         # Append the global image group
         key = (self.getImageGroup(), label, tuple())
         if key not in sPathsSet:
@@ -1809,25 +1940,17 @@ class ProductDefinitionRecipe(PackageRecipe):
         for troveName, label, attrs in sPathsList:
             nplat.addSearchPath(troveName=troveName, label=label, **dict(attrs))
 
-        for arch in self.getArchitectures():
-            nplat.addArchitecture(name = arch.name,
-                    displayName = arch.displayName, flavor = arch.flavor)
+        nplat.addArchitectures([ x for x in self.iterAllArchitectures()
+            if x.name in archRefs ])
+        nplat.addFlavorSets([ x for x in self.iterAllFlavorSets()
+            if x.name in flavorSetRefs ])
+        nplat.addContainerTemplates([x for x in self.iterAllContainerTemplates()
+            if x.containerFormat in containerTemplateRefs])
+        nplat.addBuildTemplates([x for x in self.iterAllBuildTemplates()
+            if (x.architectureRef, x.containerTemplateRef, x.flavorSetRef)
+                in buildTemplateRefs])
 
-        for flvSet in self.getFlavorSets():
-            nplat.addFlavorSet(name = flvSet.name,
-                    displayName = flvSet.displayName, flavor = flvSet.flavor)
-
-        for ctmpl in self.getContainerTemplates():
-            nplat.addContainerTemplate(ctmpl)
-
-        for btmpl in self.getBuildTemplates():
-            nplat.addBuildTemplate(name = btmpl.name,
-                    displayName = btmpl.displayName,
-                    architectureRef = btmpl.architectureRef,
-                    containerTemplateRef = btmpl.containerTemplateRef,
-                    flavorSetRef = btmpl.flavorSetRef,)
-
-        nplat.setPlatformName(self.getPlatformName())
+        nplat.setPlatformName(self.getProductName())
         nplat.setPlatformVersionTrove(self.getPlatformVersionTrove())
 
         for alr in self.getPlatformAutoLoadRecipes():
@@ -1928,11 +2051,9 @@ class ProductDefinitionRecipe(PackageRecipe):
 
         if buildTemplateRef:
             buildTemplate = self.getBuildTemplate(buildTemplateRef, None)
-            if not buildTemplate:
-                buildTemplate = self.getPlatformBuildTemplate(buildTemplateRef)
-            if not architectureRef:
+            if not architectureRef and buildTemplate is not None:
                 architectureRef = buildTemplate.architectureRef
-            if not flavorSetRef:
+            if not flavorSetRef and buildTemplate is not None:
                 flavorSetRef = buildTemplate.flavorSetRef
         if flavorSetRef:
             methods = [ self.getPlatformFlavorSet, self.getFlavorSet ]
