@@ -631,14 +631,18 @@ class BaseDefinition(object):
         if not objList:
             return
         xmlsubs = self.xmlFactory()
-        buildTemplatesNode = self._rootObj.get_buildTemplates()
-        if buildTemplatesNode is None:
-            buildTemplatesNode = xmlsubs.buildTemplatesTypeSub.factory()
-            self._rootObj.set_buildTemplates(buildTemplatesNode)
-        for obj in objList:
-            if not isinstance(obj, xmlsubs.buildTemplateTypeSub):
-                raise ProductDefinitionError("Unexpected object %s" % obj)
-            buildTemplatesNode.add_buildTemplate(obj)
+        oldBuildTemplates = self._rootObj.get_buildTemplates()
+        if oldBuildTemplates is None:
+            oldBuildTemplates = []
+        else:
+            oldBuildTemplates = oldBuildTemplates.get_buildTemplate() or []
+
+        buildTemplatesNode = xmlsubs.buildTemplatesTypeSub.factory()
+        self._rootObj.set_buildTemplates(buildTemplatesNode)
+
+        self._addCollection(buildTemplatesNode.add_buildTemplate,
+            oldBuildTemplates, objList, xmlsubs.buildTemplateTypeSub,
+            ['architectureRef', 'containerTemplateRef', 'flavorSetRef'])
 
     def clearBuildTemplates(self):
         """
