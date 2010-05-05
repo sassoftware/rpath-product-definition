@@ -33,6 +33,7 @@ clean: default-clean
 	rm -f proddef_constants.py
 
 GENERATE_DS=~/hg/generateDS/generateDS.py
+GENERATE_DS_ROOT=$(shell dirname $(GENERATE_DS))
 xmlDir = $(subst .,_,$(patsubst rule-%,xml_%,$(1)))
 xmlVer = $(patsubst rule-%,%,$(1))
 
@@ -52,6 +53,11 @@ rule-%:
                 -s $(call xmlDir,$@)/subs.py \
                 --user-methods=gends_user_methods \
                 ../xsd/rpd-$(call xmlVer,$@).xsd
+	$(GENERATE_DS) --version > gends_version.txt
+	[ -x /usr/bin/hg ] && [ -d "$(GENERATE_DS_ROOT)/.hg" ] \
+		&& ( echo -n "HG: "; hg -R "$(GENERATE_DS_ROOT)" parents --template "{node}\n"; ) \
+			>> gends_version.txt \
+		|| true
 
 install-generate: $(addprefix install-rule-,$(wildcard xml_*))
 
