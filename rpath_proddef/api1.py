@@ -291,6 +291,20 @@ class BaseDefinition(object):
         """
         self._rootObj.set_searchPaths(None)
 
+    def getPlatformInformation(self):
+        """
+        @return: Information about the originating platform.
+        @rtype: C{platformInformationType}
+        """
+        return self._rootObj.platformInformation
+
+    def setPlatformInformation(self, info):
+        """
+        @param info: New upstream platform information.
+        @type  info: C{platformInformationType}
+        """
+        self._rootObj.set_platformInformation(info)
+
     def getFactorySources(self):
         """
         @return: the factory sources from this product definition
@@ -1281,6 +1295,16 @@ class ProductDefinitionRecipe(PackageRecipe):
             return fs
         return self.getPlatformFactorySources()
 
+    def getPlatformInformation(self):
+        """
+        @return: Information about the originating platform.
+        @rtype: C{platformInformationType}
+        """
+        if self._rootObj.platformInformation:
+            return self._rootObj.platformInformation
+        elif self.platform:
+            return self.platform.getPlatformInformation()
+
     def getBuildDefinitions(self):
         """
         @return: The build definitions from this product definition
@@ -1550,6 +1574,25 @@ class ProductDefinitionRecipe(PackageRecipe):
         self._ensurePlatformExists()
         self.platform.setPlatformSourceTrove(sourceTrove)
 
+    def getPlatformSourceLabel(self):
+        """
+        @return: The label on which the platform's source trove resides.
+        @rtype: C{str}
+        """
+        troveSpec = self.getPlatformSourceTrove()
+        if troveSpec:
+            tn, tv, tf = cmdline.parseTroveSpec(troveSpec)
+            if not tv.startswith('/'):
+                tv = "/" + tv
+            verObj = conaryVersions.VersionFromString(tv)
+            if hasattr(verObj, 'trailingLabel'):
+                # Version
+                return str(verObj.trailingLabel())
+            elif hasattr(verObj, 'label'):
+                # Branch
+                return str(verObj.label())
+        return None
+
     def getPlatformUseLatest(self):
         """
         @return: the platform's useLatest flag.
@@ -1760,6 +1803,7 @@ class ProductDefinitionRecipe(PackageRecipe):
 
     def toPlatformDefinition(self):
         "Create a PlatformDefinition object from this ProductDefinition"
+        xmlsubs = self.xmlFactory()
         nplat = PlatformDefinition()
         baseFlavor = self.getBaseFlavor()
         nplat.setBaseFlavor(baseFlavor)
@@ -1833,6 +1877,16 @@ class ProductDefinitionRecipe(PackageRecipe):
         for alr in self.getPlatformAutoLoadRecipes():
             nplat.addAutoLoadRecipe(alr.getTroveName(), alr.getLabel())
 
+        # Platform information is copied from the upstream platform, unless it
+        # does not exist in which case it must be created.
+        upstream = self.getPlatformInformation()
+        if not upstream:
+            originLabel = self.getPlatformSourceLabel()
+            if originLabel:
+                upstream = xmlsubs.platformInformationTypeSub()
+                upstream.set_originLabel(self.getPlatformSourceLabel())
+        nplat.setPlatformInformation(upstream)
+
         return nplat
 
     def savePlatformToRepository(self, client, message = None):
@@ -1858,14 +1912,7 @@ class ProductDefinitionRecipe(PackageRecipe):
             raise ProductDefinitionError("Conflicting arguments useLatest and "
                 "platformVersion specified")
         if label is None:
-            troveSpec = self.getPlatformSourceTrove()
-            if troveSpec:
-                tn, tv, tf = cmdline.parseTroveSpec(troveSpec)
-                if not tv.startswith('/'):
-                    tv = "/" + tv
-                label = str(conaryVersions.VersionFromString(tv).trailingLabel())
-            else:
-                label = None
+            label = self.getPlatformSourceLabel()
         if label is None:
             raise PlatformLabelMissingError()
         nplat = self.toPlatformDefinition()
@@ -2142,6 +2189,7 @@ class BasePlatform(BaseDefinition):
         return self.xmlFactory().contentSourceTypeTypeSub.factory(
             name = name, description = description, isSingleton = isSingleton)
 
+
 class Platform(BasePlatform):
     ClassFactoryName = 'platformTypeSub'
     RootNode = 'platform'
@@ -2188,6 +2236,7 @@ class PlatformDefinition(BasePlatform):
 
     # list of files to search for in the trove, ordered by priority.
     _troveFileNames = [
+        'platform-definition-4.1.xml',
         'platform-definition-4.0.xml',
         'platform-definition.xml',
     ]
@@ -2917,6 +2966,12 @@ class Migrate_31_40(BaseMigration):
     toVersion = '4.0'
     CanMigrateBack = True
 MigrationManager.register(Migrate_31_40)
+
+class Migrate_40_41(BaseMigration):
+    fromVersion = '4.0'
+    toVersion = '4.1'
+    CanMigrateBack = True
+MigrationManager.register(Migrate_40_41)
 
 
 # export all things that do not have a leading underscore and aren't imported
