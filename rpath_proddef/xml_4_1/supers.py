@@ -195,6 +195,195 @@ def _cast(typ, value):
 # Data representation classes.
 #
 
+class nameLabelType(GeneratedsSuper):
+    member_data_items_ = [
+        MemberSpec_('troveName', 'xsd:string', 0),
+        MemberSpec_('label', 'xsd:string', 0),
+        MemberSpec_('valueOf_', [], 0),
+        ]
+    subclass = None
+    superclass = None
+    def __init__(self, troveName=None, label=None, valueOf_=''):
+        self.troveName = _cast(None, troveName)
+        self.label = _cast(None, label)
+        self.valueOf_ = valueOf_
+    def factory(*args_, **kwargs_):
+        if nameLabelType.subclass:
+            return nameLabelType.subclass(*args_, **kwargs_)
+        else:
+            return nameLabelType(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_troveName(self): return self.troveName
+    def set_troveName(self, troveName): self.troveName = troveName
+    def get_label(self): return self.label
+    def set_label(self, label): self.label = label
+    def getValueOf_(self): return self.valueOf_
+    def setValueOf_(self, valueOf_): self.valueOf_ = valueOf_
+    def export(self, outfile, level, namespace_='rpd:', name_='nameLabelType', namespacedef_=''):
+        showIndent(outfile, level)
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        self.exportAttributes(outfile, level, namespace_, name_='nameLabelType')
+        if self.hasContent_():
+            outfile.write('>')
+            self.exportChildren(outfile, level + 1, namespace_, name_)
+            outfile.write('</%s%s>\n' % (namespace_, name_))
+        else:
+            outfile.write('/>\n')
+    def exportAttributes(self, outfile, level, namespace_='rpd:', name_='nameLabelType'):
+        if self.troveName is not None:
+            outfile.write(' troveName=%s' % (self.format_string(quote_attrib(self.troveName).encode(ExternalEncoding), input_name='troveName'), ))
+        if self.label is not None:
+            outfile.write(' label=%s' % (self.format_string(quote_attrib(self.label).encode(ExternalEncoding), input_name='label'), ))
+    def exportChildren(self, outfile, level, namespace_='rpd:', name_='nameLabelType'):
+        if self.valueOf_.find('![CDATA') > -1:
+            value=quote_xml('%s' % self.valueOf_)
+            value=value.replace('![CDATA','<![CDATA')
+            value=value.replace(']]',']]>')
+            outfile.write(value.encode(ExternalEncoding))
+        else:
+            outfile.write(quote_xml('%s' % self.valueOf_.encode(ExternalEncoding)))
+    def hasContent_(self):
+        if (
+            self.valueOf_
+            ):
+            return True
+        else:
+            return False
+    def exportLiteral(self, outfile, level, name_='nameLabelType'):
+        level += 1
+        self.exportLiteralAttributes(outfile, level, name_)
+        if self.hasContent_():
+            self.exportLiteralChildren(outfile, level, name_)
+    def exportLiteralAttributes(self, outfile, level, name_):
+        if self.troveName is not None:
+            showIndent(outfile, level)
+            outfile.write('troveName = "%s",\n' % (self.troveName,))
+        if self.label is not None:
+            showIndent(outfile, level)
+            outfile.write('label = "%s",\n' % (self.label,))
+    def exportLiteralChildren(self, outfile, level, name_):
+        showIndent(outfile, level)
+        outfile.write('valueOf_ = """%s""",\n' % (self.valueOf_,))
+    def build(self, node_):
+        attrs = node_.attributes
+        self.buildAttributes(attrs)
+        self.valueOf_ = ''
+        for child_ in node_.childNodes:
+            nodeName_ = child_.nodeName.split(':')[-1]
+            self.buildChildren(child_, nodeName_)
+    def buildAttributes(self, attrs):
+        if attrs.get('troveName'):
+            self.troveName = attrs.get('troveName').value
+        if attrs.get('label'):
+            self.label = attrs.get('label').value
+    def buildChildren(self, child_, nodeName_):
+        if child_.nodeType == Node.TEXT_NODE:
+            self.valueOf_ += child_.nodeValue
+        elif child_.nodeType == Node.CDATA_SECTION_NODE:
+            self.valueOf_ += '![CDATA['+child_.nodeValue+']]'
+
+    getTroveName = get_troveName
+    getLabel = get_label
+# end class nameLabelType
+
+
+class nameFlavorType(GeneratedsSuper):
+    member_data_items_ = [
+        MemberSpec_('flavor', 'xsd:string', 0),
+        MemberSpec_('displayName', 'xsd:string', 0),
+        MemberSpec_('name', 'xsd:string', 0),
+        MemberSpec_('valueOf_', [], 0),
+        ]
+    subclass = None
+    superclass = None
+    def __init__(self, flavor=None, displayName=None, name=None, valueOf_=''):
+        self.flavor = _cast(None, flavor)
+        self.displayName = _cast(None, displayName)
+        self.name = _cast(None, name)
+        self.valueOf_ = valueOf_
+    def factory(*args_, **kwargs_):
+        if nameFlavorType.subclass:
+            return nameFlavorType.subclass(*args_, **kwargs_)
+        else:
+            return nameFlavorType(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_flavor(self): return self.flavor
+    def set_flavor(self, flavor): self.flavor = flavor
+    def get_displayName(self): return self.displayName
+    def set_displayName(self, displayName): self.displayName = displayName
+    def get_name(self): return self.name
+    def set_name(self, name): self.name = name
+    def getValueOf_(self): return self.valueOf_
+    def setValueOf_(self, valueOf_): self.valueOf_ = valueOf_
+    def export(self, outfile, level, namespace_='rpd:', name_='nameFlavorType', namespacedef_=''):
+        showIndent(outfile, level)
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        self.exportAttributes(outfile, level, namespace_, name_='nameFlavorType')
+        if self.hasContent_():
+            outfile.write('>')
+            self.exportChildren(outfile, level + 1, namespace_, name_)
+            outfile.write('</%s%s>\n' % (namespace_, name_))
+        else:
+            outfile.write('/>\n')
+    def exportAttributes(self, outfile, level, namespace_='rpd:', name_='nameFlavorType'):
+        outfile.write(' flavor=%s' % (self.format_string(quote_attrib(self.flavor).encode(ExternalEncoding), input_name='flavor'), ))
+        outfile.write(' displayName=%s' % (self.format_string(quote_attrib(self.displayName).encode(ExternalEncoding), input_name='displayName'), ))
+        outfile.write(' name=%s' % (self.format_string(quote_attrib(self.name).encode(ExternalEncoding), input_name='name'), ))
+    def exportChildren(self, outfile, level, namespace_='rpd:', name_='nameFlavorType'):
+        if self.valueOf_.find('![CDATA') > -1:
+            value=quote_xml('%s' % self.valueOf_)
+            value=value.replace('![CDATA','<![CDATA')
+            value=value.replace(']]',']]>')
+            outfile.write(value.encode(ExternalEncoding))
+        else:
+            outfile.write(quote_xml('%s' % self.valueOf_.encode(ExternalEncoding)))
+    def hasContent_(self):
+        if (
+            self.valueOf_
+            ):
+            return True
+        else:
+            return False
+    def exportLiteral(self, outfile, level, name_='nameFlavorType'):
+        level += 1
+        self.exportLiteralAttributes(outfile, level, name_)
+        if self.hasContent_():
+            self.exportLiteralChildren(outfile, level, name_)
+    def exportLiteralAttributes(self, outfile, level, name_):
+        if self.flavor is not None:
+            showIndent(outfile, level)
+            outfile.write('flavor = "%s",\n' % (self.flavor,))
+        if self.displayName is not None:
+            showIndent(outfile, level)
+            outfile.write('displayName = "%s",\n' % (self.displayName,))
+        if self.name is not None:
+            showIndent(outfile, level)
+            outfile.write('name = "%s",\n' % (self.name,))
+    def exportLiteralChildren(self, outfile, level, name_):
+        showIndent(outfile, level)
+        outfile.write('valueOf_ = """%s""",\n' % (self.valueOf_,))
+    def build(self, node_):
+        attrs = node_.attributes
+        self.buildAttributes(attrs)
+        self.valueOf_ = ''
+        for child_ in node_.childNodes:
+            nodeName_ = child_.nodeName.split(':')[-1]
+            self.buildChildren(child_, nodeName_)
+    def buildAttributes(self, attrs):
+        if attrs.get('flavor'):
+            self.flavor = attrs.get('flavor').value
+        if attrs.get('displayName'):
+            self.displayName = attrs.get('displayName').value
+        if attrs.get('name'):
+            self.name = attrs.get('name').value
+    def buildChildren(self, child_, nodeName_):
+        if child_.nodeType == Node.TEXT_NODE:
+            self.valueOf_ += child_.nodeValue
+        elif child_.nodeType == Node.CDATA_SECTION_NODE:
+            self.valueOf_ += '![CDATA['+child_.nodeValue+']]'
+# end class nameFlavorType
+
+
 class stageType(GeneratedsSuper):
     member_data_items_ = [
         MemberSpec_('labelSuffix', 'xsd:string', 0),
@@ -369,115 +558,25 @@ class stageListType(GeneratedsSuper):
 # end class stageListType
 
 
-class nameLabelType(GeneratedsSuper):
-    member_data_items_ = [
-        MemberSpec_('troveName', 'xsd:string', 0),
-        MemberSpec_('label', 'xsd:string', 0),
-        MemberSpec_('valueOf_', [], 0),
-        ]
-    subclass = None
-    superclass = None
-    def __init__(self, troveName=None, label=None, valueOf_=''):
-        self.troveName = _cast(None, troveName)
-        self.label = _cast(None, label)
-        self.valueOf_ = valueOf_
-    def factory(*args_, **kwargs_):
-        if nameLabelType.subclass:
-            return nameLabelType.subclass(*args_, **kwargs_)
-        else:
-            return nameLabelType(*args_, **kwargs_)
-    factory = staticmethod(factory)
-    def get_troveName(self): return self.troveName
-    def set_troveName(self, troveName): self.troveName = troveName
-    def get_label(self): return self.label
-    def set_label(self, label): self.label = label
-    def getValueOf_(self): return self.valueOf_
-    def setValueOf_(self, valueOf_): self.valueOf_ = valueOf_
-    def export(self, outfile, level, namespace_='rpd:', name_='nameLabelType', namespacedef_=''):
-        showIndent(outfile, level)
-        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
-        self.exportAttributes(outfile, level, namespace_, name_='nameLabelType')
-        if self.hasContent_():
-            outfile.write('>')
-            self.exportChildren(outfile, level + 1, namespace_, name_)
-            outfile.write('</%s%s>\n' % (namespace_, name_))
-        else:
-            outfile.write('/>\n')
-    def exportAttributes(self, outfile, level, namespace_='rpd:', name_='nameLabelType'):
-        if self.troveName is not None:
-            outfile.write(' troveName=%s' % (self.format_string(quote_attrib(self.troveName).encode(ExternalEncoding), input_name='troveName'), ))
-        if self.label is not None:
-            outfile.write(' label=%s' % (self.format_string(quote_attrib(self.label).encode(ExternalEncoding), input_name='label'), ))
-    def exportChildren(self, outfile, level, namespace_='rpd:', name_='nameLabelType'):
-        if self.valueOf_.find('![CDATA') > -1:
-            value=quote_xml('%s' % self.valueOf_)
-            value=value.replace('![CDATA','<![CDATA')
-            value=value.replace(']]',']]>')
-            outfile.write(value.encode(ExternalEncoding))
-        else:
-            outfile.write(quote_xml('%s' % self.valueOf_.encode(ExternalEncoding)))
-    def hasContent_(self):
-        if (
-            self.valueOf_
-            ):
-            return True
-        else:
-            return False
-    def exportLiteral(self, outfile, level, name_='nameLabelType'):
-        level += 1
-        self.exportLiteralAttributes(outfile, level, name_)
-        if self.hasContent_():
-            self.exportLiteralChildren(outfile, level, name_)
-    def exportLiteralAttributes(self, outfile, level, name_):
-        if self.troveName is not None:
-            showIndent(outfile, level)
-            outfile.write('troveName = "%s",\n' % (self.troveName,))
-        if self.label is not None:
-            showIndent(outfile, level)
-            outfile.write('label = "%s",\n' % (self.label,))
-    def exportLiteralChildren(self, outfile, level, name_):
-        showIndent(outfile, level)
-        outfile.write('valueOf_ = """%s""",\n' % (self.valueOf_,))
-    def build(self, node_):
-        attrs = node_.attributes
-        self.buildAttributes(attrs)
-        self.valueOf_ = ''
-        for child_ in node_.childNodes:
-            nodeName_ = child_.nodeName.split(':')[-1]
-            self.buildChildren(child_, nodeName_)
-    def buildAttributes(self, attrs):
-        if attrs.get('troveName'):
-            self.troveName = attrs.get('troveName').value
-        if attrs.get('label'):
-            self.label = attrs.get('label').value
-    def buildChildren(self, child_, nodeName_):
-        if child_.nodeType == Node.TEXT_NODE:
-            self.valueOf_ += child_.nodeValue
-        elif child_.nodeType == Node.CDATA_SECTION_NODE:
-            self.valueOf_ += '![CDATA['+child_.nodeValue+']]'
-
-    getTroveName = get_troveName
-    getLabel = get_label
-# end class nameLabelType
-
-
 class searchPathType(GeneratedsSuper):
     member_data_items_ = [
-        MemberSpec_('isGroupSearchPathTrove', 'xsd:boolean', 0),
+        MemberSpec_('isPlatformTrove', 'xsd:boolean', 0),
+        MemberSpec_('label', 'xsd:string', 0),
         MemberSpec_('troveName', 'xsd:string', 0),
         MemberSpec_('version', 'xsd:string', 0),
+        MemberSpec_('isGroupSearchPathTrove', 'xsd:boolean', 0),
         MemberSpec_('isResolveTrove', 'xsd:boolean', 0),
-        MemberSpec_('label', 'xsd:string', 0),
         MemberSpec_('valueOf_', [], 0),
         ]
     subclass = None
     superclass = None
-    def __init__(self, isGroupSearchPathTrove=None, troveName=None, version=None, isResolveTrove=None, label=None, valueOf_=''):
-        self.isGroupSearchPathTrove = _cast(bool, isGroupSearchPathTrove)
+    def __init__(self, isPlatformTrove=None, label=None, troveName=None, version=None, isGroupSearchPathTrove=None, isResolveTrove=None, valueOf_=''):
+        self.isPlatformTrove = _cast(bool, isPlatformTrove)
+        self.label = _cast(None, label)
         self.troveName = _cast(None, troveName)
         self.version = _cast(None, version)
+        self.isGroupSearchPathTrove = _cast(bool, isGroupSearchPathTrove)
         self.isResolveTrove = _cast(bool, isResolveTrove)
-        self.label = _cast(None, label)
         self.valueOf_ = valueOf_
     def factory(*args_, **kwargs_):
         if searchPathType.subclass:
@@ -485,16 +584,18 @@ class searchPathType(GeneratedsSuper):
         else:
             return searchPathType(*args_, **kwargs_)
     factory = staticmethod(factory)
-    def get_isGroupSearchPathTrove(self): return self.isGroupSearchPathTrove
-    def set_isGroupSearchPathTrove(self, isGroupSearchPathTrove): self.isGroupSearchPathTrove = isGroupSearchPathTrove
+    def get_isPlatformTrove(self): return self.isPlatformTrove
+    def set_isPlatformTrove(self, isPlatformTrove): self.isPlatformTrove = isPlatformTrove
+    def get_label(self): return self.label
+    def set_label(self, label): self.label = label
     def get_troveName(self): return self.troveName
     def set_troveName(self, troveName): self.troveName = troveName
     def get_version(self): return self.version
     def set_version(self, version): self.version = version
+    def get_isGroupSearchPathTrove(self): return self.isGroupSearchPathTrove
+    def set_isGroupSearchPathTrove(self, isGroupSearchPathTrove): self.isGroupSearchPathTrove = isGroupSearchPathTrove
     def get_isResolveTrove(self): return self.isResolveTrove
     def set_isResolveTrove(self, isResolveTrove): self.isResolveTrove = isResolveTrove
-    def get_label(self): return self.label
-    def set_label(self, label): self.label = label
     def getValueOf_(self): return self.valueOf_
     def setValueOf_(self, valueOf_): self.valueOf_ = valueOf_
     def export(self, outfile, level, namespace_='rpd:', name_='searchPathType', namespacedef_=''):
@@ -508,16 +609,18 @@ class searchPathType(GeneratedsSuper):
         else:
             outfile.write('/>\n')
     def exportAttributes(self, outfile, level, namespace_='rpd:', name_='searchPathType'):
-        if self.isGroupSearchPathTrove is not None:
-            outfile.write(' isGroupSearchPathTrove="%s"' % self.format_boolean(str_lower(str(self.isGroupSearchPathTrove)), input_name='isGroupSearchPathTrove'))
+        if self.isPlatformTrove is not None:
+            outfile.write(' isPlatformTrove="%s"' % self.format_boolean(str_lower(str(self.isPlatformTrove)), input_name='isPlatformTrove'))
+        if self.label is not None:
+            outfile.write(' label=%s' % (self.format_string(quote_attrib(self.label).encode(ExternalEncoding), input_name='label'), ))
         if self.troveName is not None:
             outfile.write(' troveName=%s' % (self.format_string(quote_attrib(self.troveName).encode(ExternalEncoding), input_name='troveName'), ))
         if self.version is not None:
             outfile.write(' version=%s' % (self.format_string(quote_attrib(self.version).encode(ExternalEncoding), input_name='version'), ))
+        if self.isGroupSearchPathTrove is not None:
+            outfile.write(' isGroupSearchPathTrove="%s"' % self.format_boolean(str_lower(str(self.isGroupSearchPathTrove)), input_name='isGroupSearchPathTrove'))
         if self.isResolveTrove is not None:
             outfile.write(' isResolveTrove="%s"' % self.format_boolean(str_lower(str(self.isResolveTrove)), input_name='isResolveTrove'))
-        if self.label is not None:
-            outfile.write(' label=%s' % (self.format_string(quote_attrib(self.label).encode(ExternalEncoding), input_name='label'), ))
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='searchPathType'):
         if self.valueOf_.find('![CDATA') > -1:
             value=quote_xml('%s' % self.valueOf_)
@@ -539,21 +642,24 @@ class searchPathType(GeneratedsSuper):
         if self.hasContent_():
             self.exportLiteralChildren(outfile, level, name_)
     def exportLiteralAttributes(self, outfile, level, name_):
-        if self.isGroupSearchPathTrove is not None:
+        if self.isPlatformTrove is not None:
             showIndent(outfile, level)
-            outfile.write('isGroupSearchPathTrove = %s,\n' % (self.isGroupSearchPathTrove,))
+            outfile.write('isPlatformTrove = %s,\n' % (self.isPlatformTrove,))
+        if self.label is not None:
+            showIndent(outfile, level)
+            outfile.write('label = "%s",\n' % (self.label,))
         if self.troveName is not None:
             showIndent(outfile, level)
             outfile.write('troveName = "%s",\n' % (self.troveName,))
         if self.version is not None:
             showIndent(outfile, level)
             outfile.write('version = "%s",\n' % (self.version,))
+        if self.isGroupSearchPathTrove is not None:
+            showIndent(outfile, level)
+            outfile.write('isGroupSearchPathTrove = %s,\n' % (self.isGroupSearchPathTrove,))
         if self.isResolveTrove is not None:
             showIndent(outfile, level)
             outfile.write('isResolveTrove = %s,\n' % (self.isResolveTrove,))
-        if self.label is not None:
-            showIndent(outfile, level)
-            outfile.write('label = "%s",\n' % (self.label,))
     def exportLiteralChildren(self, outfile, level, name_):
         showIndent(outfile, level)
         outfile.write('valueOf_ = """%s""",\n' % (self.valueOf_,))
@@ -565,6 +671,19 @@ class searchPathType(GeneratedsSuper):
             nodeName_ = child_.nodeName.split(':')[-1]
             self.buildChildren(child_, nodeName_)
     def buildAttributes(self, attrs):
+        if attrs.get('isPlatformTrove'):
+            if attrs.get('isPlatformTrove').value in ('true', '1'):
+                self.isPlatformTrove = True
+            elif attrs.get('isPlatformTrove').value in ('false', '0'):
+                self.isPlatformTrove = False
+            else:
+                raise ValueError('Bad boolean attribute (isPlatformTrove)')
+        if attrs.get('label'):
+            self.label = attrs.get('label').value
+        if attrs.get('troveName'):
+            self.troveName = attrs.get('troveName').value
+        if attrs.get('version'):
+            self.version = attrs.get('version').value
         if attrs.get('isGroupSearchPathTrove'):
             if attrs.get('isGroupSearchPathTrove').value in ('true', '1'):
                 self.isGroupSearchPathTrove = True
@@ -572,10 +691,6 @@ class searchPathType(GeneratedsSuper):
                 self.isGroupSearchPathTrove = False
             else:
                 raise ValueError('Bad boolean attribute (isGroupSearchPathTrove)')
-        if attrs.get('troveName'):
-            self.troveName = attrs.get('troveName').value
-        if attrs.get('version'):
-            self.version = attrs.get('version').value
         if attrs.get('isResolveTrove'):
             if attrs.get('isResolveTrove').value in ('true', '1'):
                 self.isResolveTrove = True
@@ -583,8 +698,6 @@ class searchPathType(GeneratedsSuper):
                 self.isResolveTrove = False
             else:
                 raise ValueError('Bad boolean attribute (isResolveTrove)')
-        if attrs.get('label'):
-            self.label = attrs.get('label').value
     def buildChildren(self, child_, nodeName_):
         if child_.nodeType == Node.TEXT_NODE:
             self.valueOf_ += child_.nodeValue
@@ -1953,637 +2066,6 @@ class promoteMapType(GeneratedsSuper):
 # end class promoteMapType
 
 
-class platformDefinitionType(GeneratedsSuper):
-    member_data_items_ = [
-        MemberSpec_('version', 'xsd:string', 0),
-        MemberSpec_('platformName', 'xsd:string', 0),
-        MemberSpec_('platformVersionTrove', 'xsd:string', 0),
-        MemberSpec_('baseFlavor', ['flavorStringType', 'xsd:string'], 0),
-        MemberSpec_('searchPaths', 'searchPathListType', 0),
-        MemberSpec_('factorySources', 'factorySourceListType', 0),
-        MemberSpec_('autoLoadRecipes', 'autoLoadRecipesType', 0),
-        MemberSpec_('secondaryLabels', 'secondaryLabelsType', 0),
-        MemberSpec_('architectures', 'architecturesType', 0),
-        MemberSpec_('flavorSets', 'flavorSetsType', 0),
-        MemberSpec_('containerTemplates', 'containerTemplatesType', 0),
-        MemberSpec_('buildTemplates', 'buildTemplatesType', 0),
-        ]
-    subclass = None
-    superclass = None
-    def __init__(self, version=None, platformName=None, platformVersionTrove=None, baseFlavor=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None):
-        self.version = _cast(None, version)
-        self.platformName = platformName
-        self.platformVersionTrove = platformVersionTrove
-        self.baseFlavor = baseFlavor
-        self.searchPaths = searchPaths
-        self.factorySources = factorySources
-        self.autoLoadRecipes = autoLoadRecipes
-        self.secondaryLabels = secondaryLabels
-        self.architectures = architectures
-        self.flavorSets = flavorSets
-        self.containerTemplates = containerTemplates
-        self.buildTemplates = buildTemplates
-    def factory(*args_, **kwargs_):
-        if platformDefinitionType.subclass:
-            return platformDefinitionType.subclass(*args_, **kwargs_)
-        else:
-            return platformDefinitionType(*args_, **kwargs_)
-    factory = staticmethod(factory)
-    def get_platformName(self): return self.platformName
-    def set_platformName(self, platformName): self.platformName = platformName
-    def get_platformVersionTrove(self): return self.platformVersionTrove
-    def set_platformVersionTrove(self, platformVersionTrove): self.platformVersionTrove = platformVersionTrove
-    def get_baseFlavor(self): return self.baseFlavor
-    def set_baseFlavor(self, baseFlavor): self.baseFlavor = baseFlavor
-    def validate_baseFlavor(self, value):
-        # validate type baseFlavor
-        pass
-    def get_searchPaths(self): return self.searchPaths
-    def set_searchPaths(self, searchPaths): self.searchPaths = searchPaths
-    def get_factorySources(self): return self.factorySources
-    def set_factorySources(self, factorySources): self.factorySources = factorySources
-    def get_autoLoadRecipes(self): return self.autoLoadRecipes
-    def set_autoLoadRecipes(self, autoLoadRecipes): self.autoLoadRecipes = autoLoadRecipes
-    def get_secondaryLabels(self): return self.secondaryLabels
-    def set_secondaryLabels(self, secondaryLabels): self.secondaryLabels = secondaryLabels
-    def get_architectures(self): return self.architectures
-    def set_architectures(self, architectures): self.architectures = architectures
-    def get_flavorSets(self): return self.flavorSets
-    def set_flavorSets(self, flavorSets): self.flavorSets = flavorSets
-    def get_containerTemplates(self): return self.containerTemplates
-    def set_containerTemplates(self, containerTemplates): self.containerTemplates = containerTemplates
-    def get_buildTemplates(self): return self.buildTemplates
-    def set_buildTemplates(self, buildTemplates): self.buildTemplates = buildTemplates
-    def get_version(self): return self.version
-    def set_version(self, version): self.version = version
-    def export(self, outfile, level, namespace_='rpd:', name_='platformDefinitionType', namespacedef_=''):
-        showIndent(outfile, level)
-        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
-        self.exportAttributes(outfile, level, namespace_, name_='platformDefinitionType')
-        if self.hasContent_():
-            outfile.write('>\n')
-            self.exportChildren(outfile, level + 1, namespace_, name_)
-            showIndent(outfile, level)
-            outfile.write('</%s%s>\n' % (namespace_, name_))
-        else:
-            outfile.write('/>\n')
-    def exportAttributes(self, outfile, level, namespace_='rpd:', name_='platformDefinitionType'):
-        if self.version is not None:
-            outfile.write(' version=%s' % (self.format_string(quote_attrib(self.version).encode(ExternalEncoding), input_name='version'), ))
-    def exportChildren(self, outfile, level, namespace_='rpd:', name_='platformDefinitionType'):
-        if self.platformName is not None:
-            showIndent(outfile, level)
-            outfile.write('<%splatformName>%s</%splatformName>\n' % (namespace_, self.format_string(quote_xml(self.platformName).encode(ExternalEncoding), input_name='platformName'), namespace_))
-        if self.platformVersionTrove is not None:
-            showIndent(outfile, level)
-            outfile.write('<%splatformVersionTrove>%s</%splatformVersionTrove>\n' % (namespace_, self.format_string(quote_xml(self.platformVersionTrove).encode(ExternalEncoding), input_name='platformVersionTrove'), namespace_))
-        if self.baseFlavor is not None:
-            showIndent(outfile, level)
-            outfile.write('<%sbaseFlavor>%s</%sbaseFlavor>\n' % (namespace_, self.format_string(quote_xml(self.baseFlavor).encode(ExternalEncoding), input_name='baseFlavor'), namespace_))
-        if self.searchPaths:
-            self.searchPaths.export(outfile, level, namespace_, name_='searchPaths')
-        if self.factorySources:
-            self.factorySources.export(outfile, level, namespace_, name_='factorySources')
-        if self.autoLoadRecipes:
-            self.autoLoadRecipes.export(outfile, level, namespace_, name_='autoLoadRecipes')
-        if self.secondaryLabels:
-            self.secondaryLabels.export(outfile, level, namespace_, name_='secondaryLabels')
-        if self.architectures:
-            self.architectures.export(outfile, level, namespace_, name_='architectures')
-        if self.flavorSets:
-            self.flavorSets.export(outfile, level, namespace_, name_='flavorSets')
-        if self.containerTemplates:
-            self.containerTemplates.export(outfile, level, namespace_, name_='containerTemplates')
-        if self.buildTemplates:
-            self.buildTemplates.export(outfile, level, namespace_, name_='buildTemplates')
-    def hasContent_(self):
-        if (
-            self.platformName is not None or
-            self.platformVersionTrove is not None or
-            self.baseFlavor is not None or
-            self.searchPaths is not None or
-            self.factorySources is not None or
-            self.autoLoadRecipes is not None or
-            self.secondaryLabels is not None or
-            self.architectures is not None or
-            self.flavorSets is not None or
-            self.containerTemplates is not None or
-            self.buildTemplates is not None
-            ):
-            return True
-        else:
-            return False
-    def exportLiteral(self, outfile, level, name_='platformDefinitionType'):
-        level += 1
-        self.exportLiteralAttributes(outfile, level, name_)
-        if self.hasContent_():
-            self.exportLiteralChildren(outfile, level, name_)
-    def exportLiteralAttributes(self, outfile, level, name_):
-        if self.version is not None:
-            showIndent(outfile, level)
-            outfile.write('version = "%s",\n' % (self.version,))
-    def exportLiteralChildren(self, outfile, level, name_):
-        if self.platformName is not None:
-            showIndent(outfile, level)
-            outfile.write('platformName=%s,\n' % quote_python(self.platformName).encode(ExternalEncoding))
-        if self.platformVersionTrove is not None:
-            showIndent(outfile, level)
-            outfile.write('platformVersionTrove=%s,\n' % quote_python(self.platformVersionTrove).encode(ExternalEncoding))
-        if self.baseFlavor is not None:
-            showIndent(outfile, level)
-            outfile.write('baseFlavor=%s,\n' % quote_python(self.baseFlavor).encode(ExternalEncoding))
-        if self.searchPaths is not None:
-            showIndent(outfile, level)
-            outfile.write('searchPaths=model_.searchPathListType(\n')
-            self.searchPaths.exportLiteral(outfile, level, name_='searchPaths')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        if self.factorySources is not None:
-            showIndent(outfile, level)
-            outfile.write('factorySources=model_.factorySourceListType(\n')
-            self.factorySources.exportLiteral(outfile, level, name_='factorySources')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        if self.autoLoadRecipes is not None:
-            showIndent(outfile, level)
-            outfile.write('autoLoadRecipes=model_.autoLoadRecipesType(\n')
-            self.autoLoadRecipes.exportLiteral(outfile, level, name_='autoLoadRecipes')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        if self.secondaryLabels is not None:
-            showIndent(outfile, level)
-            outfile.write('secondaryLabels=model_.secondaryLabelsType(\n')
-            self.secondaryLabels.exportLiteral(outfile, level, name_='secondaryLabels')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        if self.architectures is not None:
-            showIndent(outfile, level)
-            outfile.write('architectures=model_.architecturesType(\n')
-            self.architectures.exportLiteral(outfile, level, name_='architectures')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        if self.flavorSets is not None:
-            showIndent(outfile, level)
-            outfile.write('flavorSets=model_.flavorSetsType(\n')
-            self.flavorSets.exportLiteral(outfile, level, name_='flavorSets')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        if self.containerTemplates is not None:
-            showIndent(outfile, level)
-            outfile.write('containerTemplates=model_.containerTemplatesType(\n')
-            self.containerTemplates.exportLiteral(outfile, level, name_='containerTemplates')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        if self.buildTemplates is not None:
-            showIndent(outfile, level)
-            outfile.write('buildTemplates=model_.buildTemplatesType(\n')
-            self.buildTemplates.exportLiteral(outfile, level, name_='buildTemplates')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-    def build(self, node_):
-        attrs = node_.attributes
-        self.buildAttributes(attrs)
-        for child_ in node_.childNodes:
-            nodeName_ = child_.nodeName.split(':')[-1]
-            self.buildChildren(child_, nodeName_)
-    def buildAttributes(self, attrs):
-        if attrs.get('version'):
-            self.version = attrs.get('version').value
-    def buildChildren(self, child_, nodeName_):
-        if child_.nodeType == Node.ELEMENT_NODE and \
-            nodeName_ == 'platformName':
-            platformName_ = ''
-            for text__content_ in child_.childNodes:
-                platformName_ += text__content_.nodeValue
-            self.platformName = platformName_
-        elif child_.nodeType == Node.ELEMENT_NODE and \
-            nodeName_ == 'platformVersionTrove':
-            platformVersionTrove_ = ''
-            for text__content_ in child_.childNodes:
-                platformVersionTrove_ += text__content_.nodeValue
-            self.platformVersionTrove = platformVersionTrove_
-        elif child_.nodeType == Node.ELEMENT_NODE and \
-            nodeName_ == 'baseFlavor':
-            baseFlavor_ = ''
-            for text__content_ in child_.childNodes:
-                baseFlavor_ += text__content_.nodeValue
-            self.baseFlavor = baseFlavor_
-            self.validate_baseFlavor(self.baseFlavor)    # validate type baseFlavor
-        elif child_.nodeType == Node.ELEMENT_NODE and \
-            nodeName_ == 'searchPaths':
-            obj_ = searchPathListType.factory()
-            obj_.build(child_)
-            self.set_searchPaths(obj_)
-        elif child_.nodeType == Node.ELEMENT_NODE and \
-            nodeName_ == 'factorySources':
-            obj_ = factorySourceListType.factory()
-            obj_.build(child_)
-            self.set_factorySources(obj_)
-        elif child_.nodeType == Node.ELEMENT_NODE and \
-            nodeName_ == 'autoLoadRecipes':
-            obj_ = autoLoadRecipesType.factory()
-            obj_.build(child_)
-            self.set_autoLoadRecipes(obj_)
-        elif child_.nodeType == Node.ELEMENT_NODE and \
-            nodeName_ == 'secondaryLabels':
-            obj_ = secondaryLabelsType.factory()
-            obj_.build(child_)
-            self.set_secondaryLabels(obj_)
-        elif child_.nodeType == Node.ELEMENT_NODE and \
-            nodeName_ == 'architectures':
-            obj_ = architecturesType.factory()
-            obj_.build(child_)
-            self.set_architectures(obj_)
-        elif child_.nodeType == Node.ELEMENT_NODE and \
-            nodeName_ == 'flavorSets':
-            obj_ = flavorSetsType.factory()
-            obj_.build(child_)
-            self.set_flavorSets(obj_)
-        elif child_.nodeType == Node.ELEMENT_NODE and \
-            nodeName_ == 'containerTemplates':
-            obj_ = containerTemplatesType.factory()
-            obj_.build(child_)
-            self.set_containerTemplates(obj_)
-        elif child_.nodeType == Node.ELEMENT_NODE and \
-            nodeName_ == 'buildTemplates':
-            obj_ = buildTemplatesType.factory()
-            obj_.build(child_)
-            self.set_buildTemplates(obj_)
-# end class platformDefinitionType
-
-
-class platformType(GeneratedsSuper):
-    member_data_items_ = [
-        MemberSpec_('sourceTrove', 'xsd:string', 0),
-        MemberSpec_('useLatest', 'xsd:boolean', 0),
-        MemberSpec_('platformName', 'xsd:string', 0),
-        MemberSpec_('platformVersionTrove', 'xsd:string', 0),
-        MemberSpec_('baseFlavor', ['flavorStringType', 'xsd:string'], 0),
-        MemberSpec_('searchPaths', 'searchPathListType', 0),
-        MemberSpec_('factorySources', 'factorySourceListType', 0),
-        MemberSpec_('autoLoadRecipes', 'autoLoadRecipesType', 0),
-        MemberSpec_('secondaryLabels', 'secondaryLabelsType', 0),
-        MemberSpec_('architectures', 'architecturesType', 0),
-        MemberSpec_('flavorSets', 'flavorSetsType', 0),
-        MemberSpec_('containerTemplates', 'containerTemplatesType', 0),
-        MemberSpec_('buildTemplates', 'buildTemplatesType', 0),
-        ]
-    subclass = None
-    superclass = None
-    def __init__(self, sourceTrove=None, useLatest=None, platformName=None, platformVersionTrove=None, baseFlavor=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None):
-        self.sourceTrove = _cast(None, sourceTrove)
-        self.useLatest = _cast(bool, useLatest)
-        self.platformName = platformName
-        self.platformVersionTrove = platformVersionTrove
-        self.baseFlavor = baseFlavor
-        self.searchPaths = searchPaths
-        self.factorySources = factorySources
-        self.autoLoadRecipes = autoLoadRecipes
-        self.secondaryLabels = secondaryLabels
-        self.architectures = architectures
-        self.flavorSets = flavorSets
-        self.containerTemplates = containerTemplates
-        self.buildTemplates = buildTemplates
-    def factory(*args_, **kwargs_):
-        if platformType.subclass:
-            return platformType.subclass(*args_, **kwargs_)
-        else:
-            return platformType(*args_, **kwargs_)
-    factory = staticmethod(factory)
-    def get_platformName(self): return self.platformName
-    def set_platformName(self, platformName): self.platformName = platformName
-    def get_platformVersionTrove(self): return self.platformVersionTrove
-    def set_platformVersionTrove(self, platformVersionTrove): self.platformVersionTrove = platformVersionTrove
-    def get_baseFlavor(self): return self.baseFlavor
-    def set_baseFlavor(self, baseFlavor): self.baseFlavor = baseFlavor
-    def validate_baseFlavor(self, value):
-        # validate type baseFlavor
-        pass
-    def get_searchPaths(self): return self.searchPaths
-    def set_searchPaths(self, searchPaths): self.searchPaths = searchPaths
-    def get_factorySources(self): return self.factorySources
-    def set_factorySources(self, factorySources): self.factorySources = factorySources
-    def get_autoLoadRecipes(self): return self.autoLoadRecipes
-    def set_autoLoadRecipes(self, autoLoadRecipes): self.autoLoadRecipes = autoLoadRecipes
-    def get_secondaryLabels(self): return self.secondaryLabels
-    def set_secondaryLabels(self, secondaryLabels): self.secondaryLabels = secondaryLabels
-    def get_architectures(self): return self.architectures
-    def set_architectures(self, architectures): self.architectures = architectures
-    def get_flavorSets(self): return self.flavorSets
-    def set_flavorSets(self, flavorSets): self.flavorSets = flavorSets
-    def get_containerTemplates(self): return self.containerTemplates
-    def set_containerTemplates(self, containerTemplates): self.containerTemplates = containerTemplates
-    def get_buildTemplates(self): return self.buildTemplates
-    def set_buildTemplates(self, buildTemplates): self.buildTemplates = buildTemplates
-    def get_sourceTrove(self): return self.sourceTrove
-    def set_sourceTrove(self, sourceTrove): self.sourceTrove = sourceTrove
-    def get_useLatest(self): return self.useLatest
-    def set_useLatest(self, useLatest): self.useLatest = useLatest
-    def export(self, outfile, level, namespace_='rpd:', name_='platformType', namespacedef_=''):
-        showIndent(outfile, level)
-        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
-        self.exportAttributes(outfile, level, namespace_, name_='platformType')
-        if self.hasContent_():
-            outfile.write('>\n')
-            self.exportChildren(outfile, level + 1, namespace_, name_)
-            showIndent(outfile, level)
-            outfile.write('</%s%s>\n' % (namespace_, name_))
-        else:
-            outfile.write('/>\n')
-    def exportAttributes(self, outfile, level, namespace_='rpd:', name_='platformType'):
-        if self.sourceTrove is not None:
-            outfile.write(' sourceTrove=%s' % (self.format_string(quote_attrib(self.sourceTrove).encode(ExternalEncoding), input_name='sourceTrove'), ))
-        if self.useLatest is not None:
-            outfile.write(' useLatest="%s"' % self.format_boolean(str_lower(str(self.useLatest)), input_name='useLatest'))
-    def exportChildren(self, outfile, level, namespace_='rpd:', name_='platformType'):
-        if self.platformName is not None:
-            showIndent(outfile, level)
-            outfile.write('<%splatformName>%s</%splatformName>\n' % (namespace_, self.format_string(quote_xml(self.platformName).encode(ExternalEncoding), input_name='platformName'), namespace_))
-        if self.platformVersionTrove is not None:
-            showIndent(outfile, level)
-            outfile.write('<%splatformVersionTrove>%s</%splatformVersionTrove>\n' % (namespace_, self.format_string(quote_xml(self.platformVersionTrove).encode(ExternalEncoding), input_name='platformVersionTrove'), namespace_))
-        if self.baseFlavor is not None:
-            showIndent(outfile, level)
-            outfile.write('<%sbaseFlavor>%s</%sbaseFlavor>\n' % (namespace_, self.format_string(quote_xml(self.baseFlavor).encode(ExternalEncoding), input_name='baseFlavor'), namespace_))
-        if self.searchPaths:
-            self.searchPaths.export(outfile, level, namespace_, name_='searchPaths')
-        if self.factorySources:
-            self.factorySources.export(outfile, level, namespace_, name_='factorySources')
-        if self.autoLoadRecipes:
-            self.autoLoadRecipes.export(outfile, level, namespace_, name_='autoLoadRecipes')
-        if self.secondaryLabels:
-            self.secondaryLabels.export(outfile, level, namespace_, name_='secondaryLabels')
-        if self.architectures:
-            self.architectures.export(outfile, level, namespace_, name_='architectures')
-        if self.flavorSets:
-            self.flavorSets.export(outfile, level, namespace_, name_='flavorSets')
-        if self.containerTemplates:
-            self.containerTemplates.export(outfile, level, namespace_, name_='containerTemplates')
-        if self.buildTemplates:
-            self.buildTemplates.export(outfile, level, namespace_, name_='buildTemplates')
-    def hasContent_(self):
-        if (
-            self.platformName is not None or
-            self.platformVersionTrove is not None or
-            self.baseFlavor is not None or
-            self.searchPaths is not None or
-            self.factorySources is not None or
-            self.autoLoadRecipes is not None or
-            self.secondaryLabels is not None or
-            self.architectures is not None or
-            self.flavorSets is not None or
-            self.containerTemplates is not None or
-            self.buildTemplates is not None
-            ):
-            return True
-        else:
-            return False
-    def exportLiteral(self, outfile, level, name_='platformType'):
-        level += 1
-        self.exportLiteralAttributes(outfile, level, name_)
-        if self.hasContent_():
-            self.exportLiteralChildren(outfile, level, name_)
-    def exportLiteralAttributes(self, outfile, level, name_):
-        if self.sourceTrove is not None:
-            showIndent(outfile, level)
-            outfile.write('sourceTrove = "%s",\n' % (self.sourceTrove,))
-        if self.useLatest is not None:
-            showIndent(outfile, level)
-            outfile.write('useLatest = %s,\n' % (self.useLatest,))
-    def exportLiteralChildren(self, outfile, level, name_):
-        if self.platformName is not None:
-            showIndent(outfile, level)
-            outfile.write('platformName=%s,\n' % quote_python(self.platformName).encode(ExternalEncoding))
-        if self.platformVersionTrove is not None:
-            showIndent(outfile, level)
-            outfile.write('platformVersionTrove=%s,\n' % quote_python(self.platformVersionTrove).encode(ExternalEncoding))
-        if self.baseFlavor is not None:
-            showIndent(outfile, level)
-            outfile.write('baseFlavor=%s,\n' % quote_python(self.baseFlavor).encode(ExternalEncoding))
-        if self.searchPaths is not None:
-            showIndent(outfile, level)
-            outfile.write('searchPaths=model_.searchPathListType(\n')
-            self.searchPaths.exportLiteral(outfile, level, name_='searchPaths')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        if self.factorySources is not None:
-            showIndent(outfile, level)
-            outfile.write('factorySources=model_.factorySourceListType(\n')
-            self.factorySources.exportLiteral(outfile, level, name_='factorySources')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        if self.autoLoadRecipes is not None:
-            showIndent(outfile, level)
-            outfile.write('autoLoadRecipes=model_.autoLoadRecipesType(\n')
-            self.autoLoadRecipes.exportLiteral(outfile, level, name_='autoLoadRecipes')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        if self.secondaryLabels is not None:
-            showIndent(outfile, level)
-            outfile.write('secondaryLabels=model_.secondaryLabelsType(\n')
-            self.secondaryLabels.exportLiteral(outfile, level, name_='secondaryLabels')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        if self.architectures is not None:
-            showIndent(outfile, level)
-            outfile.write('architectures=model_.architecturesType(\n')
-            self.architectures.exportLiteral(outfile, level, name_='architectures')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        if self.flavorSets is not None:
-            showIndent(outfile, level)
-            outfile.write('flavorSets=model_.flavorSetsType(\n')
-            self.flavorSets.exportLiteral(outfile, level, name_='flavorSets')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        if self.containerTemplates is not None:
-            showIndent(outfile, level)
-            outfile.write('containerTemplates=model_.containerTemplatesType(\n')
-            self.containerTemplates.exportLiteral(outfile, level, name_='containerTemplates')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        if self.buildTemplates is not None:
-            showIndent(outfile, level)
-            outfile.write('buildTemplates=model_.buildTemplatesType(\n')
-            self.buildTemplates.exportLiteral(outfile, level, name_='buildTemplates')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-    def build(self, node_):
-        attrs = node_.attributes
-        self.buildAttributes(attrs)
-        for child_ in node_.childNodes:
-            nodeName_ = child_.nodeName.split(':')[-1]
-            self.buildChildren(child_, nodeName_)
-    def buildAttributes(self, attrs):
-        if attrs.get('sourceTrove'):
-            self.sourceTrove = attrs.get('sourceTrove').value
-        if attrs.get('useLatest'):
-            if attrs.get('useLatest').value in ('true', '1'):
-                self.useLatest = True
-            elif attrs.get('useLatest').value in ('false', '0'):
-                self.useLatest = False
-            else:
-                raise ValueError('Bad boolean attribute (useLatest)')
-    def buildChildren(self, child_, nodeName_):
-        if child_.nodeType == Node.ELEMENT_NODE and \
-            nodeName_ == 'platformName':
-            platformName_ = ''
-            for text__content_ in child_.childNodes:
-                platformName_ += text__content_.nodeValue
-            self.platformName = platformName_
-        elif child_.nodeType == Node.ELEMENT_NODE and \
-            nodeName_ == 'platformVersionTrove':
-            platformVersionTrove_ = ''
-            for text__content_ in child_.childNodes:
-                platformVersionTrove_ += text__content_.nodeValue
-            self.platformVersionTrove = platformVersionTrove_
-        elif child_.nodeType == Node.ELEMENT_NODE and \
-            nodeName_ == 'baseFlavor':
-            baseFlavor_ = ''
-            for text__content_ in child_.childNodes:
-                baseFlavor_ += text__content_.nodeValue
-            self.baseFlavor = baseFlavor_
-            self.validate_baseFlavor(self.baseFlavor)    # validate type baseFlavor
-        elif child_.nodeType == Node.ELEMENT_NODE and \
-            nodeName_ == 'searchPaths':
-            obj_ = searchPathListType.factory()
-            obj_.build(child_)
-            self.set_searchPaths(obj_)
-        elif child_.nodeType == Node.ELEMENT_NODE and \
-            nodeName_ == 'factorySources':
-            obj_ = factorySourceListType.factory()
-            obj_.build(child_)
-            self.set_factorySources(obj_)
-        elif child_.nodeType == Node.ELEMENT_NODE and \
-            nodeName_ == 'autoLoadRecipes':
-            obj_ = autoLoadRecipesType.factory()
-            obj_.build(child_)
-            self.set_autoLoadRecipes(obj_)
-        elif child_.nodeType == Node.ELEMENT_NODE and \
-            nodeName_ == 'secondaryLabels':
-            obj_ = secondaryLabelsType.factory()
-            obj_.build(child_)
-            self.set_secondaryLabels(obj_)
-        elif child_.nodeType == Node.ELEMENT_NODE and \
-            nodeName_ == 'architectures':
-            obj_ = architecturesType.factory()
-            obj_.build(child_)
-            self.set_architectures(obj_)
-        elif child_.nodeType == Node.ELEMENT_NODE and \
-            nodeName_ == 'flavorSets':
-            obj_ = flavorSetsType.factory()
-            obj_.build(child_)
-            self.set_flavorSets(obj_)
-        elif child_.nodeType == Node.ELEMENT_NODE and \
-            nodeName_ == 'containerTemplates':
-            obj_ = containerTemplatesType.factory()
-            obj_.build(child_)
-            self.set_containerTemplates(obj_)
-        elif child_.nodeType == Node.ELEMENT_NODE and \
-            nodeName_ == 'buildTemplates':
-            obj_ = buildTemplatesType.factory()
-            obj_.build(child_)
-            self.set_buildTemplates(obj_)
-# end class platformType
-
-
-class nameFlavorType(GeneratedsSuper):
-    member_data_items_ = [
-        MemberSpec_('flavor', 'xsd:string', 0),
-        MemberSpec_('displayName', 'xsd:string', 0),
-        MemberSpec_('name', 'xsd:string', 0),
-        MemberSpec_('valueOf_', [], 0),
-        ]
-    subclass = None
-    superclass = None
-    def __init__(self, flavor=None, displayName=None, name=None, valueOf_=''):
-        self.flavor = _cast(None, flavor)
-        self.displayName = _cast(None, displayName)
-        self.name = _cast(None, name)
-        self.valueOf_ = valueOf_
-    def factory(*args_, **kwargs_):
-        if nameFlavorType.subclass:
-            return nameFlavorType.subclass(*args_, **kwargs_)
-        else:
-            return nameFlavorType(*args_, **kwargs_)
-    factory = staticmethod(factory)
-    def get_flavor(self): return self.flavor
-    def set_flavor(self, flavor): self.flavor = flavor
-    def get_displayName(self): return self.displayName
-    def set_displayName(self, displayName): self.displayName = displayName
-    def get_name(self): return self.name
-    def set_name(self, name): self.name = name
-    def getValueOf_(self): return self.valueOf_
-    def setValueOf_(self, valueOf_): self.valueOf_ = valueOf_
-    def export(self, outfile, level, namespace_='rpd:', name_='nameFlavorType', namespacedef_=''):
-        showIndent(outfile, level)
-        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
-        self.exportAttributes(outfile, level, namespace_, name_='nameFlavorType')
-        if self.hasContent_():
-            outfile.write('>')
-            self.exportChildren(outfile, level + 1, namespace_, name_)
-            outfile.write('</%s%s>\n' % (namespace_, name_))
-        else:
-            outfile.write('/>\n')
-    def exportAttributes(self, outfile, level, namespace_='rpd:', name_='nameFlavorType'):
-        outfile.write(' flavor=%s' % (self.format_string(quote_attrib(self.flavor).encode(ExternalEncoding), input_name='flavor'), ))
-        outfile.write(' displayName=%s' % (self.format_string(quote_attrib(self.displayName).encode(ExternalEncoding), input_name='displayName'), ))
-        outfile.write(' name=%s' % (self.format_string(quote_attrib(self.name).encode(ExternalEncoding), input_name='name'), ))
-    def exportChildren(self, outfile, level, namespace_='rpd:', name_='nameFlavorType'):
-        if self.valueOf_.find('![CDATA') > -1:
-            value=quote_xml('%s' % self.valueOf_)
-            value=value.replace('![CDATA','<![CDATA')
-            value=value.replace(']]',']]>')
-            outfile.write(value.encode(ExternalEncoding))
-        else:
-            outfile.write(quote_xml('%s' % self.valueOf_.encode(ExternalEncoding)))
-    def hasContent_(self):
-        if (
-            self.valueOf_
-            ):
-            return True
-        else:
-            return False
-    def exportLiteral(self, outfile, level, name_='nameFlavorType'):
-        level += 1
-        self.exportLiteralAttributes(outfile, level, name_)
-        if self.hasContent_():
-            self.exportLiteralChildren(outfile, level, name_)
-    def exportLiteralAttributes(self, outfile, level, name_):
-        if self.flavor is not None:
-            showIndent(outfile, level)
-            outfile.write('flavor = "%s",\n' % (self.flavor,))
-        if self.displayName is not None:
-            showIndent(outfile, level)
-            outfile.write('displayName = "%s",\n' % (self.displayName,))
-        if self.name is not None:
-            showIndent(outfile, level)
-            outfile.write('name = "%s",\n' % (self.name,))
-    def exportLiteralChildren(self, outfile, level, name_):
-        showIndent(outfile, level)
-        outfile.write('valueOf_ = """%s""",\n' % (self.valueOf_,))
-    def build(self, node_):
-        attrs = node_.attributes
-        self.buildAttributes(attrs)
-        self.valueOf_ = ''
-        for child_ in node_.childNodes:
-            nodeName_ = child_.nodeName.split(':')[-1]
-            self.buildChildren(child_, nodeName_)
-    def buildAttributes(self, attrs):
-        if attrs.get('flavor'):
-            self.flavor = attrs.get('flavor').value
-        if attrs.get('displayName'):
-            self.displayName = attrs.get('displayName').value
-        if attrs.get('name'):
-            self.name = attrs.get('name').value
-    def buildChildren(self, child_, nodeName_):
-        if child_.nodeType == Node.TEXT_NODE:
-            self.valueOf_ += child_.nodeValue
-        elif child_.nodeType == Node.CDATA_SECTION_NODE:
-            self.valueOf_ += '![CDATA['+child_.nodeValue+']]'
-# end class nameFlavorType
-
-
 class architecturesType(GeneratedsSuper):
     member_data_items_ = [
         MemberSpec_('architecture', 'nameFlavorType', 1),
@@ -3030,6 +2512,1213 @@ class buildTemplatesType(GeneratedsSuper):
 # end class buildTemplatesType
 
 
+class platformClassifierType(GeneratedsSuper):
+    member_data_items_ = [
+        MemberSpec_('version', 'xsd:string', 0),
+        MemberSpec_('name', 'xsd:string', 0),
+        MemberSpec_('tags', 'xsd:string', 0),
+        MemberSpec_('valueOf_', [], 0),
+        ]
+    subclass = None
+    superclass = None
+    def __init__(self, version=None, name=None, tags=None, valueOf_=''):
+        self.version = _cast(None, version)
+        self.name = _cast(None, name)
+        self.tags = _cast(None, tags)
+        self.valueOf_ = valueOf_
+    def factory(*args_, **kwargs_):
+        if platformClassifierType.subclass:
+            return platformClassifierType.subclass(*args_, **kwargs_)
+        else:
+            return platformClassifierType(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_version(self): return self.version
+    def set_version(self, version): self.version = version
+    def get_name(self): return self.name
+    def set_name(self, name): self.name = name
+    def get_tags(self): return self.tags
+    def set_tags(self, tags): self.tags = tags
+    def getValueOf_(self): return self.valueOf_
+    def setValueOf_(self, valueOf_): self.valueOf_ = valueOf_
+    def export(self, outfile, level, namespace_='rpd:', name_='platformClassifierType', namespacedef_=''):
+        showIndent(outfile, level)
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        self.exportAttributes(outfile, level, namespace_, name_='platformClassifierType')
+        if self.hasContent_():
+            outfile.write('>')
+            self.exportChildren(outfile, level + 1, namespace_, name_)
+            outfile.write('</%s%s>\n' % (namespace_, name_))
+        else:
+            outfile.write('/>\n')
+    def exportAttributes(self, outfile, level, namespace_='rpd:', name_='platformClassifierType'):
+        outfile.write(' version=%s' % (self.format_string(quote_attrib(self.version).encode(ExternalEncoding), input_name='version'), ))
+        outfile.write(' name=%s' % (self.format_string(quote_attrib(self.name).encode(ExternalEncoding), input_name='name'), ))
+        if self.tags is not None:
+            outfile.write(' tags=%s' % (self.format_string(quote_attrib(self.tags).encode(ExternalEncoding), input_name='tags'), ))
+    def exportChildren(self, outfile, level, namespace_='rpd:', name_='platformClassifierType'):
+        if self.valueOf_.find('![CDATA') > -1:
+            value=quote_xml('%s' % self.valueOf_)
+            value=value.replace('![CDATA','<![CDATA')
+            value=value.replace(']]',']]>')
+            outfile.write(value.encode(ExternalEncoding))
+        else:
+            outfile.write(quote_xml('%s' % self.valueOf_.encode(ExternalEncoding)))
+    def hasContent_(self):
+        if (
+            self.valueOf_
+            ):
+            return True
+        else:
+            return False
+    def exportLiteral(self, outfile, level, name_='platformClassifierType'):
+        level += 1
+        self.exportLiteralAttributes(outfile, level, name_)
+        if self.hasContent_():
+            self.exportLiteralChildren(outfile, level, name_)
+    def exportLiteralAttributes(self, outfile, level, name_):
+        if self.version is not None:
+            showIndent(outfile, level)
+            outfile.write('version = "%s",\n' % (self.version,))
+        if self.name is not None:
+            showIndent(outfile, level)
+            outfile.write('name = "%s",\n' % (self.name,))
+        if self.tags is not None:
+            showIndent(outfile, level)
+            outfile.write('tags = "%s",\n' % (self.tags,))
+    def exportLiteralChildren(self, outfile, level, name_):
+        showIndent(outfile, level)
+        outfile.write('valueOf_ = """%s""",\n' % (self.valueOf_,))
+    def build(self, node_):
+        attrs = node_.attributes
+        self.buildAttributes(attrs)
+        self.valueOf_ = ''
+        for child_ in node_.childNodes:
+            nodeName_ = child_.nodeName.split(':')[-1]
+            self.buildChildren(child_, nodeName_)
+    def buildAttributes(self, attrs):
+        if attrs.get('version'):
+            self.version = attrs.get('version').value
+        if attrs.get('name'):
+            self.name = attrs.get('name').value
+        if attrs.get('tags'):
+            self.tags = attrs.get('tags').value
+    def buildChildren(self, child_, nodeName_):
+        if child_.nodeType == Node.TEXT_NODE:
+            self.valueOf_ += child_.nodeValue
+        elif child_.nodeType == Node.CDATA_SECTION_NODE:
+            self.valueOf_ += '![CDATA['+child_.nodeValue+']]'
+# end class platformClassifierType
+
+
+class platformInformationType(GeneratedsSuper):
+    member_data_items_ = [
+        MemberSpec_('platformClassfier', 'platformClassifierType', 0),
+        MemberSpec_('originLabel', 'xsd:string', 0),
+        MemberSpec_('bootstrapTrove', ['troveSpecType', 'xsd:string'], 0),
+        MemberSpec_('rpmRequirement', ['conaryDepType', 'xsd:string'], 1),
+        ]
+    subclass = None
+    superclass = None
+    def __init__(self, platformClassfier=None, originLabel=None, bootstrapTrove=None, rpmRequirement=None):
+        self.platformClassfier = platformClassfier
+        self.originLabel = originLabel
+        self.bootstrapTrove = bootstrapTrove
+        if rpmRequirement is None:
+            self.rpmRequirement = []
+        else:
+            self.rpmRequirement = rpmRequirement
+    def factory(*args_, **kwargs_):
+        if platformInformationType.subclass:
+            return platformInformationType.subclass(*args_, **kwargs_)
+        else:
+            return platformInformationType(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_platformClassfier(self): return self.platformClassfier
+    def set_platformClassfier(self, platformClassfier): self.platformClassfier = platformClassfier
+    def get_originLabel(self): return self.originLabel
+    def set_originLabel(self, originLabel): self.originLabel = originLabel
+    def get_bootstrapTrove(self): return self.bootstrapTrove
+    def set_bootstrapTrove(self, bootstrapTrove): self.bootstrapTrove = bootstrapTrove
+    def validate_bootstrapTrove(self, value):
+        # validate type bootstrapTrove
+        pass
+    def get_rpmRequirement(self): return self.rpmRequirement
+    def set_rpmRequirement(self, rpmRequirement): self.rpmRequirement = rpmRequirement
+    def add_rpmRequirement(self, value): self.rpmRequirement.append(value)
+    def insert_rpmRequirement(self, index, value): self.rpmRequirement[index] = value
+    def validate_rpmRequirement(self, value):
+        # validate type rpmRequirement
+        pass
+    def export(self, outfile, level, namespace_='rpd:', name_='platformInformationType', namespacedef_=''):
+        showIndent(outfile, level)
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        self.exportAttributes(outfile, level, namespace_, name_='platformInformationType')
+        if self.hasContent_():
+            outfile.write('>\n')
+            self.exportChildren(outfile, level + 1, namespace_, name_)
+            showIndent(outfile, level)
+            outfile.write('</%s%s>\n' % (namespace_, name_))
+        else:
+            outfile.write('/>\n')
+    def exportAttributes(self, outfile, level, namespace_='rpd:', name_='platformInformationType'):
+        pass
+    def exportChildren(self, outfile, level, namespace_='rpd:', name_='platformInformationType'):
+        if self.platformClassfier:
+            self.platformClassfier.export(outfile, level, namespace_, name_='platformClassfier')
+        if self.originLabel is not None:
+            showIndent(outfile, level)
+            outfile.write('<%soriginLabel>%s</%soriginLabel>\n' % (namespace_, self.format_string(quote_xml(self.originLabel).encode(ExternalEncoding), input_name='originLabel'), namespace_))
+        if self.bootstrapTrove is not None:
+            showIndent(outfile, level)
+            outfile.write('<%sbootstrapTrove>%s</%sbootstrapTrove>\n' % (namespace_, self.format_string(quote_xml(self.bootstrapTrove).encode(ExternalEncoding), input_name='bootstrapTrove'), namespace_))
+        for rpmRequirement_ in self.rpmRequirement:
+            showIndent(outfile, level)
+            outfile.write('<%srpmRequirement>%s</%srpmRequirement>\n' % (namespace_, self.format_string(quote_xml(rpmRequirement_).encode(ExternalEncoding), input_name='rpmRequirement'), namespace_))
+    def hasContent_(self):
+        if (
+            self.platformClassfier is not None or
+            self.originLabel is not None or
+            self.bootstrapTrove is not None or
+            self.rpmRequirement
+            ):
+            return True
+        else:
+            return False
+    def exportLiteral(self, outfile, level, name_='platformInformationType'):
+        level += 1
+        self.exportLiteralAttributes(outfile, level, name_)
+        if self.hasContent_():
+            self.exportLiteralChildren(outfile, level, name_)
+    def exportLiteralAttributes(self, outfile, level, name_):
+        pass
+    def exportLiteralChildren(self, outfile, level, name_):
+        if self.platformClassfier is not None:
+            showIndent(outfile, level)
+            outfile.write('platformClassfier=model_.platformClassifierType(\n')
+            self.platformClassfier.exportLiteral(outfile, level, name_='platformClassfier')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.originLabel is not None:
+            showIndent(outfile, level)
+            outfile.write('originLabel=%s,\n' % quote_python(self.originLabel).encode(ExternalEncoding))
+        if self.bootstrapTrove is not None:
+            showIndent(outfile, level)
+            outfile.write('bootstrapTrove=%s,\n' % quote_python(self.bootstrapTrove).encode(ExternalEncoding))
+        showIndent(outfile, level)
+        outfile.write('rpmRequirement=[\n')
+        level += 1
+        for rpmRequirement_ in self.rpmRequirement:
+            showIndent(outfile, level)
+            outfile.write('%s,\n' % quote_python(rpmRequirement_).encode(ExternalEncoding))
+        level -= 1
+        showIndent(outfile, level)
+        outfile.write('],\n')
+    def build(self, node_):
+        attrs = node_.attributes
+        self.buildAttributes(attrs)
+        for child_ in node_.childNodes:
+            nodeName_ = child_.nodeName.split(':')[-1]
+            self.buildChildren(child_, nodeName_)
+    def buildAttributes(self, attrs):
+        pass
+    def buildChildren(self, child_, nodeName_):
+        if child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'platformClassfier':
+            obj_ = platformClassifierType.factory()
+            obj_.build(child_)
+            self.set_platformClassfier(obj_)
+        elif child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'originLabel':
+            originLabel_ = ''
+            for text__content_ in child_.childNodes:
+                originLabel_ += text__content_.nodeValue
+            self.originLabel = originLabel_
+        elif child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'bootstrapTrove':
+            bootstrapTrove_ = ''
+            for text__content_ in child_.childNodes:
+                bootstrapTrove_ += text__content_.nodeValue
+            self.bootstrapTrove = bootstrapTrove_
+            self.validate_bootstrapTrove(self.bootstrapTrove)    # validate type bootstrapTrove
+        elif child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'rpmRequirement':
+            rpmRequirement_ = ''
+            for text__content_ in child_.childNodes:
+                rpmRequirement_ += text__content_.nodeValue
+            self.rpmRequirement.append(rpmRequirement_)
+            self.validate_rpmRequirement(self.rpmRequirement)    # validate type rpmRequirement
+# end class platformInformationType
+
+
+class contentProviderType(GeneratedsSuper):
+    member_data_items_ = [
+        MemberSpec_('name', 'xsd:string', 0),
+        MemberSpec_('description', 'xsd:string', 0),
+        MemberSpec_('contentSourceType', 'contentSourceTypeType', 1),
+        MemberSpec_('dataSource', 'dataSourceType', 1),
+        ]
+    subclass = None
+    superclass = None
+    def __init__(self, name=None, description=None, contentSourceType=None, dataSource=None):
+        self.name = _cast(None, name)
+        self.description = _cast(None, description)
+        if contentSourceType is None:
+            self.contentSourceType = []
+        else:
+            self.contentSourceType = contentSourceType
+        if dataSource is None:
+            self.dataSource = []
+        else:
+            self.dataSource = dataSource
+    def factory(*args_, **kwargs_):
+        if contentProviderType.subclass:
+            return contentProviderType.subclass(*args_, **kwargs_)
+        else:
+            return contentProviderType(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_contentSourceType(self): return self.contentSourceType
+    def set_contentSourceType(self, contentSourceType): self.contentSourceType = contentSourceType
+    def add_contentSourceType(self, value): self.contentSourceType.append(value)
+    def insert_contentSourceType(self, index, value): self.contentSourceType[index] = value
+    def get_dataSource(self): return self.dataSource
+    def set_dataSource(self, dataSource): self.dataSource = dataSource
+    def add_dataSource(self, value): self.dataSource.append(value)
+    def insert_dataSource(self, index, value): self.dataSource[index] = value
+    def get_name(self): return self.name
+    def set_name(self, name): self.name = name
+    def get_description(self): return self.description
+    def set_description(self, description): self.description = description
+    def export(self, outfile, level, namespace_='rpd:', name_='contentProviderType', namespacedef_=''):
+        showIndent(outfile, level)
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        self.exportAttributes(outfile, level, namespace_, name_='contentProviderType')
+        if self.hasContent_():
+            outfile.write('>\n')
+            self.exportChildren(outfile, level + 1, namespace_, name_)
+            showIndent(outfile, level)
+            outfile.write('</%s%s>\n' % (namespace_, name_))
+        else:
+            outfile.write('/>\n')
+    def exportAttributes(self, outfile, level, namespace_='rpd:', name_='contentProviderType'):
+        outfile.write(' name=%s' % (self.format_string(quote_attrib(self.name).encode(ExternalEncoding), input_name='name'), ))
+        outfile.write(' description=%s' % (self.format_string(quote_attrib(self.description).encode(ExternalEncoding), input_name='description'), ))
+    def exportChildren(self, outfile, level, namespace_='rpd:', name_='contentProviderType'):
+        for contentSourceType_ in self.contentSourceType:
+            contentSourceType_.export(outfile, level, namespace_, name_='contentSourceType')
+        for dataSource_ in self.dataSource:
+            dataSource_.export(outfile, level, namespace_, name_='dataSource')
+    def hasContent_(self):
+        if (
+            self.contentSourceType or
+            self.dataSource
+            ):
+            return True
+        else:
+            return False
+    def exportLiteral(self, outfile, level, name_='contentProviderType'):
+        level += 1
+        self.exportLiteralAttributes(outfile, level, name_)
+        if self.hasContent_():
+            self.exportLiteralChildren(outfile, level, name_)
+    def exportLiteralAttributes(self, outfile, level, name_):
+        if self.name is not None:
+            showIndent(outfile, level)
+            outfile.write('name = "%s",\n' % (self.name,))
+        if self.description is not None:
+            showIndent(outfile, level)
+            outfile.write('description = "%s",\n' % (self.description,))
+    def exportLiteralChildren(self, outfile, level, name_):
+        showIndent(outfile, level)
+        outfile.write('contentSourceType=[\n')
+        level += 1
+        for contentSourceType_ in self.contentSourceType:
+            showIndent(outfile, level)
+            outfile.write('model_.contentSourceTypeType(\n')
+            contentSourceType_.exportLiteral(outfile, level, name_='contentSourceTypeType')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        level -= 1
+        showIndent(outfile, level)
+        outfile.write('],\n')
+        showIndent(outfile, level)
+        outfile.write('dataSource=[\n')
+        level += 1
+        for dataSource_ in self.dataSource:
+            showIndent(outfile, level)
+            outfile.write('model_.dataSourceType(\n')
+            dataSource_.exportLiteral(outfile, level, name_='dataSourceType')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        level -= 1
+        showIndent(outfile, level)
+        outfile.write('],\n')
+    def build(self, node_):
+        attrs = node_.attributes
+        self.buildAttributes(attrs)
+        for child_ in node_.childNodes:
+            nodeName_ = child_.nodeName.split(':')[-1]
+            self.buildChildren(child_, nodeName_)
+    def buildAttributes(self, attrs):
+        if attrs.get('name'):
+            self.name = attrs.get('name').value
+        if attrs.get('description'):
+            self.description = attrs.get('description').value
+    def buildChildren(self, child_, nodeName_):
+        if child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'contentSourceType':
+            obj_ = contentSourceTypeType.factory()
+            obj_.build(child_)
+            self.contentSourceType.append(obj_)
+        elif child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'dataSource':
+            obj_ = dataSourceType.factory()
+            obj_.build(child_)
+            self.dataSource.append(obj_)
+
+    def _getDataSources(self):
+        if self.dataSource is None:
+            return []
+        return self.dataSource
+    dataSources = property(_getDataSources)
+
+    def _getContentSourceTypes(self):
+        if self.contentSourceType is None:
+            return []
+        return self.contentSourceType
+    contentSourceTypes = property(_getContentSourceTypes)
+# end class contentProviderType
+
+
+class dataSourceType(GeneratedsSuper):
+    member_data_items_ = [
+        MemberSpec_('name', 'xsd:string', 0),
+        MemberSpec_('description', 'xsd:string', 0),
+        MemberSpec_('valueOf_', [], 0),
+        ]
+    subclass = None
+    superclass = None
+    def __init__(self, name=None, description=None, valueOf_=''):
+        self.name = _cast(None, name)
+        self.description = _cast(None, description)
+        self.valueOf_ = valueOf_
+    def factory(*args_, **kwargs_):
+        if dataSourceType.subclass:
+            return dataSourceType.subclass(*args_, **kwargs_)
+        else:
+            return dataSourceType(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_name(self): return self.name
+    def set_name(self, name): self.name = name
+    def get_description(self): return self.description
+    def set_description(self, description): self.description = description
+    def getValueOf_(self): return self.valueOf_
+    def setValueOf_(self, valueOf_): self.valueOf_ = valueOf_
+    def export(self, outfile, level, namespace_='rpd:', name_='dataSourceType', namespacedef_=''):
+        showIndent(outfile, level)
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        self.exportAttributes(outfile, level, namespace_, name_='dataSourceType')
+        if self.hasContent_():
+            outfile.write('>')
+            self.exportChildren(outfile, level + 1, namespace_, name_)
+            outfile.write('</%s%s>\n' % (namespace_, name_))
+        else:
+            outfile.write('/>\n')
+    def exportAttributes(self, outfile, level, namespace_='rpd:', name_='dataSourceType'):
+        outfile.write(' name=%s' % (self.format_string(quote_attrib(self.name).encode(ExternalEncoding), input_name='name'), ))
+        outfile.write(' description=%s' % (self.format_string(quote_attrib(self.description).encode(ExternalEncoding), input_name='description'), ))
+    def exportChildren(self, outfile, level, namespace_='rpd:', name_='dataSourceType'):
+        if self.valueOf_.find('![CDATA') > -1:
+            value=quote_xml('%s' % self.valueOf_)
+            value=value.replace('![CDATA','<![CDATA')
+            value=value.replace(']]',']]>')
+            outfile.write(value.encode(ExternalEncoding))
+        else:
+            outfile.write(quote_xml('%s' % self.valueOf_.encode(ExternalEncoding)))
+    def hasContent_(self):
+        if (
+            self.valueOf_
+            ):
+            return True
+        else:
+            return False
+    def exportLiteral(self, outfile, level, name_='dataSourceType'):
+        level += 1
+        self.exportLiteralAttributes(outfile, level, name_)
+        if self.hasContent_():
+            self.exportLiteralChildren(outfile, level, name_)
+    def exportLiteralAttributes(self, outfile, level, name_):
+        if self.name is not None:
+            showIndent(outfile, level)
+            outfile.write('name = "%s",\n' % (self.name,))
+        if self.description is not None:
+            showIndent(outfile, level)
+            outfile.write('description = "%s",\n' % (self.description,))
+    def exportLiteralChildren(self, outfile, level, name_):
+        showIndent(outfile, level)
+        outfile.write('valueOf_ = """%s""",\n' % (self.valueOf_,))
+    def build(self, node_):
+        attrs = node_.attributes
+        self.buildAttributes(attrs)
+        self.valueOf_ = ''
+        for child_ in node_.childNodes:
+            nodeName_ = child_.nodeName.split(':')[-1]
+            self.buildChildren(child_, nodeName_)
+    def buildAttributes(self, attrs):
+        if attrs.get('name'):
+            self.name = attrs.get('name').value
+        if attrs.get('description'):
+            self.description = attrs.get('description').value
+    def buildChildren(self, child_, nodeName_):
+        if child_.nodeType == Node.TEXT_NODE:
+            self.valueOf_ += child_.nodeValue
+        elif child_.nodeType == Node.CDATA_SECTION_NODE:
+            self.valueOf_ += '![CDATA['+child_.nodeValue+']]'
+# end class dataSourceType
+
+
+class contentSourceTypeType(GeneratedsSuper):
+    member_data_items_ = [
+        MemberSpec_('isSingleton', 'xsd:boolean', 0),
+        MemberSpec_('name', 'xsd:string', 0),
+        MemberSpec_('description', 'xsd:string', 0),
+        MemberSpec_('valueOf_', [], 0),
+        ]
+    subclass = None
+    superclass = None
+    def __init__(self, isSingleton=None, name=None, description=None, valueOf_=''):
+        self.isSingleton = _cast(bool, isSingleton)
+        self.name = _cast(None, name)
+        self.description = _cast(None, description)
+        self.valueOf_ = valueOf_
+    def factory(*args_, **kwargs_):
+        if contentSourceTypeType.subclass:
+            return contentSourceTypeType.subclass(*args_, **kwargs_)
+        else:
+            return contentSourceTypeType(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_isSingleton(self): return self.isSingleton
+    def set_isSingleton(self, isSingleton): self.isSingleton = isSingleton
+    def get_name(self): return self.name
+    def set_name(self, name): self.name = name
+    def get_description(self): return self.description
+    def set_description(self, description): self.description = description
+    def getValueOf_(self): return self.valueOf_
+    def setValueOf_(self, valueOf_): self.valueOf_ = valueOf_
+    def export(self, outfile, level, namespace_='rpd:', name_='contentSourceTypeType', namespacedef_=''):
+        showIndent(outfile, level)
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        self.exportAttributes(outfile, level, namespace_, name_='contentSourceTypeType')
+        if self.hasContent_():
+            outfile.write('>')
+            self.exportChildren(outfile, level + 1, namespace_, name_)
+            outfile.write('</%s%s>\n' % (namespace_, name_))
+        else:
+            outfile.write('/>\n')
+    def exportAttributes(self, outfile, level, namespace_='rpd:', name_='contentSourceTypeType'):
+        if self.isSingleton is not None:
+            outfile.write(' isSingleton="%s"' % self.format_boolean(str_lower(str(self.isSingleton)), input_name='isSingleton'))
+        outfile.write(' name=%s' % (self.format_string(quote_attrib(self.name).encode(ExternalEncoding), input_name='name'), ))
+        outfile.write(' description=%s' % (self.format_string(quote_attrib(self.description).encode(ExternalEncoding), input_name='description'), ))
+    def exportChildren(self, outfile, level, namespace_='rpd:', name_='contentSourceTypeType'):
+        if self.valueOf_.find('![CDATA') > -1:
+            value=quote_xml('%s' % self.valueOf_)
+            value=value.replace('![CDATA','<![CDATA')
+            value=value.replace(']]',']]>')
+            outfile.write(value.encode(ExternalEncoding))
+        else:
+            outfile.write(quote_xml('%s' % self.valueOf_.encode(ExternalEncoding)))
+    def hasContent_(self):
+        if (
+            self.valueOf_
+            ):
+            return True
+        else:
+            return False
+    def exportLiteral(self, outfile, level, name_='contentSourceTypeType'):
+        level += 1
+        self.exportLiteralAttributes(outfile, level, name_)
+        if self.hasContent_():
+            self.exportLiteralChildren(outfile, level, name_)
+    def exportLiteralAttributes(self, outfile, level, name_):
+        if self.isSingleton is not None:
+            showIndent(outfile, level)
+            outfile.write('isSingleton = %s,\n' % (self.isSingleton,))
+        if self.name is not None:
+            showIndent(outfile, level)
+            outfile.write('name = "%s",\n' % (self.name,))
+        if self.description is not None:
+            showIndent(outfile, level)
+            outfile.write('description = "%s",\n' % (self.description,))
+    def exportLiteralChildren(self, outfile, level, name_):
+        showIndent(outfile, level)
+        outfile.write('valueOf_ = """%s""",\n' % (self.valueOf_,))
+    def build(self, node_):
+        attrs = node_.attributes
+        self.buildAttributes(attrs)
+        self.valueOf_ = ''
+        for child_ in node_.childNodes:
+            nodeName_ = child_.nodeName.split(':')[-1]
+            self.buildChildren(child_, nodeName_)
+    def buildAttributes(self, attrs):
+        if attrs.get('isSingleton'):
+            if attrs.get('isSingleton').value in ('true', '1'):
+                self.isSingleton = True
+            elif attrs.get('isSingleton').value in ('false', '0'):
+                self.isSingleton = False
+            else:
+                raise ValueError('Bad boolean attribute (isSingleton)')
+        if attrs.get('name'):
+            self.name = attrs.get('name').value
+        if attrs.get('description'):
+            self.description = attrs.get('description').value
+    def buildChildren(self, child_, nodeName_):
+        if child_.nodeType == Node.TEXT_NODE:
+            self.valueOf_ += child_.nodeValue
+        elif child_.nodeType == Node.CDATA_SECTION_NODE:
+            self.valueOf_ += '![CDATA['+child_.nodeValue+']]'
+# end class contentSourceTypeType
+
+
+class platformDefinitionType(GeneratedsSuper):
+    member_data_items_ = [
+        MemberSpec_('version', 'xsd:string', 0),
+        MemberSpec_('platformName', 'xsd:string', 0),
+        MemberSpec_('platformUsageTerms', 'xsd:string', 0),
+        MemberSpec_('platformVersionTrove', 'xsd:string', 0),
+        MemberSpec_('baseFlavor', ['flavorStringType', 'xsd:string', 'xsd:string'], 0),
+        MemberSpec_('contentProvider', 'contentProviderType', 0),
+        MemberSpec_('platformInformation', 'platformInformationType', 0),
+        MemberSpec_('searchPaths', 'searchPathListType', 0),
+        MemberSpec_('factorySources', 'factorySourceListType', 0),
+        MemberSpec_('autoLoadRecipes', 'autoLoadRecipesType', 0),
+        MemberSpec_('secondaryLabels', 'secondaryLabelsType', 0),
+        MemberSpec_('architectures', 'architecturesType', 0),
+        MemberSpec_('flavorSets', 'flavorSetsType', 0),
+        MemberSpec_('containerTemplates', 'containerTemplatesType', 0),
+        MemberSpec_('buildTemplates', 'buildTemplatesType', 0),
+        ]
+    subclass = None
+    superclass = None
+    def __init__(self, version=None, platformName=None, platformUsageTerms=None, platformVersionTrove=None, baseFlavor=None, contentProvider=None, platformInformation=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None):
+        self.version = _cast(None, version)
+        self.platformName = platformName
+        self.platformUsageTerms = platformUsageTerms
+        self.platformVersionTrove = platformVersionTrove
+        self.baseFlavor = baseFlavor
+        self.contentProvider = contentProvider
+        self.platformInformation = platformInformation
+        self.searchPaths = searchPaths
+        self.factorySources = factorySources
+        self.autoLoadRecipes = autoLoadRecipes
+        self.secondaryLabels = secondaryLabels
+        self.architectures = architectures
+        self.flavorSets = flavorSets
+        self.containerTemplates = containerTemplates
+        self.buildTemplates = buildTemplates
+    def factory(*args_, **kwargs_):
+        if platformDefinitionType.subclass:
+            return platformDefinitionType.subclass(*args_, **kwargs_)
+        else:
+            return platformDefinitionType(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_platformName(self): return self.platformName
+    def set_platformName(self, platformName): self.platformName = platformName
+    def get_platformUsageTerms(self): return self.platformUsageTerms
+    def set_platformUsageTerms(self, platformUsageTerms): self.platformUsageTerms = platformUsageTerms
+    def get_platformVersionTrove(self): return self.platformVersionTrove
+    def set_platformVersionTrove(self, platformVersionTrove): self.platformVersionTrove = platformVersionTrove
+    def get_baseFlavor(self): return self.baseFlavor
+    def set_baseFlavor(self, baseFlavor): self.baseFlavor = baseFlavor
+    def validate_baseFlavor(self, value):
+        # validate type baseFlavor
+        pass
+    def get_contentProvider(self): return self.contentProvider
+    def set_contentProvider(self, contentProvider): self.contentProvider = contentProvider
+    def get_platformInformation(self): return self.platformInformation
+    def set_platformInformation(self, platformInformation): self.platformInformation = platformInformation
+    def get_searchPaths(self): return self.searchPaths
+    def set_searchPaths(self, searchPaths): self.searchPaths = searchPaths
+    def get_factorySources(self): return self.factorySources
+    def set_factorySources(self, factorySources): self.factorySources = factorySources
+    def get_autoLoadRecipes(self): return self.autoLoadRecipes
+    def set_autoLoadRecipes(self, autoLoadRecipes): self.autoLoadRecipes = autoLoadRecipes
+    def get_secondaryLabels(self): return self.secondaryLabels
+    def set_secondaryLabels(self, secondaryLabels): self.secondaryLabels = secondaryLabels
+    def get_architectures(self): return self.architectures
+    def set_architectures(self, architectures): self.architectures = architectures
+    def get_flavorSets(self): return self.flavorSets
+    def set_flavorSets(self, flavorSets): self.flavorSets = flavorSets
+    def get_containerTemplates(self): return self.containerTemplates
+    def set_containerTemplates(self, containerTemplates): self.containerTemplates = containerTemplates
+    def get_buildTemplates(self): return self.buildTemplates
+    def set_buildTemplates(self, buildTemplates): self.buildTemplates = buildTemplates
+    def get_version(self): return self.version
+    def set_version(self, version): self.version = version
+    def export(self, outfile, level, namespace_='rpd:', name_='platformDefinitionType', namespacedef_=''):
+        showIndent(outfile, level)
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        self.exportAttributes(outfile, level, namespace_, name_='platformDefinitionType')
+        if self.hasContent_():
+            outfile.write('>\n')
+            self.exportChildren(outfile, level + 1, namespace_, name_)
+            showIndent(outfile, level)
+            outfile.write('</%s%s>\n' % (namespace_, name_))
+        else:
+            outfile.write('/>\n')
+    def exportAttributes(self, outfile, level, namespace_='rpd:', name_='platformDefinitionType'):
+        if self.version is not None:
+            outfile.write(' version=%s' % (self.format_string(quote_attrib(self.version).encode(ExternalEncoding), input_name='version'), ))
+    def exportChildren(self, outfile, level, namespace_='rpd:', name_='platformDefinitionType'):
+        if self.platformName is not None:
+            showIndent(outfile, level)
+            outfile.write('<%splatformName>%s</%splatformName>\n' % (namespace_, self.format_string(quote_xml(self.platformName).encode(ExternalEncoding), input_name='platformName'), namespace_))
+        if self.platformUsageTerms is not None:
+            showIndent(outfile, level)
+            outfile.write('<%splatformUsageTerms>%s</%splatformUsageTerms>\n' % (namespace_, self.format_string(quote_xml(self.platformUsageTerms).encode(ExternalEncoding), input_name='platformUsageTerms'), namespace_))
+        if self.platformVersionTrove is not None:
+            showIndent(outfile, level)
+            outfile.write('<%splatformVersionTrove>%s</%splatformVersionTrove>\n' % (namespace_, self.format_string(quote_xml(self.platformVersionTrove).encode(ExternalEncoding), input_name='platformVersionTrove'), namespace_))
+        if self.baseFlavor is not None:
+            showIndent(outfile, level)
+            outfile.write('<%sbaseFlavor>%s</%sbaseFlavor>\n' % (namespace_, self.format_string(quote_xml(self.baseFlavor).encode(ExternalEncoding), input_name='baseFlavor'), namespace_))
+        if self.contentProvider:
+            self.contentProvider.export(outfile, level, namespace_, name_='contentProvider')
+        if self.platformInformation:
+            self.platformInformation.export(outfile, level, namespace_, name_='platformInformation')
+        if self.searchPaths:
+            self.searchPaths.export(outfile, level, namespace_, name_='searchPaths')
+        if self.factorySources:
+            self.factorySources.export(outfile, level, namespace_, name_='factorySources')
+        if self.autoLoadRecipes:
+            self.autoLoadRecipes.export(outfile, level, namespace_, name_='autoLoadRecipes')
+        if self.secondaryLabels:
+            self.secondaryLabels.export(outfile, level, namespace_, name_='secondaryLabels')
+        if self.architectures:
+            self.architectures.export(outfile, level, namespace_, name_='architectures')
+        if self.flavorSets:
+            self.flavorSets.export(outfile, level, namespace_, name_='flavorSets')
+        if self.containerTemplates:
+            self.containerTemplates.export(outfile, level, namespace_, name_='containerTemplates')
+        if self.buildTemplates:
+            self.buildTemplates.export(outfile, level, namespace_, name_='buildTemplates')
+    def hasContent_(self):
+        if (
+            self.platformName is not None or
+            self.platformUsageTerms is not None or
+            self.platformVersionTrove is not None or
+            self.baseFlavor is not None or
+            self.contentProvider is not None or
+            self.platformInformation is not None or
+            self.searchPaths is not None or
+            self.factorySources is not None or
+            self.autoLoadRecipes is not None or
+            self.secondaryLabels is not None or
+            self.architectures is not None or
+            self.flavorSets is not None or
+            self.containerTemplates is not None or
+            self.buildTemplates is not None
+            ):
+            return True
+        else:
+            return False
+    def exportLiteral(self, outfile, level, name_='platformDefinitionType'):
+        level += 1
+        self.exportLiteralAttributes(outfile, level, name_)
+        if self.hasContent_():
+            self.exportLiteralChildren(outfile, level, name_)
+    def exportLiteralAttributes(self, outfile, level, name_):
+        if self.version is not None:
+            showIndent(outfile, level)
+            outfile.write('version = "%s",\n' % (self.version,))
+    def exportLiteralChildren(self, outfile, level, name_):
+        if self.platformName is not None:
+            showIndent(outfile, level)
+            outfile.write('platformName=%s,\n' % quote_python(self.platformName).encode(ExternalEncoding))
+        if self.platformUsageTerms is not None:
+            showIndent(outfile, level)
+            outfile.write('platformUsageTerms=%s,\n' % quote_python(self.platformUsageTerms).encode(ExternalEncoding))
+        if self.platformVersionTrove is not None:
+            showIndent(outfile, level)
+            outfile.write('platformVersionTrove=%s,\n' % quote_python(self.platformVersionTrove).encode(ExternalEncoding))
+        if self.baseFlavor is not None:
+            showIndent(outfile, level)
+            outfile.write('baseFlavor=%s,\n' % quote_python(self.baseFlavor).encode(ExternalEncoding))
+        if self.contentProvider is not None:
+            showIndent(outfile, level)
+            outfile.write('contentProvider=model_.contentProviderType(\n')
+            self.contentProvider.exportLiteral(outfile, level, name_='contentProvider')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.platformInformation is not None:
+            showIndent(outfile, level)
+            outfile.write('platformInformation=model_.platformInformationType(\n')
+            self.platformInformation.exportLiteral(outfile, level, name_='platformInformation')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.searchPaths is not None:
+            showIndent(outfile, level)
+            outfile.write('searchPaths=model_.searchPathListType(\n')
+            self.searchPaths.exportLiteral(outfile, level, name_='searchPaths')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.factorySources is not None:
+            showIndent(outfile, level)
+            outfile.write('factorySources=model_.factorySourceListType(\n')
+            self.factorySources.exportLiteral(outfile, level, name_='factorySources')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.autoLoadRecipes is not None:
+            showIndent(outfile, level)
+            outfile.write('autoLoadRecipes=model_.autoLoadRecipesType(\n')
+            self.autoLoadRecipes.exportLiteral(outfile, level, name_='autoLoadRecipes')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.secondaryLabels is not None:
+            showIndent(outfile, level)
+            outfile.write('secondaryLabels=model_.secondaryLabelsType(\n')
+            self.secondaryLabels.exportLiteral(outfile, level, name_='secondaryLabels')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.architectures is not None:
+            showIndent(outfile, level)
+            outfile.write('architectures=model_.architecturesType(\n')
+            self.architectures.exportLiteral(outfile, level, name_='architectures')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.flavorSets is not None:
+            showIndent(outfile, level)
+            outfile.write('flavorSets=model_.flavorSetsType(\n')
+            self.flavorSets.exportLiteral(outfile, level, name_='flavorSets')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.containerTemplates is not None:
+            showIndent(outfile, level)
+            outfile.write('containerTemplates=model_.containerTemplatesType(\n')
+            self.containerTemplates.exportLiteral(outfile, level, name_='containerTemplates')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.buildTemplates is not None:
+            showIndent(outfile, level)
+            outfile.write('buildTemplates=model_.buildTemplatesType(\n')
+            self.buildTemplates.exportLiteral(outfile, level, name_='buildTemplates')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+    def build(self, node_):
+        attrs = node_.attributes
+        self.buildAttributes(attrs)
+        for child_ in node_.childNodes:
+            nodeName_ = child_.nodeName.split(':')[-1]
+            self.buildChildren(child_, nodeName_)
+    def buildAttributes(self, attrs):
+        if attrs.get('version'):
+            self.version = attrs.get('version').value
+    def buildChildren(self, child_, nodeName_):
+        if child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'platformName':
+            platformName_ = ''
+            for text__content_ in child_.childNodes:
+                platformName_ += text__content_.nodeValue
+            self.platformName = platformName_
+        elif child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'platformUsageTerms':
+            platformUsageTerms_ = ''
+            for text__content_ in child_.childNodes:
+                platformUsageTerms_ += text__content_.nodeValue
+            self.platformUsageTerms = platformUsageTerms_
+        elif child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'platformVersionTrove':
+            platformVersionTrove_ = ''
+            for text__content_ in child_.childNodes:
+                platformVersionTrove_ += text__content_.nodeValue
+            self.platformVersionTrove = platformVersionTrove_
+        elif child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'baseFlavor':
+            baseFlavor_ = ''
+            for text__content_ in child_.childNodes:
+                baseFlavor_ += text__content_.nodeValue
+            self.baseFlavor = baseFlavor_
+            self.validate_baseFlavor(self.baseFlavor)    # validate type baseFlavor
+        elif child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'contentProvider':
+            obj_ = contentProviderType.factory()
+            obj_.build(child_)
+            self.set_contentProvider(obj_)
+        elif child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'platformInformation':
+            obj_ = platformInformationType.factory()
+            obj_.build(child_)
+            self.set_platformInformation(obj_)
+        elif child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'searchPaths':
+            obj_ = searchPathListType.factory()
+            obj_.build(child_)
+            self.set_searchPaths(obj_)
+        elif child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'factorySources':
+            obj_ = factorySourceListType.factory()
+            obj_.build(child_)
+            self.set_factorySources(obj_)
+        elif child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'autoLoadRecipes':
+            obj_ = autoLoadRecipesType.factory()
+            obj_.build(child_)
+            self.set_autoLoadRecipes(obj_)
+        elif child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'secondaryLabels':
+            obj_ = secondaryLabelsType.factory()
+            obj_.build(child_)
+            self.set_secondaryLabels(obj_)
+        elif child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'architectures':
+            obj_ = architecturesType.factory()
+            obj_.build(child_)
+            self.set_architectures(obj_)
+        elif child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'flavorSets':
+            obj_ = flavorSetsType.factory()
+            obj_.build(child_)
+            self.set_flavorSets(obj_)
+        elif child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'containerTemplates':
+            obj_ = containerTemplatesType.factory()
+            obj_.build(child_)
+            self.set_containerTemplates(obj_)
+        elif child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'buildTemplates':
+            obj_ = buildTemplatesType.factory()
+            obj_.build(child_)
+            self.set_buildTemplates(obj_)
+# end class platformDefinitionType
+
+
+class platformType(GeneratedsSuper):
+    member_data_items_ = [
+        MemberSpec_('sourceTrove', 'xsd:string', 0),
+        MemberSpec_('useLatest', 'xsd:boolean', 0),
+        MemberSpec_('platformName', 'xsd:string', 0),
+        MemberSpec_('platformUsageTerms', 'xsd:string', 0),
+        MemberSpec_('platformVersionTrove', 'xsd:string', 0),
+        MemberSpec_('baseFlavor', ['flavorStringType', 'xsd:string', 'xsd:string'], 0),
+        MemberSpec_('contentProvider', 'contentProviderType', 0),
+        MemberSpec_('platformInformation', 'platformInformationType', 0),
+        MemberSpec_('searchPaths', 'searchPathListType', 0),
+        MemberSpec_('factorySources', 'factorySourceListType', 0),
+        MemberSpec_('autoLoadRecipes', 'autoLoadRecipesType', 0),
+        MemberSpec_('secondaryLabels', 'secondaryLabelsType', 0),
+        MemberSpec_('architectures', 'architecturesType', 0),
+        MemberSpec_('flavorSets', 'flavorSetsType', 0),
+        MemberSpec_('containerTemplates', 'containerTemplatesType', 0),
+        MemberSpec_('buildTemplates', 'buildTemplatesType', 0),
+        ]
+    subclass = None
+    superclass = None
+    def __init__(self, sourceTrove=None, useLatest=None, platformName=None, platformUsageTerms=None, platformVersionTrove=None, baseFlavor=None, contentProvider=None, platformInformation=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None):
+        self.sourceTrove = _cast(None, sourceTrove)
+        self.useLatest = _cast(bool, useLatest)
+        self.platformName = platformName
+        self.platformUsageTerms = platformUsageTerms
+        self.platformVersionTrove = platformVersionTrove
+        self.baseFlavor = baseFlavor
+        self.contentProvider = contentProvider
+        self.platformInformation = platformInformation
+        self.searchPaths = searchPaths
+        self.factorySources = factorySources
+        self.autoLoadRecipes = autoLoadRecipes
+        self.secondaryLabels = secondaryLabels
+        self.architectures = architectures
+        self.flavorSets = flavorSets
+        self.containerTemplates = containerTemplates
+        self.buildTemplates = buildTemplates
+    def factory(*args_, **kwargs_):
+        if platformType.subclass:
+            return platformType.subclass(*args_, **kwargs_)
+        else:
+            return platformType(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_platformName(self): return self.platformName
+    def set_platformName(self, platformName): self.platformName = platformName
+    def get_platformUsageTerms(self): return self.platformUsageTerms
+    def set_platformUsageTerms(self, platformUsageTerms): self.platformUsageTerms = platformUsageTerms
+    def get_platformVersionTrove(self): return self.platformVersionTrove
+    def set_platformVersionTrove(self, platformVersionTrove): self.platformVersionTrove = platformVersionTrove
+    def get_baseFlavor(self): return self.baseFlavor
+    def set_baseFlavor(self, baseFlavor): self.baseFlavor = baseFlavor
+    def validate_baseFlavor(self, value):
+        # validate type baseFlavor
+        pass
+    def get_contentProvider(self): return self.contentProvider
+    def set_contentProvider(self, contentProvider): self.contentProvider = contentProvider
+    def get_platformInformation(self): return self.platformInformation
+    def set_platformInformation(self, platformInformation): self.platformInformation = platformInformation
+    def get_searchPaths(self): return self.searchPaths
+    def set_searchPaths(self, searchPaths): self.searchPaths = searchPaths
+    def get_factorySources(self): return self.factorySources
+    def set_factorySources(self, factorySources): self.factorySources = factorySources
+    def get_autoLoadRecipes(self): return self.autoLoadRecipes
+    def set_autoLoadRecipes(self, autoLoadRecipes): self.autoLoadRecipes = autoLoadRecipes
+    def get_secondaryLabels(self): return self.secondaryLabels
+    def set_secondaryLabels(self, secondaryLabels): self.secondaryLabels = secondaryLabels
+    def get_architectures(self): return self.architectures
+    def set_architectures(self, architectures): self.architectures = architectures
+    def get_flavorSets(self): return self.flavorSets
+    def set_flavorSets(self, flavorSets): self.flavorSets = flavorSets
+    def get_containerTemplates(self): return self.containerTemplates
+    def set_containerTemplates(self, containerTemplates): self.containerTemplates = containerTemplates
+    def get_buildTemplates(self): return self.buildTemplates
+    def set_buildTemplates(self, buildTemplates): self.buildTemplates = buildTemplates
+    def get_sourceTrove(self): return self.sourceTrove
+    def set_sourceTrove(self, sourceTrove): self.sourceTrove = sourceTrove
+    def get_useLatest(self): return self.useLatest
+    def set_useLatest(self, useLatest): self.useLatest = useLatest
+    def export(self, outfile, level, namespace_='rpd:', name_='platformType', namespacedef_=''):
+        showIndent(outfile, level)
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        self.exportAttributes(outfile, level, namespace_, name_='platformType')
+        if self.hasContent_():
+            outfile.write('>\n')
+            self.exportChildren(outfile, level + 1, namespace_, name_)
+            showIndent(outfile, level)
+            outfile.write('</%s%s>\n' % (namespace_, name_))
+        else:
+            outfile.write('/>\n')
+    def exportAttributes(self, outfile, level, namespace_='rpd:', name_='platformType'):
+        if self.sourceTrove is not None:
+            outfile.write(' sourceTrove=%s' % (self.format_string(quote_attrib(self.sourceTrove).encode(ExternalEncoding), input_name='sourceTrove'), ))
+        if self.useLatest is not None:
+            outfile.write(' useLatest="%s"' % self.format_boolean(str_lower(str(self.useLatest)), input_name='useLatest'))
+    def exportChildren(self, outfile, level, namespace_='rpd:', name_='platformType'):
+        if self.platformName is not None:
+            showIndent(outfile, level)
+            outfile.write('<%splatformName>%s</%splatformName>\n' % (namespace_, self.format_string(quote_xml(self.platformName).encode(ExternalEncoding), input_name='platformName'), namespace_))
+        if self.platformUsageTerms is not None:
+            showIndent(outfile, level)
+            outfile.write('<%splatformUsageTerms>%s</%splatformUsageTerms>\n' % (namespace_, self.format_string(quote_xml(self.platformUsageTerms).encode(ExternalEncoding), input_name='platformUsageTerms'), namespace_))
+        if self.platformVersionTrove is not None:
+            showIndent(outfile, level)
+            outfile.write('<%splatformVersionTrove>%s</%splatformVersionTrove>\n' % (namespace_, self.format_string(quote_xml(self.platformVersionTrove).encode(ExternalEncoding), input_name='platformVersionTrove'), namespace_))
+        if self.baseFlavor is not None:
+            showIndent(outfile, level)
+            outfile.write('<%sbaseFlavor>%s</%sbaseFlavor>\n' % (namespace_, self.format_string(quote_xml(self.baseFlavor).encode(ExternalEncoding), input_name='baseFlavor'), namespace_))
+        if self.contentProvider:
+            self.contentProvider.export(outfile, level, namespace_, name_='contentProvider')
+        if self.platformInformation:
+            self.platformInformation.export(outfile, level, namespace_, name_='platformInformation')
+        if self.searchPaths:
+            self.searchPaths.export(outfile, level, namespace_, name_='searchPaths')
+        if self.factorySources:
+            self.factorySources.export(outfile, level, namespace_, name_='factorySources')
+        if self.autoLoadRecipes:
+            self.autoLoadRecipes.export(outfile, level, namespace_, name_='autoLoadRecipes')
+        if self.secondaryLabels:
+            self.secondaryLabels.export(outfile, level, namespace_, name_='secondaryLabels')
+        if self.architectures:
+            self.architectures.export(outfile, level, namespace_, name_='architectures')
+        if self.flavorSets:
+            self.flavorSets.export(outfile, level, namespace_, name_='flavorSets')
+        if self.containerTemplates:
+            self.containerTemplates.export(outfile, level, namespace_, name_='containerTemplates')
+        if self.buildTemplates:
+            self.buildTemplates.export(outfile, level, namespace_, name_='buildTemplates')
+    def hasContent_(self):
+        if (
+            self.platformName is not None or
+            self.platformUsageTerms is not None or
+            self.platformVersionTrove is not None or
+            self.baseFlavor is not None or
+            self.contentProvider is not None or
+            self.platformInformation is not None or
+            self.searchPaths is not None or
+            self.factorySources is not None or
+            self.autoLoadRecipes is not None or
+            self.secondaryLabels is not None or
+            self.architectures is not None or
+            self.flavorSets is not None or
+            self.containerTemplates is not None or
+            self.buildTemplates is not None
+            ):
+            return True
+        else:
+            return False
+    def exportLiteral(self, outfile, level, name_='platformType'):
+        level += 1
+        self.exportLiteralAttributes(outfile, level, name_)
+        if self.hasContent_():
+            self.exportLiteralChildren(outfile, level, name_)
+    def exportLiteralAttributes(self, outfile, level, name_):
+        if self.sourceTrove is not None:
+            showIndent(outfile, level)
+            outfile.write('sourceTrove = "%s",\n' % (self.sourceTrove,))
+        if self.useLatest is not None:
+            showIndent(outfile, level)
+            outfile.write('useLatest = %s,\n' % (self.useLatest,))
+    def exportLiteralChildren(self, outfile, level, name_):
+        if self.platformName is not None:
+            showIndent(outfile, level)
+            outfile.write('platformName=%s,\n' % quote_python(self.platformName).encode(ExternalEncoding))
+        if self.platformUsageTerms is not None:
+            showIndent(outfile, level)
+            outfile.write('platformUsageTerms=%s,\n' % quote_python(self.platformUsageTerms).encode(ExternalEncoding))
+        if self.platformVersionTrove is not None:
+            showIndent(outfile, level)
+            outfile.write('platformVersionTrove=%s,\n' % quote_python(self.platformVersionTrove).encode(ExternalEncoding))
+        if self.baseFlavor is not None:
+            showIndent(outfile, level)
+            outfile.write('baseFlavor=%s,\n' % quote_python(self.baseFlavor).encode(ExternalEncoding))
+        if self.contentProvider is not None:
+            showIndent(outfile, level)
+            outfile.write('contentProvider=model_.contentProviderType(\n')
+            self.contentProvider.exportLiteral(outfile, level, name_='contentProvider')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.platformInformation is not None:
+            showIndent(outfile, level)
+            outfile.write('platformInformation=model_.platformInformationType(\n')
+            self.platformInformation.exportLiteral(outfile, level, name_='platformInformation')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.searchPaths is not None:
+            showIndent(outfile, level)
+            outfile.write('searchPaths=model_.searchPathListType(\n')
+            self.searchPaths.exportLiteral(outfile, level, name_='searchPaths')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.factorySources is not None:
+            showIndent(outfile, level)
+            outfile.write('factorySources=model_.factorySourceListType(\n')
+            self.factorySources.exportLiteral(outfile, level, name_='factorySources')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.autoLoadRecipes is not None:
+            showIndent(outfile, level)
+            outfile.write('autoLoadRecipes=model_.autoLoadRecipesType(\n')
+            self.autoLoadRecipes.exportLiteral(outfile, level, name_='autoLoadRecipes')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.secondaryLabels is not None:
+            showIndent(outfile, level)
+            outfile.write('secondaryLabels=model_.secondaryLabelsType(\n')
+            self.secondaryLabels.exportLiteral(outfile, level, name_='secondaryLabels')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.architectures is not None:
+            showIndent(outfile, level)
+            outfile.write('architectures=model_.architecturesType(\n')
+            self.architectures.exportLiteral(outfile, level, name_='architectures')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.flavorSets is not None:
+            showIndent(outfile, level)
+            outfile.write('flavorSets=model_.flavorSetsType(\n')
+            self.flavorSets.exportLiteral(outfile, level, name_='flavorSets')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.containerTemplates is not None:
+            showIndent(outfile, level)
+            outfile.write('containerTemplates=model_.containerTemplatesType(\n')
+            self.containerTemplates.exportLiteral(outfile, level, name_='containerTemplates')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.buildTemplates is not None:
+            showIndent(outfile, level)
+            outfile.write('buildTemplates=model_.buildTemplatesType(\n')
+            self.buildTemplates.exportLiteral(outfile, level, name_='buildTemplates')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+    def build(self, node_):
+        attrs = node_.attributes
+        self.buildAttributes(attrs)
+        for child_ in node_.childNodes:
+            nodeName_ = child_.nodeName.split(':')[-1]
+            self.buildChildren(child_, nodeName_)
+    def buildAttributes(self, attrs):
+        if attrs.get('sourceTrove'):
+            self.sourceTrove = attrs.get('sourceTrove').value
+        if attrs.get('useLatest'):
+            if attrs.get('useLatest').value in ('true', '1'):
+                self.useLatest = True
+            elif attrs.get('useLatest').value in ('false', '0'):
+                self.useLatest = False
+            else:
+                raise ValueError('Bad boolean attribute (useLatest)')
+    def buildChildren(self, child_, nodeName_):
+        if child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'platformName':
+            platformName_ = ''
+            for text__content_ in child_.childNodes:
+                platformName_ += text__content_.nodeValue
+            self.platformName = platformName_
+        elif child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'platformUsageTerms':
+            platformUsageTerms_ = ''
+            for text__content_ in child_.childNodes:
+                platformUsageTerms_ += text__content_.nodeValue
+            self.platformUsageTerms = platformUsageTerms_
+        elif child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'platformVersionTrove':
+            platformVersionTrove_ = ''
+            for text__content_ in child_.childNodes:
+                platformVersionTrove_ += text__content_.nodeValue
+            self.platformVersionTrove = platformVersionTrove_
+        elif child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'baseFlavor':
+            baseFlavor_ = ''
+            for text__content_ in child_.childNodes:
+                baseFlavor_ += text__content_.nodeValue
+            self.baseFlavor = baseFlavor_
+            self.validate_baseFlavor(self.baseFlavor)    # validate type baseFlavor
+        elif child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'contentProvider':
+            obj_ = contentProviderType.factory()
+            obj_.build(child_)
+            self.set_contentProvider(obj_)
+        elif child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'platformInformation':
+            obj_ = platformInformationType.factory()
+            obj_.build(child_)
+            self.set_platformInformation(obj_)
+        elif child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'searchPaths':
+            obj_ = searchPathListType.factory()
+            obj_.build(child_)
+            self.set_searchPaths(obj_)
+        elif child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'factorySources':
+            obj_ = factorySourceListType.factory()
+            obj_.build(child_)
+            self.set_factorySources(obj_)
+        elif child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'autoLoadRecipes':
+            obj_ = autoLoadRecipesType.factory()
+            obj_.build(child_)
+            self.set_autoLoadRecipes(obj_)
+        elif child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'secondaryLabels':
+            obj_ = secondaryLabelsType.factory()
+            obj_.build(child_)
+            self.set_secondaryLabels(obj_)
+        elif child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'architectures':
+            obj_ = architecturesType.factory()
+            obj_.build(child_)
+            self.set_architectures(obj_)
+        elif child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'flavorSets':
+            obj_ = flavorSetsType.factory()
+            obj_.build(child_)
+            self.set_flavorSets(obj_)
+        elif child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'containerTemplates':
+            obj_ = containerTemplatesType.factory()
+            obj_.build(child_)
+            self.set_containerTemplates(obj_)
+        elif child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'buildTemplates':
+            obj_ = buildTemplatesType.factory()
+            obj_.build(child_)
+            self.set_buildTemplates(obj_)
+# end class platformType
+
+
 class productDefinition(GeneratedsSuper):
     member_data_items_ = [
         MemberSpec_('version', 'xsd:string', 0),
@@ -3045,6 +3734,7 @@ class productDefinition(GeneratedsSuper):
         MemberSpec_('baseLabel', 'xsd:string', 0),
         MemberSpec_('baseFlavor', ['flavorStringType', 'xsd:string'], 0),
         MemberSpec_('stages', 'stageListType', 0),
+        MemberSpec_('platformInformation', 'platformInformationType', 0),
         MemberSpec_('searchPaths', 'searchPathListType', 0),
         MemberSpec_('factorySources', 'factorySourceListType', 0),
         MemberSpec_('autoLoadRecipes', 'autoLoadRecipesType', 0),
@@ -3058,7 +3748,7 @@ class productDefinition(GeneratedsSuper):
         ]
     subclass = None
     superclass = None
-    def __init__(self, version=None, productName=None, productShortname=None, productDescription=None, productVersion=None, productVersionDescription=None, conaryRepositoryHostname=None, conaryNamespace=None, imageGroup=None, sourceGroup=None, baseLabel=None, baseFlavor=None, stages=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None, buildDefinition=None, platform=None):
+    def __init__(self, version=None, productName=None, productShortname=None, productDescription=None, productVersion=None, productVersionDescription=None, conaryRepositoryHostname=None, conaryNamespace=None, imageGroup=None, sourceGroup=None, baseLabel=None, baseFlavor=None, stages=None, platformInformation=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None, buildDefinition=None, platform=None):
         self.version = _cast(None, version)
         self.productName = productName
         self.productShortname = productShortname
@@ -3072,6 +3762,7 @@ class productDefinition(GeneratedsSuper):
         self.baseLabel = baseLabel
         self.baseFlavor = baseFlavor
         self.stages = stages
+        self.platformInformation = platformInformation
         self.searchPaths = searchPaths
         self.factorySources = factorySources
         self.autoLoadRecipes = autoLoadRecipes
@@ -3121,6 +3812,8 @@ class productDefinition(GeneratedsSuper):
         pass
     def get_stages(self): return self.stages
     def set_stages(self, stages): self.stages = stages
+    def get_platformInformation(self): return self.platformInformation
+    def set_platformInformation(self, platformInformation): self.platformInformation = platformInformation
     def get_searchPaths(self): return self.searchPaths
     def set_searchPaths(self, searchPaths): self.searchPaths = searchPaths
     def get_factorySources(self): return self.factorySources
@@ -3193,6 +3886,8 @@ class productDefinition(GeneratedsSuper):
             outfile.write('<%sbaseFlavor>%s</%sbaseFlavor>\n' % (namespace_, self.format_string(quote_xml(self.baseFlavor).encode(ExternalEncoding), input_name='baseFlavor'), namespace_))
         if self.stages:
             self.stages.export(outfile, level, namespace_, name_='stages', )
+        if self.platformInformation:
+            self.platformInformation.export(outfile, level, namespace_, name_='platformInformation')
         if self.searchPaths:
             self.searchPaths.export(outfile, level, namespace_, name_='searchPaths')
         if self.factorySources:
@@ -3227,6 +3922,7 @@ class productDefinition(GeneratedsSuper):
             self.baseLabel is not None or
             self.baseFlavor is not None or
             self.stages is not None or
+            self.platformInformation is not None or
             self.searchPaths is not None or
             self.factorySources is not None or
             self.autoLoadRecipes is not None or
@@ -3288,6 +3984,12 @@ class productDefinition(GeneratedsSuper):
             showIndent(outfile, level)
             outfile.write('stages=model_.stageListType(\n')
             self.stages.exportLiteral(outfile, level, name_='stages')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.platformInformation is not None:
+            showIndent(outfile, level)
+            outfile.write('platformInformation=model_.platformInformationType(\n')
+            self.platformInformation.exportLiteral(outfile, level, name_='platformInformation')
             showIndent(outfile, level)
             outfile.write('),\n')
         if self.searchPaths is not None:
@@ -3435,6 +4137,11 @@ class productDefinition(GeneratedsSuper):
             obj_.build(child_)
             self.set_stages(obj_)
         elif child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'platformInformation':
+            obj_ = platformInformationType.factory()
+            obj_.build(child_)
+            self.set_platformInformation(obj_)
+        elif child_.nodeType == Node.ELEMENT_NODE and \
             nodeName_ == 'searchPaths':
             obj_ = searchPathListType.factory()
             obj_.build(child_)
@@ -3499,12 +4206,12 @@ def usage():
 def parse(inFileName):
     doc = minidom.parse(inFileName)
     rootNode = doc.documentElement
-    rootObj = stageType.factory()
+    rootObj = nameLabelType.factory()
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
     doc = None
 ##     sys.stdout.write('<?xml version="1.0" ?>\n')
-##     rootObj.export(sys.stdout, 0, name_="stageType", 
+##     rootObj.export(sys.stdout, 0, name_="nameLabelType", 
 ##         namespacedef_='')
     return rootObj
 
@@ -3512,12 +4219,12 @@ def parse(inFileName):
 def parseString(inString):
     doc = minidom.parseString(inString)
     rootNode = doc.documentElement
-    rootObj = stageType.factory()
+    rootObj = nameLabelType.factory()
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
     doc = None
 ##     sys.stdout.write('<?xml version="1.0" ?>\n')
-##     rootObj.export(sys.stdout, 0, name_="stageType",
+##     rootObj.export(sys.stdout, 0, name_="nameLabelType",
 ##         namespacedef_='')
     return rootObj
 
@@ -3525,14 +4232,14 @@ def parseString(inString):
 def parseLiteral(inFileName):
     doc = minidom.parse(inFileName)
     rootNode = doc.documentElement
-    rootObj = stageType.factory()
+    rootObj = nameLabelType.factory()
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
     doc = None
 ##     sys.stdout.write('#from supers import *\n\n')
 ##     sys.stdout.write('import supers as model_\n\n')
-##     sys.stdout.write('rootObj = model_.stageType(\n')
-##     rootObj.exportLiteral(sys.stdout, 0, name_="stageType")
+##     sys.stdout.write('rootObj = model_.nameLabelType(\n')
+##     rootObj.exportLiteral(sys.stdout, 0, name_="nameLabelType")
 ##     sys.stdout.write(')\n')
     return rootObj
 
