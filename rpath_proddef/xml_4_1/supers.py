@@ -2614,7 +2614,7 @@ class platformInformationType(GeneratedsSuper):
     member_data_items_ = [
         MemberSpec_('platformClassfier', 'platformClassifierType', 0),
         MemberSpec_('originLabel', 'xsd:string', 0),
-        MemberSpec_('bootstrapTrove', ['troveSpecType', 'xsd:string'], 0),
+        MemberSpec_('bootstrapTrove', ['troveSpecType', 'xsd:string'], 1),
         MemberSpec_('rpmRequirement', ['conaryDepType', 'xsd:string'], 1),
         ]
     subclass = None
@@ -2622,7 +2622,10 @@ class platformInformationType(GeneratedsSuper):
     def __init__(self, platformClassfier=None, originLabel=None, bootstrapTrove=None, rpmRequirement=None):
         self.platformClassfier = platformClassfier
         self.originLabel = originLabel
-        self.bootstrapTrove = bootstrapTrove
+        if bootstrapTrove is None:
+            self.bootstrapTrove = []
+        else:
+            self.bootstrapTrove = bootstrapTrove
         if rpmRequirement is None:
             self.rpmRequirement = []
         else:
@@ -2639,6 +2642,8 @@ class platformInformationType(GeneratedsSuper):
     def set_originLabel(self, originLabel): self.originLabel = originLabel
     def get_bootstrapTrove(self): return self.bootstrapTrove
     def set_bootstrapTrove(self, bootstrapTrove): self.bootstrapTrove = bootstrapTrove
+    def add_bootstrapTrove(self, value): self.bootstrapTrove.append(value)
+    def insert_bootstrapTrove(self, index, value): self.bootstrapTrove[index] = value
     def validate_bootstrapTrove(self, value):
         # validate type bootstrapTrove
         pass
@@ -2668,9 +2673,9 @@ class platformInformationType(GeneratedsSuper):
         if self.originLabel is not None:
             showIndent(outfile, level)
             outfile.write('<%soriginLabel>%s</%soriginLabel>\n' % (namespace_, self.format_string(quote_xml(self.originLabel).encode(ExternalEncoding), input_name='originLabel'), namespace_))
-        if self.bootstrapTrove is not None:
+        for bootstrapTrove_ in self.bootstrapTrove:
             showIndent(outfile, level)
-            outfile.write('<%sbootstrapTrove>%s</%sbootstrapTrove>\n' % (namespace_, self.format_string(quote_xml(self.bootstrapTrove).encode(ExternalEncoding), input_name='bootstrapTrove'), namespace_))
+            outfile.write('<%sbootstrapTrove>%s</%sbootstrapTrove>\n' % (namespace_, self.format_string(quote_xml(bootstrapTrove_).encode(ExternalEncoding), input_name='bootstrapTrove'), namespace_))
         for rpmRequirement_ in self.rpmRequirement:
             showIndent(outfile, level)
             outfile.write('<%srpmRequirement>%s</%srpmRequirement>\n' % (namespace_, self.format_string(quote_xml(rpmRequirement_).encode(ExternalEncoding), input_name='rpmRequirement'), namespace_))
@@ -2678,7 +2683,7 @@ class platformInformationType(GeneratedsSuper):
         if (
             self.platformClassfier is not None or
             self.originLabel is not None or
-            self.bootstrapTrove is not None or
+            self.bootstrapTrove or
             self.rpmRequirement
             ):
             return True
@@ -2701,9 +2706,15 @@ class platformInformationType(GeneratedsSuper):
         if self.originLabel is not None:
             showIndent(outfile, level)
             outfile.write('originLabel=%s,\n' % quote_python(self.originLabel).encode(ExternalEncoding))
-        if self.bootstrapTrove is not None:
+        showIndent(outfile, level)
+        outfile.write('bootstrapTrove=[\n')
+        level += 1
+        for bootstrapTrove_ in self.bootstrapTrove:
             showIndent(outfile, level)
-            outfile.write('bootstrapTrove=%s,\n' % quote_python(self.bootstrapTrove).encode(ExternalEncoding))
+            outfile.write('%s,\n' % quote_python(bootstrapTrove_).encode(ExternalEncoding))
+        level -= 1
+        showIndent(outfile, level)
+        outfile.write('],\n')
         showIndent(outfile, level)
         outfile.write('rpmRequirement=[\n')
         level += 1
@@ -2738,7 +2749,7 @@ class platformInformationType(GeneratedsSuper):
             bootstrapTrove_ = ''
             for text__content_ in child_.childNodes:
                 bootstrapTrove_ += text__content_.nodeValue
-            self.bootstrapTrove = bootstrapTrove_
+            self.bootstrapTrove.append(bootstrapTrove_)
             self.validate_bootstrapTrove(self.bootstrapTrove)    # validate type bootstrapTrove
         elif child_.nodeType == Node.ELEMENT_NODE and \
             nodeName_ == 'rpmRequirement':
