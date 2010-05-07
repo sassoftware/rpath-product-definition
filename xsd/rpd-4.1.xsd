@@ -260,10 +260,10 @@
           label if no <platformInformation> element exists in the parent. -->
         <xsd:element name="originLabel" type="xsd:string"
             minOccurs="1" maxOccurs="1" />
-        <!-- If provided, this trove will be installed before the product
+        <!-- If provided, these troves will be installed before the product
           contents in a rMake chroot or rBuilder image. -->
         <xsd:element name="bootstrapTrove" type="rpd:troveSpecType"
-            minOccurs="0" maxOccurs="1" />
+            minOccurs="0" maxOccurs="unbounded" />
         <!-- If provided, a trove satisfying any of these deps will be used by
           Conary, rMake, or rBuilder to choose a *system* RPM to use to install
           the product group. -->
