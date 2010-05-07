@@ -253,7 +253,7 @@
     <xsd:complexType name="platformInformationType">
       <xsd:sequence>
         <!-- Identifies the platform using well-known keywords. -->
-        <xsd:element name="platformClassfier" type="rpd:platformClassifierType"
+        <xsd:element name="platformClassifier" type="rpd:platformClassifierType"
             minOccurs="0" maxOccurs="1" />
         <!-- Label from which the platform was originally derived. It must be
           copied from the parent platform, or set to the parent platform's

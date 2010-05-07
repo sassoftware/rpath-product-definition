@@ -175,8 +175,8 @@ supermod.platformClassifierType.subclass = platformClassifierTypeSub
 
 
 class platformInformationTypeSub(supermod.platformInformationType):
-    def __init__(self, platformClassfier=None, originLabel=None, bootstrapTrove=None, rpmRequirement=None):
-        supermod.platformInformationType.__init__(self, platformClassfier, originLabel, bootstrapTrove, rpmRequirement)
+    def __init__(self, platformClassifier=None, originLabel=None, bootstrapTrove=None, rpmRequirement=None):
+        supermod.platformInformationType.__init__(self, platformClassifier, originLabel, bootstrapTrove, rpmRequirement)
 supermod.platformInformationType.subclass = platformInformationTypeSub
 # end class platformInformationTypeSub
 

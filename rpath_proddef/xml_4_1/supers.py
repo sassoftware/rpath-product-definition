@@ -2612,15 +2612,15 @@ class platformClassifierType(GeneratedsSuper):
 
 class platformInformationType(GeneratedsSuper):
     member_data_items_ = [
-        MemberSpec_('platformClassfier', 'platformClassifierType', 0),
+        MemberSpec_('platformClassifier', 'platformClassifierType', 0),
         MemberSpec_('originLabel', 'xsd:string', 0),
         MemberSpec_('bootstrapTrove', ['troveSpecType', 'xsd:string'], 1),
         MemberSpec_('rpmRequirement', ['conaryDepType', 'xsd:string'], 1),
         ]
     subclass = None
     superclass = None
-    def __init__(self, platformClassfier=None, originLabel=None, bootstrapTrove=None, rpmRequirement=None):
-        self.platformClassfier = platformClassfier
+    def __init__(self, platformClassifier=None, originLabel=None, bootstrapTrove=None, rpmRequirement=None):
+        self.platformClassifier = platformClassifier
         self.originLabel = originLabel
         if bootstrapTrove is None:
             self.bootstrapTrove = []
@@ -2636,8 +2636,8 @@ class platformInformationType(GeneratedsSuper):
         else:
             return platformInformationType(*args_, **kwargs_)
     factory = staticmethod(factory)
-    def get_platformClassfier(self): return self.platformClassfier
-    def set_platformClassfier(self, platformClassfier): self.platformClassfier = platformClassfier
+    def get_platformClassifier(self): return self.platformClassifier
+    def set_platformClassifier(self, platformClassifier): self.platformClassifier = platformClassifier
     def get_originLabel(self): return self.originLabel
     def set_originLabel(self, originLabel): self.originLabel = originLabel
     def get_bootstrapTrove(self): return self.bootstrapTrove
@@ -2668,8 +2668,8 @@ class platformInformationType(GeneratedsSuper):
     def exportAttributes(self, outfile, level, namespace_='rpd:', name_='platformInformationType'):
         pass
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='platformInformationType'):
-        if self.platformClassfier:
-            self.platformClassfier.export(outfile, level, namespace_, name_='platformClassfier')
+        if self.platformClassifier:
+            self.platformClassifier.export(outfile, level, namespace_, name_='platformClassifier')
         if self.originLabel is not None:
             showIndent(outfile, level)
             outfile.write('<%soriginLabel>%s</%soriginLabel>\n' % (namespace_, self.format_string(quote_xml(self.originLabel).encode(ExternalEncoding), input_name='originLabel'), namespace_))
@@ -2681,7 +2681,7 @@ class platformInformationType(GeneratedsSuper):
             outfile.write('<%srpmRequirement>%s</%srpmRequirement>\n' % (namespace_, self.format_string(quote_xml(rpmRequirement_).encode(ExternalEncoding), input_name='rpmRequirement'), namespace_))
     def hasContent_(self):
         if (
-            self.platformClassfier is not None or
+            self.platformClassifier is not None or
             self.originLabel is not None or
             self.bootstrapTrove or
             self.rpmRequirement
@@ -2697,10 +2697,10 @@ class platformInformationType(GeneratedsSuper):
     def exportLiteralAttributes(self, outfile, level, name_):
         pass
     def exportLiteralChildren(self, outfile, level, name_):
-        if self.platformClassfier is not None:
+        if self.platformClassifier is not None:
             showIndent(outfile, level)
-            outfile.write('platformClassfier=model_.platformClassifierType(\n')
-            self.platformClassfier.exportLiteral(outfile, level, name_='platformClassfier')
+            outfile.write('platformClassifier=model_.platformClassifierType(\n')
+            self.platformClassifier.exportLiteral(outfile, level, name_='platformClassifier')
             showIndent(outfile, level)
             outfile.write('),\n')
         if self.originLabel is not None:
@@ -2734,10 +2734,10 @@ class platformInformationType(GeneratedsSuper):
         pass
     def buildChildren(self, child_, nodeName_):
         if child_.nodeType == Node.ELEMENT_NODE and \
-            nodeName_ == 'platformClassfier':
+            nodeName_ == 'platformClassifier':
             obj_ = platformClassifierType.factory()
             obj_.build(child_)
-            self.set_platformClassfier(obj_)
+            self.set_platformClassifier(obj_)
         elif child_.nodeType == Node.ELEMENT_NODE and \
             nodeName_ == 'originLabel':
             originLabel_ = ''
