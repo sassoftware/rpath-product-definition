@@ -35,6 +35,13 @@ install: install-subdirs install-compat
 clean: clean-subdirs default-clean
 
 
+generate:
+	make -C rpath_proddef generate
+
+validate-schema:
+	make -C xsd validate-schema
+
+
 
 install-compat:
 	# Compatibility stubs for old rbuild (RPCL-63)

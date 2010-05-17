@@ -151,15 +151,15 @@ class MixedContainer:
     def exportLiteral(self, outfile, level, name):
         if self.category == MixedContainer.CategoryText:
             showIndent(outfile, level)
-            outfile.write('MixedContainer(%d, %d, "%s", "%s"),\n' % \
+            outfile.write('model_.MixedContainer(%d, %d, "%s", "%s"),\n' % \
                 (self.category, self.content_type, self.name, self.value))
         elif self.category == MixedContainer.CategorySimple:
             showIndent(outfile, level)
-            outfile.write('MixedContainer(%d, %d, "%s", "%s"),\n' % \
+            outfile.write('model_.MixedContainer(%d, %d, "%s", "%s"),\n' % \
                 (self.category, self.content_type, self.name, self.value))
         else:    # category == MixedContainer.CategoryComplex
             showIndent(outfile, level)
-            outfile.write('MixedContainer(%d, %d, "%s",\n' % \
+            outfile.write('model_.MixedContainer(%d, %d, "%s",\n' % \
                 (self.category, self.content_type, self.name,))
             self.value.exportLiteral(outfile, level + 1)
             showIndent(outfile, level)
@@ -237,9 +237,9 @@ class stageType(GeneratedsSuper):
             value=quote_xml('%s' % self.valueOf_)
             value=value.replace('![CDATA','<![CDATA')
             value=value.replace(']]',']]>')
-            outfile.write(value)
+            outfile.write(value.encode(ExternalEncoding))
         else:
-            outfile.write(quote_xml('%s' % self.valueOf_))
+            outfile.write(quote_xml('%s' % self.valueOf_.encode(ExternalEncoding)))
     def hasContent_(self):
         if (
             self.valueOf_
@@ -255,13 +255,13 @@ class stageType(GeneratedsSuper):
     def exportLiteralAttributes(self, outfile, level, name_):
         if self.labelSuffix is not None:
             showIndent(outfile, level)
-            outfile.write('labelSuffix = %s,\n' % (self.labelSuffix,))
+            outfile.write('labelSuffix = "%s",\n' % (self.labelSuffix,))
         if self.name is not None:
             showIndent(outfile, level)
-            outfile.write('name = %s,\n' % (self.name,))
+            outfile.write('name = "%s",\n' % (self.name,))
     def exportLiteralChildren(self, outfile, level, name_):
         showIndent(outfile, level)
-        outfile.write('valueOf_ = "%s",\n' % (self.valueOf_,))
+        outfile.write('valueOf_ = """%s""",\n' % (self.valueOf_,))
     def build(self, node_):
         attrs = node_.attributes
         self.buildAttributes(attrs)
@@ -343,10 +343,10 @@ class stageListType(GeneratedsSuper):
         showIndent(outfile, level)
         outfile.write('stage=[\n')
         level += 1
-        for stage in self.stage:
+        for stage_ in self.stage:
             showIndent(outfile, level)
-            outfile.write('model_.stage(\n')
-            stage.exportLiteral(outfile, level, name_='stage')
+            outfile.write('model_.stageType(\n')
+            stage_.exportLiteral(outfile, level, name_='stageType')
             showIndent(outfile, level)
             outfile.write('),\n')
         level -= 1
@@ -419,9 +419,9 @@ class searchPathType(GeneratedsSuper):
             value=quote_xml('%s' % self.valueOf_)
             value=value.replace('![CDATA','<![CDATA')
             value=value.replace(']]',']]>')
-            outfile.write(value)
+            outfile.write(value.encode(ExternalEncoding))
         else:
-            outfile.write(quote_xml('%s' % self.valueOf_))
+            outfile.write(quote_xml('%s' % self.valueOf_.encode(ExternalEncoding)))
     def hasContent_(self):
         if (
             self.valueOf_
@@ -437,16 +437,16 @@ class searchPathType(GeneratedsSuper):
     def exportLiteralAttributes(self, outfile, level, name_):
         if self.troveName is not None:
             showIndent(outfile, level)
-            outfile.write('troveName = %s,\n' % (self.troveName,))
+            outfile.write('troveName = "%s",\n' % (self.troveName,))
         if self.version is not None:
             showIndent(outfile, level)
-            outfile.write('version = %s,\n' % (self.version,))
+            outfile.write('version = "%s",\n' % (self.version,))
         if self.label is not None:
             showIndent(outfile, level)
-            outfile.write('label = %s,\n' % (self.label,))
+            outfile.write('label = "%s",\n' % (self.label,))
     def exportLiteralChildren(self, outfile, level, name_):
         showIndent(outfile, level)
-        outfile.write('valueOf_ = "%s",\n' % (self.valueOf_,))
+        outfile.write('valueOf_ = """%s""",\n' % (self.valueOf_,))
     def build(self, node_):
         attrs = node_.attributes
         self.buildAttributes(attrs)
@@ -541,10 +541,10 @@ class searchPathListType(GeneratedsSuper):
         showIndent(outfile, level)
         outfile.write('searchPath=[\n')
         level += 1
-        for searchPath in self.searchPath:
+        for searchPath_ in self.searchPath:
             showIndent(outfile, level)
-            outfile.write('model_.searchPath(\n')
-            searchPath.exportLiteral(outfile, level, name_='searchPath')
+            outfile.write('model_.searchPathType(\n')
+            searchPath_.exportLiteral(outfile, level, name_='searchPathType')
             showIndent(outfile, level)
             outfile.write('),\n')
         level -= 1
@@ -622,10 +622,10 @@ class factorySourceListType(GeneratedsSuper):
         showIndent(outfile, level)
         outfile.write('factorySource=[\n')
         level += 1
-        for factorySource in self.factorySource:
+        for factorySource_ in self.factorySource:
             showIndent(outfile, level)
-            outfile.write('model_.factorySource(\n')
-            factorySource.exportLiteral(outfile, level, name_='factorySource')
+            outfile.write('model_.searchPathType(\n')
+            factorySource_.exportLiteral(outfile, level, name_='searchPathType')
             showIndent(outfile, level)
             outfile.write('),\n')
         level -= 1
@@ -716,9 +716,9 @@ class amiImageType(GeneratedsSuper):
             value=quote_xml('%s' % self.valueOf_)
             value=value.replace('![CDATA','<![CDATA')
             value=value.replace(']]',']]>')
-            outfile.write(value)
+            outfile.write(value.encode(ExternalEncoding))
         else:
-            outfile.write(quote_xml('%s' % self.valueOf_))
+            outfile.write(quote_xml('%s' % self.valueOf_.encode(ExternalEncoding)))
     def hasContent_(self):
         if (
             self.valueOf_
@@ -737,22 +737,22 @@ class amiImageType(GeneratedsSuper):
             outfile.write('autoResolve = %s,\n' % (self.autoResolve,))
         if self.freespace is not None:
             showIndent(outfile, level)
-            outfile.write('freespace = %s,\n' % (self.freespace,))
+            outfile.write('freespace = %d,\n' % (self.freespace,))
         if self.name is not None:
             showIndent(outfile, level)
-            outfile.write('name = %s,\n' % (self.name,))
+            outfile.write('name = "%s",\n' % (self.name,))
         if self.baseFileName is not None:
             showIndent(outfile, level)
-            outfile.write('baseFileName = %s,\n' % (self.baseFileName,))
+            outfile.write('baseFileName = "%s",\n' % (self.baseFileName,))
         if self.installLabelPath is not None:
             showIndent(outfile, level)
-            outfile.write('installLabelPath = %s,\n' % (self.installLabelPath,))
+            outfile.write('installLabelPath = "%s",\n' % (self.installLabelPath,))
         if self.amiHugeDiskMountpoint is not None:
             showIndent(outfile, level)
-            outfile.write('amiHugeDiskMountpoint = %s,\n' % (self.amiHugeDiskMountpoint,))
+            outfile.write('amiHugeDiskMountpoint = "%s",\n' % (self.amiHugeDiskMountpoint,))
     def exportLiteralChildren(self, outfile, level, name_):
         showIndent(outfile, level)
-        outfile.write('valueOf_ = "%s",\n' % (self.valueOf_,))
+        outfile.write('valueOf_ = """%s""",\n' % (self.valueOf_,))
     def build(self, node_):
         attrs = node_.attributes
         self.buildAttributes(attrs)
@@ -889,9 +889,9 @@ class applianceIsoImageType(GeneratedsSuper):
             value=quote_xml('%s' % self.valueOf_)
             value=value.replace('![CDATA','<![CDATA')
             value=value.replace(']]',']]>')
-            outfile.write(value)
+            outfile.write(value.encode(ExternalEncoding))
         else:
-            outfile.write(quote_xml('%s' % self.valueOf_))
+            outfile.write(quote_xml('%s' % self.valueOf_.encode(ExternalEncoding)))
     def hasContent_(self):
         if (
             self.valueOf_
@@ -907,40 +907,40 @@ class applianceIsoImageType(GeneratedsSuper):
     def exportLiteralAttributes(self, outfile, level, name_):
         if self.maxIsoSize is not None:
             showIndent(outfile, level)
-            outfile.write('maxIsoSize = %s,\n' % (self.maxIsoSize,))
+            outfile.write('maxIsoSize = %d,\n' % (self.maxIsoSize,))
         if self.autoResolve is not None:
             showIndent(outfile, level)
             outfile.write('autoResolve = %s,\n' % (self.autoResolve,))
         if self.bugsUrl is not None:
             showIndent(outfile, level)
-            outfile.write('bugsUrl = %s,\n' % (self.bugsUrl,))
+            outfile.write('bugsUrl = "%s",\n' % (self.bugsUrl,))
         if self.name is not None:
             showIndent(outfile, level)
-            outfile.write('name = %s,\n' % (self.name,))
+            outfile.write('name = "%s",\n' % (self.name,))
         if self.anacondaCustomTrove is not None:
             showIndent(outfile, level)
-            outfile.write('anacondaCustomTrove = "%s",\n' % (self.anacondaCustomTrove,))
+            outfile.write('anacondaCustomTrove = %s,\n' % (self.anacondaCustomTrove,))
         if self.betaNag is not None:
             showIndent(outfile, level)
             outfile.write('betaNag = %s,\n' % (self.betaNag,))
         if self.mediaTemplateTrove is not None:
             showIndent(outfile, level)
-            outfile.write('mediaTemplateTrove = "%s",\n' % (self.mediaTemplateTrove,))
+            outfile.write('mediaTemplateTrove = %s,\n' % (self.mediaTemplateTrove,))
         if self.installLabelPath is not None:
             showIndent(outfile, level)
-            outfile.write('installLabelPath = %s,\n' % (self.installLabelPath,))
+            outfile.write('installLabelPath = "%s",\n' % (self.installLabelPath,))
         if self.anacondaTemplatesTrove is not None:
             showIndent(outfile, level)
-            outfile.write('anacondaTemplatesTrove = "%s",\n' % (self.anacondaTemplatesTrove,))
+            outfile.write('anacondaTemplatesTrove = %s,\n' % (self.anacondaTemplatesTrove,))
         if self.baseFileName is not None:
             showIndent(outfile, level)
-            outfile.write('baseFileName = %s,\n' % (self.baseFileName,))
+            outfile.write('baseFileName = "%s",\n' % (self.baseFileName,))
         if self.showMediaCheck is not None:
             showIndent(outfile, level)
             outfile.write('showMediaCheck = %s,\n' % (self.showMediaCheck,))
     def exportLiteralChildren(self, outfile, level, name_):
         showIndent(outfile, level)
-        outfile.write('valueOf_ = "%s",\n' % (self.valueOf_,))
+        outfile.write('valueOf_ = """%s""",\n' % (self.valueOf_,))
     def build(self, node_):
         attrs = node_.attributes
         self.buildAttributes(attrs)
@@ -1097,9 +1097,9 @@ class installableIsoImageType(GeneratedsSuper):
             value=quote_xml('%s' % self.valueOf_)
             value=value.replace('![CDATA','<![CDATA')
             value=value.replace(']]',']]>')
-            outfile.write(value)
+            outfile.write(value.encode(ExternalEncoding))
         else:
-            outfile.write(quote_xml('%s' % self.valueOf_))
+            outfile.write(quote_xml('%s' % self.valueOf_.encode(ExternalEncoding)))
     def hasContent_(self):
         if (
             self.valueOf_
@@ -1115,40 +1115,40 @@ class installableIsoImageType(GeneratedsSuper):
     def exportLiteralAttributes(self, outfile, level, name_):
         if self.maxIsoSize is not None:
             showIndent(outfile, level)
-            outfile.write('maxIsoSize = %s,\n' % (self.maxIsoSize,))
+            outfile.write('maxIsoSize = %d,\n' % (self.maxIsoSize,))
         if self.autoResolve is not None:
             showIndent(outfile, level)
             outfile.write('autoResolve = %s,\n' % (self.autoResolve,))
         if self.bugsUrl is not None:
             showIndent(outfile, level)
-            outfile.write('bugsUrl = %s,\n' % (self.bugsUrl,))
+            outfile.write('bugsUrl = "%s",\n' % (self.bugsUrl,))
         if self.name is not None:
             showIndent(outfile, level)
-            outfile.write('name = %s,\n' % (self.name,))
+            outfile.write('name = "%s",\n' % (self.name,))
         if self.anacondaCustomTrove is not None:
             showIndent(outfile, level)
-            outfile.write('anacondaCustomTrove = "%s",\n' % (self.anacondaCustomTrove,))
+            outfile.write('anacondaCustomTrove = %s,\n' % (self.anacondaCustomTrove,))
         if self.betaNag is not None:
             showIndent(outfile, level)
             outfile.write('betaNag = %s,\n' % (self.betaNag,))
         if self.mediaTemplateTrove is not None:
             showIndent(outfile, level)
-            outfile.write('mediaTemplateTrove = "%s",\n' % (self.mediaTemplateTrove,))
+            outfile.write('mediaTemplateTrove = %s,\n' % (self.mediaTemplateTrove,))
         if self.installLabelPath is not None:
             showIndent(outfile, level)
-            outfile.write('installLabelPath = %s,\n' % (self.installLabelPath,))
+            outfile.write('installLabelPath = "%s",\n' % (self.installLabelPath,))
         if self.anacondaTemplatesTrove is not None:
             showIndent(outfile, level)
-            outfile.write('anacondaTemplatesTrove = "%s",\n' % (self.anacondaTemplatesTrove,))
+            outfile.write('anacondaTemplatesTrove = %s,\n' % (self.anacondaTemplatesTrove,))
         if self.baseFileName is not None:
             showIndent(outfile, level)
-            outfile.write('baseFileName = %s,\n' % (self.baseFileName,))
+            outfile.write('baseFileName = "%s",\n' % (self.baseFileName,))
         if self.showMediaCheck is not None:
             showIndent(outfile, level)
             outfile.write('showMediaCheck = %s,\n' % (self.showMediaCheck,))
     def exportLiteralChildren(self, outfile, level, name_):
         showIndent(outfile, level)
-        outfile.write('valueOf_ = "%s",\n' % (self.valueOf_,))
+        outfile.write('valueOf_ = """%s""",\n' % (self.valueOf_,))
     def build(self, node_):
         attrs = node_.attributes
         self.buildAttributes(attrs)
@@ -1275,9 +1275,9 @@ class liveIsoImageType(GeneratedsSuper):
             value=quote_xml('%s' % self.valueOf_)
             value=value.replace('![CDATA','<![CDATA')
             value=value.replace(']]',']]>')
-            outfile.write(value)
+            outfile.write(value.encode(ExternalEncoding))
         else:
-            outfile.write(quote_xml('%s' % self.valueOf_))
+            outfile.write(quote_xml('%s' % self.valueOf_.encode(ExternalEncoding)))
     def hasContent_(self):
         if (
             self.valueOf_
@@ -1296,22 +1296,22 @@ class liveIsoImageType(GeneratedsSuper):
             outfile.write('autoResolve = %s,\n' % (self.autoResolve,))
         if self.name is not None:
             showIndent(outfile, level)
-            outfile.write('name = %s,\n' % (self.name,))
+            outfile.write('name = "%s",\n' % (self.name,))
         if self.zisofs is not None:
             showIndent(outfile, level)
             outfile.write('zisofs = %s,\n' % (self.zisofs,))
         if self.baseFileName is not None:
             showIndent(outfile, level)
-            outfile.write('baseFileName = %s,\n' % (self.baseFileName,))
+            outfile.write('baseFileName = "%s",\n' % (self.baseFileName,))
         if self.unionfs is not None:
             showIndent(outfile, level)
             outfile.write('unionfs = %s,\n' % (self.unionfs,))
         if self.installLabelPath is not None:
             showIndent(outfile, level)
-            outfile.write('installLabelPath = %s,\n' % (self.installLabelPath,))
+            outfile.write('installLabelPath = "%s",\n' % (self.installLabelPath,))
     def exportLiteralChildren(self, outfile, level, name_):
         showIndent(outfile, level)
-        outfile.write('valueOf_ = "%s",\n' % (self.valueOf_,))
+        outfile.write('valueOf_ = """%s""",\n' % (self.valueOf_,))
     def build(self, node_):
         attrs = node_.attributes
         self.buildAttributes(attrs)
@@ -1411,9 +1411,9 @@ class netbootImageType(GeneratedsSuper):
             value=quote_xml('%s' % self.valueOf_)
             value=value.replace('![CDATA','<![CDATA')
             value=value.replace(']]',']]>')
-            outfile.write(value)
+            outfile.write(value.encode(ExternalEncoding))
         else:
-            outfile.write(quote_xml('%s' % self.valueOf_))
+            outfile.write(quote_xml('%s' % self.valueOf_.encode(ExternalEncoding)))
     def hasContent_(self):
         if (
             self.valueOf_
@@ -1432,16 +1432,16 @@ class netbootImageType(GeneratedsSuper):
             outfile.write('autoResolve = %s,\n' % (self.autoResolve,))
         if self.baseFileName is not None:
             showIndent(outfile, level)
-            outfile.write('baseFileName = %s,\n' % (self.baseFileName,))
+            outfile.write('baseFileName = "%s",\n' % (self.baseFileName,))
         if self.installLabelPath is not None:
             showIndent(outfile, level)
-            outfile.write('installLabelPath = %s,\n' % (self.installLabelPath,))
+            outfile.write('installLabelPath = "%s",\n' % (self.installLabelPath,))
         if self.name is not None:
             showIndent(outfile, level)
-            outfile.write('name = %s,\n' % (self.name,))
+            outfile.write('name = "%s",\n' % (self.name,))
     def exportLiteralChildren(self, outfile, level, name_):
         showIndent(outfile, level)
-        outfile.write('valueOf_ = "%s",\n' % (self.valueOf_,))
+        outfile.write('valueOf_ = """%s""",\n' % (self.valueOf_,))
     def build(self, node_):
         attrs = node_.attributes
         self.buildAttributes(attrs)
@@ -1539,9 +1539,9 @@ class rawFsImageType(GeneratedsSuper):
             value=quote_xml('%s' % self.valueOf_)
             value=value.replace('![CDATA','<![CDATA')
             value=value.replace(']]',']]>')
-            outfile.write(value)
+            outfile.write(value.encode(ExternalEncoding))
         else:
-            outfile.write(quote_xml('%s' % self.valueOf_))
+            outfile.write(quote_xml('%s' % self.valueOf_.encode(ExternalEncoding)))
     def hasContent_(self):
         if (
             self.valueOf_
@@ -1560,22 +1560,22 @@ class rawFsImageType(GeneratedsSuper):
             outfile.write('autoResolve = %s,\n' % (self.autoResolve,))
         if self.freespace is not None:
             showIndent(outfile, level)
-            outfile.write('freespace = %s,\n' % (self.freespace,))
+            outfile.write('freespace = %d,\n' % (self.freespace,))
         if self.name is not None:
             showIndent(outfile, level)
-            outfile.write('name = %s,\n' % (self.name,))
+            outfile.write('name = "%s",\n' % (self.name,))
         if self.swapSize is not None:
             showIndent(outfile, level)
-            outfile.write('swapSize = %s,\n' % (self.swapSize,))
+            outfile.write('swapSize = %d,\n' % (self.swapSize,))
         if self.baseFileName is not None:
             showIndent(outfile, level)
-            outfile.write('baseFileName = %s,\n' % (self.baseFileName,))
+            outfile.write('baseFileName = "%s",\n' % (self.baseFileName,))
         if self.installLabelPath is not None:
             showIndent(outfile, level)
-            outfile.write('installLabelPath = %s,\n' % (self.installLabelPath,))
+            outfile.write('installLabelPath = "%s",\n' % (self.installLabelPath,))
     def exportLiteralChildren(self, outfile, level, name_):
         showIndent(outfile, level)
-        outfile.write('valueOf_ = "%s",\n' % (self.valueOf_,))
+        outfile.write('valueOf_ = """%s""",\n' % (self.valueOf_,))
     def build(self, node_):
         attrs = node_.attributes
         self.buildAttributes(attrs)
@@ -1687,9 +1687,9 @@ class rawHdImageType(GeneratedsSuper):
             value=quote_xml('%s' % self.valueOf_)
             value=value.replace('![CDATA','<![CDATA')
             value=value.replace(']]',']]>')
-            outfile.write(value)
+            outfile.write(value.encode(ExternalEncoding))
         else:
-            outfile.write(quote_xml('%s' % self.valueOf_))
+            outfile.write(quote_xml('%s' % self.valueOf_.encode(ExternalEncoding)))
     def hasContent_(self):
         if (
             self.valueOf_
@@ -1708,22 +1708,22 @@ class rawHdImageType(GeneratedsSuper):
             outfile.write('autoResolve = %s,\n' % (self.autoResolve,))
         if self.freespace is not None:
             showIndent(outfile, level)
-            outfile.write('freespace = %s,\n' % (self.freespace,))
+            outfile.write('freespace = %d,\n' % (self.freespace,))
         if self.name is not None:
             showIndent(outfile, level)
-            outfile.write('name = %s,\n' % (self.name,))
+            outfile.write('name = "%s",\n' % (self.name,))
         if self.swapSize is not None:
             showIndent(outfile, level)
-            outfile.write('swapSize = %s,\n' % (self.swapSize,))
+            outfile.write('swapSize = %d,\n' % (self.swapSize,))
         if self.baseFileName is not None:
             showIndent(outfile, level)
-            outfile.write('baseFileName = %s,\n' % (self.baseFileName,))
+            outfile.write('baseFileName = "%s",\n' % (self.baseFileName,))
         if self.installLabelPath is not None:
             showIndent(outfile, level)
-            outfile.write('installLabelPath = %s,\n' % (self.installLabelPath,))
+            outfile.write('installLabelPath = "%s",\n' % (self.installLabelPath,))
     def exportLiteralChildren(self, outfile, level, name_):
         showIndent(outfile, level)
-        outfile.write('valueOf_ = "%s",\n' % (self.valueOf_,))
+        outfile.write('valueOf_ = """%s""",\n' % (self.valueOf_,))
     def build(self, node_):
         attrs = node_.attributes
         self.buildAttributes(attrs)
@@ -1829,9 +1829,9 @@ class tarballImageType(GeneratedsSuper):
             value=quote_xml('%s' % self.valueOf_)
             value=value.replace('![CDATA','<![CDATA')
             value=value.replace(']]',']]>')
-            outfile.write(value)
+            outfile.write(value.encode(ExternalEncoding))
         else:
-            outfile.write(quote_xml('%s' % self.valueOf_))
+            outfile.write(quote_xml('%s' % self.valueOf_.encode(ExternalEncoding)))
     def hasContent_(self):
         if (
             self.valueOf_
@@ -1850,19 +1850,19 @@ class tarballImageType(GeneratedsSuper):
             outfile.write('autoResolve = %s,\n' % (self.autoResolve,))
         if self.baseFileName is not None:
             showIndent(outfile, level)
-            outfile.write('baseFileName = %s,\n' % (self.baseFileName,))
+            outfile.write('baseFileName = "%s",\n' % (self.baseFileName,))
         if self.installLabelPath is not None:
             showIndent(outfile, level)
-            outfile.write('installLabelPath = %s,\n' % (self.installLabelPath,))
+            outfile.write('installLabelPath = "%s",\n' % (self.installLabelPath,))
         if self.name is not None:
             showIndent(outfile, level)
-            outfile.write('name = %s,\n' % (self.name,))
+            outfile.write('name = "%s",\n' % (self.name,))
         if self.swapSize is not None:
             showIndent(outfile, level)
-            outfile.write('swapSize = %s,\n' % (self.swapSize,))
+            outfile.write('swapSize = %d,\n' % (self.swapSize,))
     def exportLiteralChildren(self, outfile, level, name_):
         showIndent(outfile, level)
-        outfile.write('valueOf_ = "%s",\n' % (self.valueOf_,))
+        outfile.write('valueOf_ = """%s""",\n' % (self.valueOf_,))
     def build(self, node_):
         attrs = node_.attributes
         self.buildAttributes(attrs)
@@ -1943,9 +1943,9 @@ class updateIsoImageType(GeneratedsSuper):
             value=quote_xml('%s' % self.valueOf_)
             value=value.replace('![CDATA','<![CDATA')
             value=value.replace(']]',']]>')
-            outfile.write(value)
+            outfile.write(value.encode(ExternalEncoding))
         else:
-            outfile.write(quote_xml('%s' % self.valueOf_))
+            outfile.write(quote_xml('%s' % self.valueOf_.encode(ExternalEncoding)))
     def hasContent_(self):
         if (
             self.valueOf_
@@ -1961,13 +1961,13 @@ class updateIsoImageType(GeneratedsSuper):
     def exportLiteralAttributes(self, outfile, level, name_):
         if self.mediaTemplateTrove is not None:
             showIndent(outfile, level)
-            outfile.write('mediaTemplateTrove = %s,\n' % (self.mediaTemplateTrove,))
+            outfile.write('mediaTemplateTrove = "%s",\n' % (self.mediaTemplateTrove,))
         if self.baseFileName is not None:
             showIndent(outfile, level)
-            outfile.write('baseFileName = %s,\n' % (self.baseFileName,))
+            outfile.write('baseFileName = "%s",\n' % (self.baseFileName,))
     def exportLiteralChildren(self, outfile, level, name_):
         showIndent(outfile, level)
-        outfile.write('valueOf_ = "%s",\n' % (self.valueOf_,))
+        outfile.write('valueOf_ = """%s""",\n' % (self.valueOf_,))
     def build(self, node_):
         attrs = node_.attributes
         self.buildAttributes(attrs)
@@ -2062,9 +2062,9 @@ class vhdImageType(GeneratedsSuper):
             value=quote_xml('%s' % self.valueOf_)
             value=value.replace('![CDATA','<![CDATA')
             value=value.replace(']]',']]>')
-            outfile.write(value)
+            outfile.write(value.encode(ExternalEncoding))
         else:
-            outfile.write(quote_xml('%s' % self.valueOf_))
+            outfile.write(quote_xml('%s' % self.valueOf_.encode(ExternalEncoding)))
     def hasContent_(self):
         if (
             self.valueOf_
@@ -2083,25 +2083,25 @@ class vhdImageType(GeneratedsSuper):
             outfile.write('autoResolve = %s,\n' % (self.autoResolve,))
         if self.freespace is not None:
             showIndent(outfile, level)
-            outfile.write('freespace = %s,\n' % (self.freespace,))
+            outfile.write('freespace = %d,\n' % (self.freespace,))
         if self.name is not None:
             showIndent(outfile, level)
-            outfile.write('name = %s,\n' % (self.name,))
+            outfile.write('name = "%s",\n' % (self.name,))
         if self.vhdDiskType is not None:
             showIndent(outfile, level)
-            outfile.write('vhdDiskType = %s,\n' % (self.vhdDiskType,))
+            outfile.write('vhdDiskType = "%s",\n' % (self.vhdDiskType,))
         if self.swapSize is not None:
             showIndent(outfile, level)
-            outfile.write('swapSize = %s,\n' % (self.swapSize,))
+            outfile.write('swapSize = %d,\n' % (self.swapSize,))
         if self.baseFileName is not None:
             showIndent(outfile, level)
-            outfile.write('baseFileName = %s,\n' % (self.baseFileName,))
+            outfile.write('baseFileName = "%s",\n' % (self.baseFileName,))
         if self.installLabelPath is not None:
             showIndent(outfile, level)
-            outfile.write('installLabelPath = %s,\n' % (self.installLabelPath,))
+            outfile.write('installLabelPath = "%s",\n' % (self.installLabelPath,))
     def exportLiteralChildren(self, outfile, level, name_):
         showIndent(outfile, level)
-        outfile.write('valueOf_ = "%s",\n' % (self.valueOf_,))
+        outfile.write('valueOf_ = """%s""",\n' % (self.valueOf_,))
     def build(self, node_):
         attrs = node_.attributes
         self.buildAttributes(attrs)
@@ -2221,9 +2221,9 @@ class virtualIronImageType(GeneratedsSuper):
             value=quote_xml('%s' % self.valueOf_)
             value=value.replace('![CDATA','<![CDATA')
             value=value.replace(']]',']]>')
-            outfile.write(value)
+            outfile.write(value.encode(ExternalEncoding))
         else:
-            outfile.write(quote_xml('%s' % self.valueOf_))
+            outfile.write(quote_xml('%s' % self.valueOf_.encode(ExternalEncoding)))
     def hasContent_(self):
         if (
             self.valueOf_
@@ -2242,25 +2242,25 @@ class virtualIronImageType(GeneratedsSuper):
             outfile.write('autoResolve = %s,\n' % (self.autoResolve,))
         if self.freespace is not None:
             showIndent(outfile, level)
-            outfile.write('freespace = %s,\n' % (self.freespace,))
+            outfile.write('freespace = %d,\n' % (self.freespace,))
         if self.name is not None:
             showIndent(outfile, level)
-            outfile.write('name = %s,\n' % (self.name,))
+            outfile.write('name = "%s",\n' % (self.name,))
         if self.vhdDiskType is not None:
             showIndent(outfile, level)
-            outfile.write('vhdDiskType = %s,\n' % (self.vhdDiskType,))
+            outfile.write('vhdDiskType = "%s",\n' % (self.vhdDiskType,))
         if self.swapSize is not None:
             showIndent(outfile, level)
-            outfile.write('swapSize = %s,\n' % (self.swapSize,))
+            outfile.write('swapSize = %d,\n' % (self.swapSize,))
         if self.baseFileName is not None:
             showIndent(outfile, level)
-            outfile.write('baseFileName = %s,\n' % (self.baseFileName,))
+            outfile.write('baseFileName = "%s",\n' % (self.baseFileName,))
         if self.installLabelPath is not None:
             showIndent(outfile, level)
-            outfile.write('installLabelPath = %s,\n' % (self.installLabelPath,))
+            outfile.write('installLabelPath = "%s",\n' % (self.installLabelPath,))
     def exportLiteralChildren(self, outfile, level, name_):
         showIndent(outfile, level)
-        outfile.write('valueOf_ = "%s",\n' % (self.valueOf_,))
+        outfile.write('valueOf_ = """%s""",\n' % (self.valueOf_,))
     def build(self, node_):
         attrs = node_.attributes
         self.buildAttributes(attrs)
@@ -2386,9 +2386,9 @@ class vmwareEsxImageType(GeneratedsSuper):
             value=quote_xml('%s' % self.valueOf_)
             value=value.replace('![CDATA','<![CDATA')
             value=value.replace(']]',']]>')
-            outfile.write(value)
+            outfile.write(value.encode(ExternalEncoding))
         else:
-            outfile.write(quote_xml('%s' % self.valueOf_))
+            outfile.write(quote_xml('%s' % self.valueOf_.encode(ExternalEncoding)))
     def hasContent_(self):
         if (
             self.valueOf_
@@ -2407,28 +2407,28 @@ class vmwareEsxImageType(GeneratedsSuper):
             outfile.write('autoResolve = %s,\n' % (self.autoResolve,))
         if self.freespace is not None:
             showIndent(outfile, level)
-            outfile.write('freespace = %s,\n' % (self.freespace,))
+            outfile.write('freespace = %d,\n' % (self.freespace,))
         if self.name is not None:
             showIndent(outfile, level)
-            outfile.write('name = %s,\n' % (self.name,))
+            outfile.write('name = "%s",\n' % (self.name,))
         if self.natNetworking is not None:
             showIndent(outfile, level)
             outfile.write('natNetworking = %s,\n' % (self.natNetworking,))
         if self.vmMemory is not None:
             showIndent(outfile, level)
-            outfile.write('vmMemory = %s,\n' % (self.vmMemory,))
+            outfile.write('vmMemory = %d,\n' % (self.vmMemory,))
         if self.swapSize is not None:
             showIndent(outfile, level)
-            outfile.write('swapSize = %s,\n' % (self.swapSize,))
+            outfile.write('swapSize = %d,\n' % (self.swapSize,))
         if self.installLabelPath is not None:
             showIndent(outfile, level)
-            outfile.write('installLabelPath = %s,\n' % (self.installLabelPath,))
+            outfile.write('installLabelPath = "%s",\n' % (self.installLabelPath,))
         if self.baseFileName is not None:
             showIndent(outfile, level)
-            outfile.write('baseFileName = %s,\n' % (self.baseFileName,))
+            outfile.write('baseFileName = "%s",\n' % (self.baseFileName,))
     def exportLiteralChildren(self, outfile, level, name_):
         showIndent(outfile, level)
-        outfile.write('valueOf_ = "%s",\n' % (self.valueOf_,))
+        outfile.write('valueOf_ = """%s""",\n' % (self.valueOf_,))
     def build(self, node_):
         attrs = node_.attributes
         self.buildAttributes(attrs)
@@ -2578,9 +2578,9 @@ class vmwareImageType(GeneratedsSuper):
             value=quote_xml('%s' % self.valueOf_)
             value=value.replace('![CDATA','<![CDATA')
             value=value.replace(']]',']]>')
-            outfile.write(value)
+            outfile.write(value.encode(ExternalEncoding))
         else:
-            outfile.write(quote_xml('%s' % self.valueOf_))
+            outfile.write(quote_xml('%s' % self.valueOf_.encode(ExternalEncoding)))
     def hasContent_(self):
         if (
             self.valueOf_
@@ -2599,34 +2599,34 @@ class vmwareImageType(GeneratedsSuper):
             outfile.write('autoResolve = %s,\n' % (self.autoResolve,))
         if self.freespace is not None:
             showIndent(outfile, level)
-            outfile.write('freespace = %s,\n' % (self.freespace,))
+            outfile.write('freespace = %d,\n' % (self.freespace,))
         if self.name is not None:
             showIndent(outfile, level)
-            outfile.write('name = %s,\n' % (self.name,))
+            outfile.write('name = "%s",\n' % (self.name,))
         if self.natNetworking is not None:
             showIndent(outfile, level)
             outfile.write('natNetworking = %s,\n' % (self.natNetworking,))
         if self.vmMemory is not None:
             showIndent(outfile, level)
-            outfile.write('vmMemory = %s,\n' % (self.vmMemory,))
+            outfile.write('vmMemory = %d,\n' % (self.vmMemory,))
         if self.swapSize is not None:
             showIndent(outfile, level)
-            outfile.write('swapSize = %s,\n' % (self.swapSize,))
+            outfile.write('swapSize = %d,\n' % (self.swapSize,))
         if self.diskAdapter is not None:
             showIndent(outfile, level)
-            outfile.write('diskAdapter = %s,\n' % (self.diskAdapter,))
+            outfile.write('diskAdapter = "%s",\n' % (self.diskAdapter,))
         if self.installLabelPath is not None:
             showIndent(outfile, level)
-            outfile.write('installLabelPath = %s,\n' % (self.installLabelPath,))
+            outfile.write('installLabelPath = "%s",\n' % (self.installLabelPath,))
         if self.baseFileName is not None:
             showIndent(outfile, level)
-            outfile.write('baseFileName = %s,\n' % (self.baseFileName,))
+            outfile.write('baseFileName = "%s",\n' % (self.baseFileName,))
         if self.vmSnapshots is not None:
             showIndent(outfile, level)
             outfile.write('vmSnapshots = %s,\n' % (self.vmSnapshots,))
     def exportLiteralChildren(self, outfile, level, name_):
         showIndent(outfile, level)
-        outfile.write('valueOf_ = "%s",\n' % (self.valueOf_,))
+        outfile.write('valueOf_ = """%s""",\n' % (self.valueOf_,))
     def build(self, node_):
         attrs = node_.attributes
         self.buildAttributes(attrs)
@@ -2767,9 +2767,9 @@ class xenOvaImageType(GeneratedsSuper):
             value=quote_xml('%s' % self.valueOf_)
             value=value.replace('![CDATA','<![CDATA')
             value=value.replace(']]',']]>')
-            outfile.write(value)
+            outfile.write(value.encode(ExternalEncoding))
         else:
-            outfile.write(quote_xml('%s' % self.valueOf_))
+            outfile.write(quote_xml('%s' % self.valueOf_.encode(ExternalEncoding)))
     def hasContent_(self):
         if (
             self.valueOf_
@@ -2788,25 +2788,25 @@ class xenOvaImageType(GeneratedsSuper):
             outfile.write('autoResolve = %s,\n' % (self.autoResolve,))
         if self.freespace is not None:
             showIndent(outfile, level)
-            outfile.write('freespace = %s,\n' % (self.freespace,))
+            outfile.write('freespace = %d,\n' % (self.freespace,))
         if self.name is not None:
             showIndent(outfile, level)
-            outfile.write('name = %s,\n' % (self.name,))
+            outfile.write('name = "%s",\n' % (self.name,))
         if self.vmMemory is not None:
             showIndent(outfile, level)
-            outfile.write('vmMemory = %s,\n' % (self.vmMemory,))
+            outfile.write('vmMemory = %d,\n' % (self.vmMemory,))
         if self.swapSize is not None:
             showIndent(outfile, level)
-            outfile.write('swapSize = %s,\n' % (self.swapSize,))
+            outfile.write('swapSize = %d,\n' % (self.swapSize,))
         if self.baseFileName is not None:
             showIndent(outfile, level)
-            outfile.write('baseFileName = %s,\n' % (self.baseFileName,))
+            outfile.write('baseFileName = "%s",\n' % (self.baseFileName,))
         if self.installLabelPath is not None:
             showIndent(outfile, level)
-            outfile.write('installLabelPath = %s,\n' % (self.installLabelPath,))
+            outfile.write('installLabelPath = "%s",\n' % (self.installLabelPath,))
     def exportLiteralChildren(self, outfile, level, name_):
         showIndent(outfile, level)
-        outfile.write('valueOf_ = "%s",\n' % (self.valueOf_,))
+        outfile.write('valueOf_ = """%s""",\n' % (self.valueOf_,))
     def build(self, node_):
         attrs = node_.attributes
         self.buildAttributes(attrs)
@@ -2910,12 +2910,12 @@ class buildDefinitionType(GeneratedsSuper):
         pass
     def exportLiteralChildren(self, outfile, level, name_):
         showIndent(outfile, level)
-        outfile.write('build=[\n')
+        outfile.write('build_=[\n')
         level += 1
-        for build in self.build:
+        for build_ in self.build_:
             showIndent(outfile, level)
-            outfile.write('model_.build(\n')
-            build.exportLiteral(outfile, level, name_='build')
+            outfile.write('model_.buildType(\n')
+            build_.exportLiteral(outfile, level, name_='buildType')
             showIndent(outfile, level)
             outfile.write('),\n')
         level -= 1
@@ -3109,90 +3109,90 @@ class buildType(GeneratedsSuper):
     def exportLiteralAttributes(self, outfile, level, name_):
         if self.baseFlavor is not None:
             showIndent(outfile, level)
-            outfile.write('baseFlavor = "%s",\n' % (self.baseFlavor,))
+            outfile.write('baseFlavor = %s,\n' % (self.baseFlavor,))
         if self.name is not None:
             showIndent(outfile, level)
-            outfile.write('name = %s,\n' % (self.name,))
+            outfile.write('name = "%s",\n' % (self.name,))
     def exportLiteralChildren(self, outfile, level, name_):
-        if self.amiImage:
+        if self.amiImage is not None:
             showIndent(outfile, level)
             outfile.write('amiImage=model_.amiImageType(\n')
             self.amiImage.exportLiteral(outfile, level, name_='amiImage')
             showIndent(outfile, level)
             outfile.write('),\n')
-        if self.applianceIsoImage:
+        if self.applianceIsoImage is not None:
             showIndent(outfile, level)
             outfile.write('applianceIsoImage=model_.applianceIsoImageType(\n')
             self.applianceIsoImage.exportLiteral(outfile, level, name_='applianceIsoImage')
             showIndent(outfile, level)
             outfile.write('),\n')
-        if self.installableIsoImage:
+        if self.installableIsoImage is not None:
             showIndent(outfile, level)
             outfile.write('installableIsoImage=model_.installableIsoImageType(\n')
             self.installableIsoImage.exportLiteral(outfile, level, name_='installableIsoImage')
             showIndent(outfile, level)
             outfile.write('),\n')
-        if self.liveIsoImage:
+        if self.liveIsoImage is not None:
             showIndent(outfile, level)
             outfile.write('liveIsoImage=model_.liveIsoImageType(\n')
             self.liveIsoImage.exportLiteral(outfile, level, name_='liveIsoImage')
             showIndent(outfile, level)
             outfile.write('),\n')
-        if self.netbootImage:
+        if self.netbootImage is not None:
             showIndent(outfile, level)
             outfile.write('netbootImage=model_.netbootImageType(\n')
             self.netbootImage.exportLiteral(outfile, level, name_='netbootImage')
             showIndent(outfile, level)
             outfile.write('),\n')
-        if self.rawFsImage:
+        if self.rawFsImage is not None:
             showIndent(outfile, level)
             outfile.write('rawFsImage=model_.rawFsImageType(\n')
             self.rawFsImage.exportLiteral(outfile, level, name_='rawFsImage')
             showIndent(outfile, level)
             outfile.write('),\n')
-        if self.rawHdImage:
+        if self.rawHdImage is not None:
             showIndent(outfile, level)
             outfile.write('rawHdImage=model_.rawHdImageType(\n')
             self.rawHdImage.exportLiteral(outfile, level, name_='rawHdImage')
             showIndent(outfile, level)
             outfile.write('),\n')
-        if self.tarballImage:
+        if self.tarballImage is not None:
             showIndent(outfile, level)
             outfile.write('tarballImage=model_.tarballImageType(\n')
             self.tarballImage.exportLiteral(outfile, level, name_='tarballImage')
             showIndent(outfile, level)
             outfile.write('),\n')
-        if self.updateIsoImage:
+        if self.updateIsoImage is not None:
             showIndent(outfile, level)
             outfile.write('updateIsoImage=model_.updateIsoImageType(\n')
             self.updateIsoImage.exportLiteral(outfile, level, name_='updateIsoImage')
             showIndent(outfile, level)
             outfile.write('),\n')
-        if self.vhdImage:
+        if self.vhdImage is not None:
             showIndent(outfile, level)
             outfile.write('vhdImage=model_.vhdImageType(\n')
             self.vhdImage.exportLiteral(outfile, level, name_='vhdImage')
             showIndent(outfile, level)
             outfile.write('),\n')
-        if self.virtualIronImage:
+        if self.virtualIronImage is not None:
             showIndent(outfile, level)
             outfile.write('virtualIronImage=model_.virtualIronImageType(\n')
             self.virtualIronImage.exportLiteral(outfile, level, name_='virtualIronImage')
             showIndent(outfile, level)
             outfile.write('),\n')
-        if self.vmwareImage:
+        if self.vmwareImage is not None:
             showIndent(outfile, level)
             outfile.write('vmwareImage=model_.vmwareImageType(\n')
             self.vmwareImage.exportLiteral(outfile, level, name_='vmwareImage')
             showIndent(outfile, level)
             outfile.write('),\n')
-        if self.vmwareEsxImage:
+        if self.vmwareEsxImage is not None:
             showIndent(outfile, level)
             outfile.write('vmwareEsxImage=model_.vmwareEsxImageType(\n')
             self.vmwareEsxImage.exportLiteral(outfile, level, name_='vmwareEsxImage')
             showIndent(outfile, level)
             outfile.write('),\n')
-        if self.xenOvaImage:
+        if self.xenOvaImage is not None:
             showIndent(outfile, level)
             outfile.write('xenOvaImage=model_.xenOvaImageType(\n')
             self.xenOvaImage.exportLiteral(outfile, level, name_='xenOvaImage')
@@ -3201,17 +3201,18 @@ class buildType(GeneratedsSuper):
         showIndent(outfile, level)
         outfile.write('stage=[\n')
         level += 1
-        for stage in self.stage:
+        for stage_ in self.stage:
             showIndent(outfile, level)
             outfile.write('model_.stage(\n')
-            stage.exportLiteral(outfile, level)
+            stage_.exportLiteral(outfile, level)
             showIndent(outfile, level)
             outfile.write('),\n')
         level -= 1
         showIndent(outfile, level)
         outfile.write('],\n')
-        showIndent(outfile, level)
-        outfile.write('imageGroup=%s,\n' % quote_python(self.imageGroup).encode(ExternalEncoding))
+        if self.imageGroup is not None:
+            showIndent(outfile, level)
+            outfile.write('imageGroup=%s,\n' % quote_python(self.imageGroup).encode(ExternalEncoding))
     def build(self, node_):
         attrs = node_.attributes
         self.buildAttributes(attrs)
@@ -3372,9 +3373,9 @@ class stage(GeneratedsSuper):
             value=quote_xml('%s' % self.valueOf_)
             value=value.replace('![CDATA','<![CDATA')
             value=value.replace(']]',']]>')
-            outfile.write(value)
+            outfile.write(value.encode(ExternalEncoding))
         else:
-            outfile.write(quote_xml('%s' % self.valueOf_))
+            outfile.write(quote_xml('%s' % self.valueOf_.encode(ExternalEncoding)))
     def hasContent_(self):
         if (
             self.valueOf_
@@ -3390,10 +3391,10 @@ class stage(GeneratedsSuper):
     def exportLiteralAttributes(self, outfile, level, name_):
         if self.ref is not None:
             showIndent(outfile, level)
-            outfile.write('ref = %s,\n' % (self.ref,))
+            outfile.write('ref = "%s",\n' % (self.ref,))
     def exportLiteralChildren(self, outfile, level, name_):
         showIndent(outfile, level)
-        outfile.write('valueOf_ = "%s",\n' % (self.valueOf_,))
+        outfile.write('valueOf_ = """%s""",\n' % (self.valueOf_,))
     def build(self, node_):
         attrs = node_.attributes
         self.buildAttributes(attrs)
@@ -3482,17 +3483,18 @@ class platformDefinitionType(GeneratedsSuper):
     def exportLiteralAttributes(self, outfile, level, name_):
         if self.version is not None:
             showIndent(outfile, level)
-            outfile.write('version = %s,\n' % (self.version,))
+            outfile.write('version = "%s",\n' % (self.version,))
     def exportLiteralChildren(self, outfile, level, name_):
-        showIndent(outfile, level)
-        outfile.write('baseFlavor=%s,\n' % quote_python(self.baseFlavor).encode(ExternalEncoding))
-        if self.searchPaths:
+        if self.baseFlavor is not None:
+            showIndent(outfile, level)
+            outfile.write('baseFlavor=%s,\n' % quote_python(self.baseFlavor).encode(ExternalEncoding))
+        if self.searchPaths is not None:
             showIndent(outfile, level)
             outfile.write('searchPaths=model_.searchPathListType(\n')
             self.searchPaths.exportLiteral(outfile, level, name_='searchPaths')
             showIndent(outfile, level)
             outfile.write('),\n')
-        if self.factorySources:
+        if self.factorySources is not None:
             showIndent(outfile, level)
             outfile.write('factorySources=model_.factorySourceListType(\n')
             self.factorySources.exportLiteral(outfile, level, name_='factorySources')
@@ -3604,20 +3606,21 @@ class platformType(GeneratedsSuper):
     def exportLiteralAttributes(self, outfile, level, name_):
         if self.source is not None:
             showIndent(outfile, level)
-            outfile.write('source = %s,\n' % (self.source,))
+            outfile.write('source = "%s",\n' % (self.source,))
         if self.useLatest is not None:
             showIndent(outfile, level)
             outfile.write('useLatest = %s,\n' % (self.useLatest,))
     def exportLiteralChildren(self, outfile, level, name_):
-        showIndent(outfile, level)
-        outfile.write('baseFlavor=%s,\n' % quote_python(self.baseFlavor).encode(ExternalEncoding))
-        if self.searchPaths:
+        if self.baseFlavor is not None:
+            showIndent(outfile, level)
+            outfile.write('baseFlavor=%s,\n' % quote_python(self.baseFlavor).encode(ExternalEncoding))
+        if self.searchPaths is not None:
             showIndent(outfile, level)
             outfile.write('searchPaths=model_.searchPathListType(\n')
             self.searchPaths.exportLiteral(outfile, level, name_='searchPaths')
             showIndent(outfile, level)
             outfile.write('),\n')
-        if self.factorySources:
+        if self.factorySources is not None:
             showIndent(outfile, level)
             outfile.write('factorySources=model_.factorySourceListType(\n')
             self.factorySources.exportLiteral(outfile, level, name_='factorySources')
@@ -3818,51 +3821,60 @@ class productDefinition(GeneratedsSuper):
     def exportLiteralAttributes(self, outfile, level, name_):
         if self.version is not None:
             showIndent(outfile, level)
-            outfile.write('version = %s,\n' % (self.version,))
+            outfile.write('version = "%s",\n' % (self.version,))
     def exportLiteralChildren(self, outfile, level, name_):
-        showIndent(outfile, level)
-        outfile.write('productName=%s,\n' % quote_python(self.productName).encode(ExternalEncoding))
-        showIndent(outfile, level)
-        outfile.write('productShortname=%s,\n' % quote_python(self.productShortname).encode(ExternalEncoding))
-        showIndent(outfile, level)
-        outfile.write('productDescription=%s,\n' % quote_python(self.productDescription).encode(ExternalEncoding))
-        showIndent(outfile, level)
-        outfile.write('productVersion=%s,\n' % quote_python(self.productVersion).encode(ExternalEncoding))
-        showIndent(outfile, level)
-        outfile.write('productVersionDescription=%s,\n' % quote_python(self.productVersionDescription).encode(ExternalEncoding))
-        showIndent(outfile, level)
-        outfile.write('conaryRepositoryHostname=%s,\n' % quote_python(self.conaryRepositoryHostname).encode(ExternalEncoding))
-        showIndent(outfile, level)
-        outfile.write('conaryNamespace=%s,\n' % quote_python(self.conaryNamespace).encode(ExternalEncoding))
-        showIndent(outfile, level)
-        outfile.write('imageGroup=%s,\n' % quote_python(self.imageGroup).encode(ExternalEncoding))
-        showIndent(outfile, level)
-        outfile.write('baseFlavor=%s,\n' % quote_python(self.baseFlavor).encode(ExternalEncoding))
-        if self.stages:
+        if self.productName is not None:
+            showIndent(outfile, level)
+            outfile.write('productName=%s,\n' % quote_python(self.productName).encode(ExternalEncoding))
+        if self.productShortname is not None:
+            showIndent(outfile, level)
+            outfile.write('productShortname=%s,\n' % quote_python(self.productShortname).encode(ExternalEncoding))
+        if self.productDescription is not None:
+            showIndent(outfile, level)
+            outfile.write('productDescription=%s,\n' % quote_python(self.productDescription).encode(ExternalEncoding))
+        if self.productVersion is not None:
+            showIndent(outfile, level)
+            outfile.write('productVersion=%s,\n' % quote_python(self.productVersion).encode(ExternalEncoding))
+        if self.productVersionDescription is not None:
+            showIndent(outfile, level)
+            outfile.write('productVersionDescription=%s,\n' % quote_python(self.productVersionDescription).encode(ExternalEncoding))
+        if self.conaryRepositoryHostname is not None:
+            showIndent(outfile, level)
+            outfile.write('conaryRepositoryHostname=%s,\n' % quote_python(self.conaryRepositoryHostname).encode(ExternalEncoding))
+        if self.conaryNamespace is not None:
+            showIndent(outfile, level)
+            outfile.write('conaryNamespace=%s,\n' % quote_python(self.conaryNamespace).encode(ExternalEncoding))
+        if self.imageGroup is not None:
+            showIndent(outfile, level)
+            outfile.write('imageGroup=%s,\n' % quote_python(self.imageGroup).encode(ExternalEncoding))
+        if self.baseFlavor is not None:
+            showIndent(outfile, level)
+            outfile.write('baseFlavor=%s,\n' % quote_python(self.baseFlavor).encode(ExternalEncoding))
+        if self.stages is not None:
             showIndent(outfile, level)
             outfile.write('stages=model_.stageListType(\n')
             self.stages.exportLiteral(outfile, level, name_='stages')
             showIndent(outfile, level)
             outfile.write('),\n')
-        if self.searchPaths:
+        if self.searchPaths is not None:
             showIndent(outfile, level)
             outfile.write('searchPaths=model_.searchPathListType(\n')
             self.searchPaths.exportLiteral(outfile, level, name_='searchPaths')
             showIndent(outfile, level)
             outfile.write('),\n')
-        if self.factorySources:
+        if self.factorySources is not None:
             showIndent(outfile, level)
             outfile.write('factorySources=model_.factorySourceListType(\n')
             self.factorySources.exportLiteral(outfile, level, name_='factorySources')
             showIndent(outfile, level)
             outfile.write('),\n')
-        if self.buildDefinition:
+        if self.buildDefinition is not None:
             showIndent(outfile, level)
             outfile.write('buildDefinition=model_.buildDefinitionType(\n')
             self.buildDefinition.exportLiteral(outfile, level, name_='buildDefinition')
             showIndent(outfile, level)
             outfile.write('),\n')
-        if self.platform:
+        if self.platform is not None:
             showIndent(outfile, level)
             outfile.write('platform=model_.platformType(\n')
             self.platform.exportLiteral(outfile, level, name_='platform')
@@ -4004,8 +4016,9 @@ def parseLiteral(inFileName):
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
     doc = None
-##     sys.stdout.write('from supers import *\n\n')
-##     sys.stdout.write('rootObj = stageType(\n')
+##     sys.stdout.write('#from supers import *\n\n')
+##     sys.stdout.write('import supers as model_\n\n')
+##     sys.stdout.write('rootObj = model_.stageType(\n')
 ##     rootObj.exportLiteral(sys.stdout, 0, name_="stageType")
 ##     sys.stdout.write(')\n')
     return rootObj

@@ -20,6 +20,20 @@ ExternalEncoding = 'utf-8'
 # Data representation classes
 #
 
+class nameLabelTypeSub(supermod.nameLabelType):
+    def __init__(self, troveName=None, label=None, valueOf_=''):
+        supermod.nameLabelType.__init__(self, troveName, label, valueOf_)
+supermod.nameLabelType.subclass = nameLabelTypeSub
+# end class nameLabelTypeSub
+
+
+class nameFlavorTypeSub(supermod.nameFlavorType):
+    def __init__(self, flavor=None, displayName=None, name=None, valueOf_=''):
+        supermod.nameFlavorType.__init__(self, flavor, displayName, name, valueOf_)
+supermod.nameFlavorType.subclass = nameFlavorTypeSub
+# end class nameFlavorTypeSub
+
+
 class stageTypeSub(supermod.stageType):
     def __init__(self, labelSuffix=None, name=None, promoteMaps=None):
         supermod.stageType.__init__(self, labelSuffix, name, promoteMaps)
@@ -34,16 +48,9 @@ supermod.stageListType.subclass = stageListTypeSub
 # end class stageListTypeSub
 
 
-class nameLabelTypeSub(supermod.nameLabelType):
-    def __init__(self, troveName=None, label=None, valueOf_=''):
-        supermod.nameLabelType.__init__(self, troveName, label, valueOf_)
-supermod.nameLabelType.subclass = nameLabelTypeSub
-# end class nameLabelTypeSub
-
-
 class searchPathTypeSub(supermod.searchPathType):
-    def __init__(self, isGroupSearchPathTrove=None, troveName=None, version=None, isResolveTrove=None, label=None, valueOf_=''):
-        supermod.searchPathType.__init__(self, isGroupSearchPathTrove, troveName, version, isResolveTrove, label, valueOf_)
+    def __init__(self, isPlatformTrove=None, label=None, troveName=None, version=None, isGroupSearchPathTrove=None, isResolveTrove=None, valueOf_=''):
+        supermod.searchPathType.__init__(self, isPlatformTrove, label, troveName, version, isGroupSearchPathTrove, isResolveTrove, valueOf_)
 supermod.searchPathType.subclass = searchPathTypeSub
 # end class searchPathTypeSub
 
@@ -77,8 +84,8 @@ supermod.buildDefinitionType.subclass = buildDefinitionTypeSub
 
 
 class imageTypeSub(supermod.imageType):
-    def __init__(self, autoResolve=None, maxIsoSize=None, bugsUrl=None, natNetworking=None, vhdDiskType=None, anacondaCustomTrove=None, mediaTemplateTrove=None, baseFileName=None, amiHugeDiskMountPoint=None, vmSnapshots=None, vhdDisktype=None, swapSize=None, betaNag=None, buildOVF10=None, anacondaTemplatesTrove=None, vmMemory=None, installLabelPath=None, unionfs=None, containerFormat=None, freespace=None, name=None, zisofs=None, diskAdapter=None, amiHugeDiskMountpoint=None, showMediaCheck=None, valueOf_=''):
-        supermod.imageType.__init__(self, autoResolve, maxIsoSize, bugsUrl, natNetworking, vhdDiskType, anacondaCustomTrove, mediaTemplateTrove, baseFileName, amiHugeDiskMountPoint, vmSnapshots, vhdDisktype, swapSize, betaNag, buildOVF10, anacondaTemplatesTrove, vmMemory, installLabelPath, unionfs, containerFormat, freespace, name, zisofs, diskAdapter, amiHugeDiskMountpoint, showMediaCheck, valueOf_)
+    def __init__(self, autoResolve=None, maxIsoSize=None, bugsUrl=None, natNetworking=None, vhdDiskType=None, anacondaCustomTrove=None, mediaTemplateTrove=None, baseFileName=None, vmSnapshots=None, swapSize=None, betaNag=None, buildOVF10=None, anacondaTemplatesTrove=None, vmMemory=None, installLabelPath=None, unionfs=None, containerFormat=None, freespace=None, name=None, zisofs=None, diskAdapter=None, amiHugeDiskMountpoint=None, showMediaCheck=None, valueOf_=''):
+        supermod.imageType.__init__(self, autoResolve, maxIsoSize, bugsUrl, natNetworking, vhdDiskType, anacondaCustomTrove, mediaTemplateTrove, baseFileName, vmSnapshots, swapSize, betaNag, buildOVF10, anacondaTemplatesTrove, vmMemory, installLabelPath, unionfs, containerFormat, freespace, name, zisofs, diskAdapter, amiHugeDiskMountpoint, showMediaCheck, valueOf_)
 supermod.imageType.subclass = imageTypeSub
 # end class imageTypeSub
 
@@ -125,27 +132,6 @@ supermod.promoteMapType.subclass = promoteMapTypeSub
 # end class promoteMapTypeSub
 
 
-class platformDefinitionTypeSub(supermod.platformDefinitionType):
-    def __init__(self, version=None, platformName=None, platformVersionTrove=None, baseFlavor=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None):
-        supermod.platformDefinitionType.__init__(self, version, platformName, platformVersionTrove, baseFlavor, searchPaths, factorySources, autoLoadRecipes, architectures, flavorSets, containerTemplates, buildTemplates)
-supermod.platformDefinitionType.subclass = platformDefinitionTypeSub
-# end class platformDefinitionTypeSub
-
-
-class platformTypeSub(supermod.platformType):
-    def __init__(self, sourceTrove=None, useLatest=None, platformName=None, platformVersionTrove=None, baseFlavor=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None):
-        supermod.platformType.__init__(self, sourceTrove, useLatest, platformName, platformVersionTrove, baseFlavor, searchPaths, factorySources, autoLoadRecipes, architectures, flavorSets, containerTemplates, buildTemplates)
-supermod.platformType.subclass = platformTypeSub
-# end class platformTypeSub
-
-
-class nameFlavorTypeSub(supermod.nameFlavorType):
-    def __init__(self, flavor=None, displayName=None, name=None, valueOf_=''):
-        supermod.nameFlavorType.__init__(self, flavor, displayName, name, valueOf_)
-supermod.nameFlavorType.subclass = nameFlavorTypeSub
-# end class nameFlavorTypeSub
-
-
 class architecturesTypeSub(supermod.architecturesType):
     def __init__(self, architecture=None):
         supermod.architecturesType.__init__(self, architecture)
@@ -181,9 +167,58 @@ supermod.buildTemplatesType.subclass = buildTemplatesTypeSub
 # end class buildTemplatesTypeSub
 
 
+class platformClassifierTypeSub(supermod.platformClassifierType):
+    def __init__(self, version=None, name=None, tags=None, valueOf_=''):
+        supermod.platformClassifierType.__init__(self, version, name, tags, valueOf_)
+supermod.platformClassifierType.subclass = platformClassifierTypeSub
+# end class platformClassifierTypeSub
+
+
+class platformInformationTypeSub(supermod.platformInformationType):
+    def __init__(self, platformClassifier=None, originLabel=None, bootstrapTrove=None, rpmRequirement=None):
+        supermod.platformInformationType.__init__(self, platformClassifier, originLabel, bootstrapTrove, rpmRequirement)
+supermod.platformInformationType.subclass = platformInformationTypeSub
+# end class platformInformationTypeSub
+
+
+class contentProviderTypeSub(supermod.contentProviderType):
+    def __init__(self, name=None, description=None, contentSourceType=None, dataSource=None):
+        supermod.contentProviderType.__init__(self, name, description, contentSourceType, dataSource)
+supermod.contentProviderType.subclass = contentProviderTypeSub
+# end class contentProviderTypeSub
+
+
+class dataSourceTypeSub(supermod.dataSourceType):
+    def __init__(self, name=None, description=None, valueOf_=''):
+        supermod.dataSourceType.__init__(self, name, description, valueOf_)
+supermod.dataSourceType.subclass = dataSourceTypeSub
+# end class dataSourceTypeSub
+
+
+class contentSourceTypeTypeSub(supermod.contentSourceTypeType):
+    def __init__(self, isSingleton=None, name=None, description=None, valueOf_=''):
+        supermod.contentSourceTypeType.__init__(self, isSingleton, name, description, valueOf_)
+supermod.contentSourceTypeType.subclass = contentSourceTypeTypeSub
+# end class contentSourceTypeTypeSub
+
+
+class platformDefinitionTypeSub(supermod.platformDefinitionType):
+    def __init__(self, version=None, platformName=None, platformUsageTerms=None, platformVersionTrove=None, baseFlavor=None, contentProvider=None, platformInformation=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None):
+        supermod.platformDefinitionType.__init__(self, version, platformName, platformUsageTerms, platformVersionTrove, baseFlavor, contentProvider, platformInformation, searchPaths, factorySources, autoLoadRecipes, secondaryLabels, architectures, flavorSets, containerTemplates, buildTemplates)
+supermod.platformDefinitionType.subclass = platformDefinitionTypeSub
+# end class platformDefinitionTypeSub
+
+
+class platformTypeSub(supermod.platformType):
+    def __init__(self, sourceTrove=None, useLatest=None, platformName=None, platformUsageTerms=None, platformVersionTrove=None, baseFlavor=None, contentProvider=None, platformInformation=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None):
+        supermod.platformType.__init__(self, sourceTrove, useLatest, platformName, platformUsageTerms, platformVersionTrove, baseFlavor, contentProvider, platformInformation, searchPaths, factorySources, autoLoadRecipes, secondaryLabels, architectures, flavorSets, containerTemplates, buildTemplates)
+supermod.platformType.subclass = platformTypeSub
+# end class platformTypeSub
+
+
 class productDefinitionSub(supermod.productDefinition):
-    def __init__(self, version=None, productName=None, productShortname=None, productDescription=None, productVersion=None, productVersionDescription=None, conaryRepositoryHostname=None, conaryNamespace=None, imageGroup=None, sourceGroup=None, baseLabel=None, baseFlavor=None, stages=None, searchPaths=None, factorySources=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None, buildDefinition=None, platform=None):
-        supermod.productDefinition.__init__(self, version, productName, productShortname, productDescription, productVersion, productVersionDescription, conaryRepositoryHostname, conaryNamespace, imageGroup, sourceGroup, baseLabel, baseFlavor, stages, searchPaths, factorySources, secondaryLabels, architectures, flavorSets, containerTemplates, buildTemplates, buildDefinition, platform)
+    def __init__(self, version=None, productName=None, productShortname=None, productDescription=None, productVersion=None, productVersionDescription=None, conaryRepositoryHostname=None, conaryNamespace=None, imageGroup=None, sourceGroup=None, baseLabel=None, baseFlavor=None, stages=None, platformInformation=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None, buildDefinition=None, platform=None):
+        supermod.productDefinition.__init__(self, version, productName, productShortname, productDescription, productVersion, productVersionDescription, conaryRepositoryHostname, conaryNamespace, imageGroup, sourceGroup, baseLabel, baseFlavor, stages, platformInformation, searchPaths, factorySources, autoLoadRecipes, secondaryLabels, architectures, flavorSets, containerTemplates, buildTemplates, buildDefinition, platform)
 supermod.productDefinition.subclass = productDefinitionSub
 # end class productDefinitionSub
 
@@ -192,12 +227,12 @@ supermod.productDefinition.subclass = productDefinitionSub
 def parse(inFilename):
     doc = minidom.parse(inFilename)
     rootNode = doc.documentElement
-    rootObj = supermod.stageType.factory()
+    rootObj = supermod.nameLabelType.factory()
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
     doc = None
 ##     sys.stdout.write('<?xml version="1.0" ?>\n')
-##     rootObj.export(sys.stdout, 0, name_="stageType",
+##     rootObj.export(sys.stdout, 0, name_="nameLabelType",
 ##         namespacedef_='')
     doc = None
     return rootObj
@@ -206,12 +241,12 @@ def parse(inFilename):
 def parseString(inString):
     doc = minidom.parseString(inString)
     rootNode = doc.documentElement
-    rootObj = supermod.stageType.factory()
+    rootObj = supermod.nameLabelType.factory()
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
     doc = None
 ##     sys.stdout.write('<?xml version="1.0" ?>\n')
-##     rootObj.export(sys.stdout, 0, name_="stageType",
+##     rootObj.export(sys.stdout, 0, name_="nameLabelType",
 ##         namespacedef_='')
     return rootObj
 
@@ -219,14 +254,14 @@ def parseString(inString):
 def parseLiteral(inFilename):
     doc = minidom.parse(inFilename)
     rootNode = doc.documentElement
-    rootObj = supermod.stageType.factory()
+    rootObj = supermod.nameLabelType.factory()
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
     doc = None
 ##     sys.stdout.write('#from supers import *\n\n')
 ##     sys.stdout.write('import supers as model_\n\n')
-##     sys.stdout.write('rootObj = model_.stageType(\n')
-##     rootObj.exportLiteral(sys.stdout, 0, name_="stageType")
+##     sys.stdout.write('rootObj = model_.nameLabelType(\n')
+##     rootObj.exportLiteral(sys.stdout, 0, name_="nameLabelType")
 ##     sys.stdout.write(')\n')
     return rootObj
 
