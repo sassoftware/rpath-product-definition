@@ -37,6 +37,9 @@ from conary.repository import errors as repositoryErrors
 from conary.repository import changeset
 
 from rpath_proddef import _xmlConstants
+from rpath_proddef.platform_information import (PlatformClassifier,
+        PlatformInformation)
+
 
 #{ Exception classes
 class ProductDefinitionError(Exception):
@@ -296,7 +299,27 @@ class BaseDefinition(object):
         @return: Information about the originating platform.
         @rtype: C{platformInformationType}
         """
-        return self._rootObj.platformInformation
+        xinfo = self._rootObj.platformInformation
+        if xinfo is None:
+            return None
+
+        if xinfo.originLabel:
+            originLabel = conaryVersions.Label(
+                    xinfo.originLabel.encode('ascii'))
+        else:
+            originLabel = None
+        if xinfo.platformClassifier:
+            xclass = xinfo.platformClassifier
+            pclass = PlatformClassifier(xclass.name, xclass.version,
+                    xclass.tags.split())
+        else:
+            pclass = None
+        bootstrapTroves = [cmdline.parseTroveSpec(x.encode('ascii'))
+                for x in xinfo.bootstrapTrove]
+        rpmRequirements = [conaryDeps.parseDep(x.encode('ascii'))
+                for x in xinfo.rpmRequirement]
+        return PlatformInformation(originLabel, pclass, bootstrapTroves,
+                rpmRequirements)
 
     def setPlatformInformation(self, info):
         """
@@ -2059,6 +2082,7 @@ class ProductDefinitionRecipe(PackageRecipe):
             platformName = uroot.get_platformName(),
             platformUsageTerms = uroot.get_platformUsageTerms(),
             platformVersionTrove = uroot.get_platformVersionTrove(),
+            platformInformation = uroot.get_platformInformation(),
             baseFlavor = uroot.get_baseFlavor(),
             contentProvider = uroot.get_contentProvider(),
             searchPaths = uroot.get_searchPaths(),
