@@ -28,5 +28,6 @@ export pydir = $(sitedir)/rpath_proddef/
 export initdir = /etc/init.d
 export sysconfdir = /etc/sysconfig
 export docdir = $(datadir)/doc/rpath-product-definition-$(VERSION)
+export schemaversion = $(shell ls -1 xsd/rpd-*xsd | tail -1 | sed 's^xsd/rpd-^^;s^.xsd^^')
 
 export VERSION
