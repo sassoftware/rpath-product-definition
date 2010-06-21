@@ -1927,6 +1927,8 @@ class ProductDefinitionRecipe(PackageRecipe):
         """
         prefix = self.getProductDefinitionLabel()
         labelSuffix = stageObj.labelSuffix or '' # this can be blank
+        if '@' in labelSuffix:
+            return labelSuffix
         return str(prefix + labelSuffix)
 
     def toPlatformDefinition(self, copyAll = False):
