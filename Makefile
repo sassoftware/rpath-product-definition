@@ -59,7 +59,7 @@ dist:
 	$(MAKE) forcedist
 
 
-archive:
+archive: checkversion
 	hg archive --exclude .hgignore -t tbz2 $(DISTDIR).tar.bz2
 
 forcedist: archive
@@ -68,9 +68,13 @@ doc: html
 html: default-subdirs
 	scripts/generate_docs.sh
 
-forcetag:
+checkversion:
+	@echo $(VERSION) | grep "^$(schemaversion)" || { echo "version mismatch between latest schema $(schemaversion) and product version $(VERSION)"; exit 1; }
+
+
+forcetag: checkversion
 	hg tag -f product-definition-$(VERSION)
-tag:
+tag: checkversion
 	hg tag product-definition-$(VERSION)
 
 clean: clean-subdirs default-clean

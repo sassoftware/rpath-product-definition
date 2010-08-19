@@ -8,3 +8,4 @@ rpath_proddef/proddef_constants.pyc?$
 ^pylint/reports/
 ^rpath-common-.*.tar.bz2
 ^\..*project
+NEWS.html
