@@ -66,6 +66,7 @@
         <!-- <xsd:attribute name="id" type="xsd:id" /> -->
         <xsd:attributeGroup ref="attrGroupNameLabel" />
         <xsd:attribute name="version" type="xsd:string" />
+        <xsd:attribute name="flavor" type="rpd:flavorStringType" />
         <xsd:attribute name="isResolveTrove" type="xsd:boolean" />
         <xsd:attribute name="isGroupSearchPathTrove" type="xsd:boolean" />
         <xsd:attribute name="isPlatformTrove" type="xsd:boolean" />

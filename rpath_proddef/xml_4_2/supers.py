@@ -565,17 +565,19 @@ class searchPathType(GeneratedsSuper):
         MemberSpec_('troveName', 'xsd:string', 0),
         MemberSpec_('version', 'xsd:string', 0),
         MemberSpec_('isGroupSearchPathTrove', 'xsd:boolean', 0),
+        MemberSpec_('flavor', 'rpd:flavorStringType', 0),
         MemberSpec_('isResolveTrove', 'xsd:boolean', 0),
         MemberSpec_('valueOf_', [], 0),
         ]
     subclass = None
     superclass = None
-    def __init__(self, isPlatformTrove=None, label=None, troveName=None, version=None, isGroupSearchPathTrove=None, isResolveTrove=None, valueOf_=''):
+    def __init__(self, isPlatformTrove=None, label=None, troveName=None, version=None, isGroupSearchPathTrove=None, flavor=None, isResolveTrove=None, valueOf_=''):
         self.isPlatformTrove = _cast(bool, isPlatformTrove)
         self.label = _cast(None, label)
         self.troveName = _cast(None, troveName)
         self.version = _cast(None, version)
         self.isGroupSearchPathTrove = _cast(bool, isGroupSearchPathTrove)
+        self.flavor = _cast(None, flavor)
         self.isResolveTrove = _cast(bool, isResolveTrove)
         self.valueOf_ = valueOf_
     def factory(*args_, **kwargs_):
@@ -594,6 +596,8 @@ class searchPathType(GeneratedsSuper):
     def set_version(self, version): self.version = version
     def get_isGroupSearchPathTrove(self): return self.isGroupSearchPathTrove
     def set_isGroupSearchPathTrove(self, isGroupSearchPathTrove): self.isGroupSearchPathTrove = isGroupSearchPathTrove
+    def get_flavor(self): return self.flavor
+    def set_flavor(self, flavor): self.flavor = flavor
     def get_isResolveTrove(self): return self.isResolveTrove
     def set_isResolveTrove(self, isResolveTrove): self.isResolveTrove = isResolveTrove
     def getValueOf_(self): return self.valueOf_
@@ -619,6 +623,8 @@ class searchPathType(GeneratedsSuper):
             outfile.write(' version=%s' % (self.format_string(quote_attrib(self.version).encode(ExternalEncoding), input_name='version'), ))
         if self.isGroupSearchPathTrove is not None:
             outfile.write(' isGroupSearchPathTrove="%s"' % self.format_boolean(str_lower(str(self.isGroupSearchPathTrove)), input_name='isGroupSearchPathTrove'))
+        if self.flavor is not None:
+            outfile.write(' flavor=%s' % (quote_attrib(self.flavor), ))
         if self.isResolveTrove is not None:
             outfile.write(' isResolveTrove="%s"' % self.format_boolean(str_lower(str(self.isResolveTrove)), input_name='isResolveTrove'))
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='searchPathType'):
@@ -657,6 +663,9 @@ class searchPathType(GeneratedsSuper):
         if self.isGroupSearchPathTrove is not None:
             showIndent(outfile, level)
             outfile.write('isGroupSearchPathTrove = %s,\n' % (self.isGroupSearchPathTrove,))
+        if self.flavor is not None:
+            showIndent(outfile, level)
+            outfile.write('flavor = %s,\n' % (self.flavor,))
         if self.isResolveTrove is not None:
             showIndent(outfile, level)
             outfile.write('isResolveTrove = %s,\n' % (self.isResolveTrove,))
@@ -691,6 +700,8 @@ class searchPathType(GeneratedsSuper):
                 self.isGroupSearchPathTrove = False
             else:
                 raise ValueError('Bad boolean attribute (isGroupSearchPathTrove)')
+        if attrs.get('flavor'):
+            self.flavor = attrs.get('flavor').value
         if attrs.get('isResolveTrove'):
             if attrs.get('isResolveTrove').value in ('true', '1'):
                 self.isResolveTrove = True

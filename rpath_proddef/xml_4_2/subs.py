@@ -49,8 +49,8 @@ supermod.stageListType.subclass = stageListTypeSub
 
 
 class searchPathTypeSub(supermod.searchPathType):
-    def __init__(self, isPlatformTrove=None, label=None, troveName=None, version=None, isGroupSearchPathTrove=None, isResolveTrove=None, valueOf_=''):
-        supermod.searchPathType.__init__(self, isPlatformTrove, label, troveName, version, isGroupSearchPathTrove, isResolveTrove, valueOf_)
+    def __init__(self, isPlatformTrove=None, label=None, troveName=None, version=None, isGroupSearchPathTrove=None, flavor=None, isResolveTrove=None, valueOf_=''):
+        supermod.searchPathType.__init__(self, isPlatformTrove, label, troveName, version, isGroupSearchPathTrove, flavor, isResolveTrove, valueOf_)
 supermod.searchPathType.subclass = searchPathTypeSub
 # end class searchPathTypeSub
 

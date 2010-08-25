@@ -349,6 +349,7 @@ class BaseDefinition(object):
         self._rootObj.set_factorySources(None)
 
     def addSearchPath(self, troveName = None, label = None, version = None,
+                      flavor = None,
                       isResolveTrove = True, isGroupSearchPathTrove = True,
                       isPlatformTrove = None):
         """
@@ -356,6 +357,8 @@ class BaseDefinition(object):
         @param troveName: the trove name for the search path.
         @type troveName: C{str} or C{None}
         @param label: Label for the search path
+        @type label: C{str} or C{None}
+        @param label: Flavor for the search path
         @type label: C{str} or C{None}
         @param version: Version for the search path
         @param version: C{str} or C{None}
@@ -375,6 +378,7 @@ class BaseDefinition(object):
             self._rootObj.set_searchPaths(sp)
         self._addSource(troveName, label, version,
                 xmlsubs.searchPathTypeSub.factory, sp.add_searchPath,
+                flavor = flavor,
                 isResolveTrove = isResolveTrove,
                 isGroupSearchPathTrove = isGroupSearchPathTrove,
                 isPlatformTrove = isPlatformTrove)
