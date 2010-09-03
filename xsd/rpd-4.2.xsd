@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema targetNamespace="http://www.rpath.com/permanent/rpd-4.2.xsd"
+        elementFormDefault="qualified"
+        attributeFormDefault="unqualified"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:rpd="http://www.rpath.com/permanent/rpd-4.2.xsd"
+        xmlns="http://www.rpath.com/permanent/rpd-4.2.xsd">
+
+    <!-- Simple types -->
+
+    <xsd:simpleType name="troveSpecType">
+        <xsd:restriction base="xsd:string"></xsd:restriction>
+        <!-- TODO: make a proper xsd:restriction here to validate troveSpecs -->
+    </xsd:simpleType>
+
+    <xsd:simpleType name="flavorStringType">
+        <xsd:restriction base="xsd:string">
+            <!-- TODO: make a proper xsd:restriction here to validate flavor xsd:strings -->
+            <!-- this regexp comes from conary.deps.deps.flavorRegexpStr, and it barfs inside of Eclipse (sgp) -->
+            <!-- <pattern value="^(use:)? *(?:((?:!|~!)?(?:~?!?(?:[0-9A-Za-z_-]+))(?:\\.(?:[0-9A-Za-z_-]+))? *(?:, *(?:!|~!)?(?:~?!?(?:[0-9A-Za-z_-]+))(?:\\.(?:[0-9A-Za-z_-]+))?)*)?)? *(?:(is:) *(?: *(?:((?:[0-9A-Za-z_-]+))(?:\\(( *(?:~?!?(?:[0-9A-Za-z_-]+))(?: *, *(?:~?!?(?:[0-9A-Za-z_-]+)))*)\\))?)?(?:((?:  * *(?:((?:[0-9A-Za-z_-]+))(?:\\(( *(?:~?!?(?:[0-9A-Za-z_-]+))(?: *, *(?:~?!?(?:[0-9A-Za-z_-]+)))*)\\))?)?)*))?))? *(?:(target:) *(?: *(?:((?:[0-9A-Za-z_-]+))(?:\\(( *(?:~?!?(?:[0-9A-Za-z_-]+))(?: *, *(?:~?!?(?:[0-9A-Za-z_-]+)))*)\\))?)?(?:((?:  * *(?:((?:[0-9A-Za-z_-]+))(?:\\(( *(?:~?!?(?:[0-9A-Za-z_-]+))(?: *, *(?:~?!?(?:[0-9A-Za-z_-]+)))*)\\))?)?)*))?))?$" /> -->
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="conaryDepType">
+        <xsd:restriction base="xsd:string">
+            <xsd:pattern value="[a-zA-Z0-9]+: .*" />
+        </xsd:restriction>
+    </xsd:simpleType>
+
+
+    <!-- Complex types: Primitives (usable in many locations) -->
+
+    <xsd:attributeGroup name="attrGroupNameLabel">
+        <xsd:attribute name="troveName" type="xsd:string" />
+        <xsd:attribute name="label" type="xsd:string" />
+    </xsd:attributeGroup>
+
+    <xsd:complexType name="nameLabelType">
+        <xsd:attributeGroup ref="attrGroupNameLabel" />
+    </xsd:complexType>
+
+    <xsd:complexType name="nameFlavorType">
+        <xsd:attribute name="name" type="xsd:string" use="required" />
+        <xsd:attribute name="displayName" type="xsd:string" use="required" />
+        <xsd:attribute name="flavor" type="xsd:string" use="required" />
+    </xsd:complexType>
+
+
+    <!-- Complex types: Shared between product and platform sections -->
+
+    <xsd:complexType name="stageType">
+      <xsd:sequence>
+        <xsd:element name="promoteMaps" type="rpd:promoteMapsType" minOccurs="0" maxOccurs="1" />
+      </xsd:sequence>
+      <xsd:attribute name="name" type="xsd:string" use="required" />
+      <xsd:attribute name="labelSuffix" type="xsd:string" use="required" />
+    </xsd:complexType>
+
+    <xsd:complexType name="stageListType">
+        <xsd:sequence>
+            <xsd:element name="stage" type="stageType" minOccurs="1" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="searchPathType">
+        <!-- <xsd:attribute name="id" type="xsd:id" /> -->
+        <xsd:attributeGroup ref="attrGroupNameLabel" />
+        <xsd:attribute name="version" type="xsd:string" />
+        <xsd:attribute name="isResolveTrove" type="xsd:boolean" />
+        <xsd:attribute name="isGroupSearchPathTrove" type="xsd:boolean" />
+        <xsd:attribute name="isPlatformTrove" type="xsd:boolean" />
+    </xsd:complexType>
+
+    <xsd:complexType name="searchPathListType">
+        <xsd:sequence>
+            <xsd:element name="searchPath" type="searchPathType" minOccurs="1" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="factorySourceListType">
+        <xsd:sequence>
+            <xsd:element name="factorySource" type="searchPathType" minOccurs="1" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="autoLoadRecipesType">
+        <xsd:sequence>
+            <xsd:element name="autoLoadRecipe" type="nameLabelType" minOccurs="1" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="buildDefinitionType">
+        <xsd:sequence>
+            <xsd:element name="build" type="rpd:buildType" minOccurs="1" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="imageType">
+        <xsd:attribute name="containerFormat">
+            <xsd:simpleType>
+                <xsd:restriction base="xsd:string">
+                    <xsd:enumeration value="amiImage" />
+                    <xsd:enumeration value="applianceIsoImage" />
+                    <xsd:enumeration value="imageless" />
+                    <xsd:enumeration value="installableIsoImage" />
+                    <xsd:enumeration value="liveIsoImage" />
+                    <xsd:enumeration value="netbootImage" />
+                    <xsd:enumeration value="rawFsImage" />
+                    <xsd:enumeration value="rawHdImage" />
+                    <xsd:enumeration value="tarballImage" />
+                    <xsd:enumeration value="updateIsoImage" />
+                    <xsd:enumeration value="vhdImage" />
+                    <xsd:enumeration value="virtualIronImage" />
+                    <xsd:enumeration value="vmwareEsxImage" />
+                    <xsd:enumeration value="vmwareImage" />
+                    <xsd:enumeration value="wimImage" />
+                    <xsd:enumeration value="windowsIsoImage" />
+                    <xsd:enumeration value="xenOvaImage" />
+                </xsd:restriction>
+            </xsd:simpleType>
+        </xsd:attribute>
+        <xsd:attribute name="diskAdapter">
+            <xsd:simpleType>
+                <xsd:restriction base="xsd:string">
+                    <xsd:enumeration value="ide" />
+                    <xsd:enumeration value="lsilogic" />
+                </xsd:restriction>
+            </xsd:simpleType>
+        </xsd:attribute>
+        <xsd:attribute name="vhdDiskType">
+            <xsd:simpleType>
+                <xsd:restriction base="xsd:string">
+                    <xsd:enumeration value="fixed" />
+                    <xsd:enumeration value="dynamic" />
+                    <xsd:enumeration value="difference" />
+                </xsd:restriction>
+            </xsd:simpleType>
+        </xsd:attribute>
+
+        <xsd:attribute name="amiHugeDiskMountpoint" type="xsd:string" />
+        <xsd:attribute name="anacondaCustomTrove" type="rpd:troveSpecType" />
+        <xsd:attribute name="anacondaTemplatesTrove" type="rpd:troveSpecType" />
+        <xsd:attribute name="autoResolve" type="xsd:boolean" />
+        <xsd:attribute name="baseFileName" type="xsd:string" />
+        <xsd:attribute name="betaNag" type="xsd:boolean" />
+        <xsd:attribute name="bugsUrl" type="xsd:string" />
+        <xsd:attribute name="buildOVF10" type="xsd:boolean" />
+        <xsd:attribute name="freespace" type="xsd:nonNegativeInteger" />
+        <xsd:attribute name="installLabelPath" type="xsd:string" />
+        <xsd:attribute name="maxIsoSize" type="xsd:positiveInteger" />
+        <xsd:attribute name="mediaTemplateTrove" type="rpd:troveSpecType" />
+        <xsd:attribute name="name" type="xsd:string" />
+        <xsd:attribute name="natNetworking" type="xsd:boolean" />
+        <xsd:attribute name="showMediaCheck" type="xsd:boolean" />
+        <xsd:attribute name="swapSize" type="xsd:nonNegativeInteger" />
+        <xsd:attribute name="unionfs" type="xsd:boolean" />
+        <xsd:attribute name="vmMemory" type="xsd:nonNegativeInteger" />
+        <xsd:attribute name="vmSnapshots" type="xsd:boolean" />
+        <xsd:attribute name="zisofs" type="xsd:boolean" />
+    </xsd:complexType>
+
+    <xsd:complexType name="buildType">
+        <xsd:sequence>
+            <xsd:element name="image" type="rpd:imageType" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="stage" minOccurs="0" maxOccurs="unbounded">
+                <xsd:complexType>
+                    <xsd:attribute name="ref" type="xsd:string" use="required"/>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:sequence>
+                <xsd:element name="imageGroup" type="rpd:troveSpecType" minOccurs="0" maxOccurs="1"/>
+                <xsd:element name="sourceGroup" type="rpd:troveSpecType" minOccurs="0" maxOccurs="1"/>
+            </xsd:sequence>
+        </xsd:sequence>
+        <xsd:attribute name="name" type="xsd:string" use="required" />
+        <xsd:attribute name="architectureRef" type="xsd:string" />
+        <xsd:attribute name="flavorSetRef" type="xsd:string" />
+        <xsd:attribute name="containerTemplateRef" type="xsd:string" />
+        <xsd:attribute name="flavor" type="rpd:flavorStringType" />
+    </xsd:complexType>
+
+    <xsd:complexType name="secondaryLabelsType">
+      <xsd:sequence>
+        <xsd:element name="secondaryLabel" minOccurs="1" maxOccurs="unbounded">
+          <xsd:complexType>
+            <xsd:simpleContent>
+              <xsd:extension base="xsd:string">
+                <xsd:attribute name="name" type="xsd:string" use="required" />
+              </xsd:extension>
+            </xsd:simpleContent>
+          </xsd:complexType>
+        </xsd:element>
+      </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="promoteMapsType">
+      <xsd:sequence>
+        <xsd:element name="promoteMap" type="rpd:promoteMapType" minOccurs="1" maxOccurs="unbounded" />
+      </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="promoteMapType">
+      <xsd:attribute name="name" type="xsd:string" use="required" />
+      <xsd:attribute name="label" type="xsd:string" use="required" />
+    </xsd:complexType>
+
+    <xsd:complexType name="architecturesType">
+        <xsd:sequence>
+            <xsd:element name="architecture" type="rpd:nameFlavorType" minOccurs="0" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="flavorSetsType">
+        <xsd:sequence>
+            <xsd:element name="flavorSet" type="rpd:nameFlavorType" minOccurs="0" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="containerTemplatesType">
+        <xsd:sequence>
+            <xsd:element name="image" type="rpd:imageType" minOccurs="1" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="buildTemplateType">
+      <xsd:attribute name="name" type="xsd:string" />
+      <xsd:attribute name="displayName" type="xsd:string" />
+      <xsd:attribute name="architectureRef" type="xsd:string" />
+      <xsd:attribute name="containerTemplateRef" type="xsd:string" />
+      <xsd:attribute name="flavorSetRef" type="xsd:string" />
+    </xsd:complexType>
+
+    <xsd:complexType name="buildTemplatesType">
+        <xsd:sequence>
+            <xsd:element name="buildTemplate" type="rpd:buildTemplateType" minOccurs="0" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="platformClassifierType">
+      <!-- A well-known, machine-readable identifier for the ORIGIN platform.
+        e.g. "centos" -->
+      <xsd:attribute name="name" type="xsd:string" use="required" />
+      <!-- A well-known, machine-readable identifier for the version of the
+        ORIGIN platform. This should apply to the entire platform label, not
+        just the latest troves. e.g. "5" -->
+      <xsd:attribute name="version" type="xsd:string" use="required" />
+      <!-- A space-separated list of "tags" that describe characteristics of
+        the ORIGIN platform that might be shared across several platforms.
+        rPath products may choose to use this information to activate certain
+        build procedures.
+        e.g. "redhat" for Fedora, RHEL, Centos, and Scientific Linux -->
+      <xsd:attribute name="tags" type="xsd:string" />
+    </xsd:complexType>
+
+    <xsd:complexType name="platformInformationType">
+      <xsd:sequence>
+        <!-- Identifies the platform using well-known keywords. -->
+        <xsd:element name="platformClassifier" type="rpd:platformClassifierType"
+            minOccurs="0" maxOccurs="1" />
+        <!-- Label from which the platform was originally derived. It must be
+          copied from the parent platform, or set to the parent platform's
+          label if no <platformInformation> element exists in the parent. -->
+        <xsd:element name="originLabel" type="xsd:string"
+            minOccurs="1" maxOccurs="1" />
+        <!-- If provided, these troves will be installed before the product
+          contents in a rMake chroot or rBuilder image. -->
+        <xsd:element name="bootstrapTrove" type="rpd:troveSpecType"
+            minOccurs="0" maxOccurs="unbounded" />
+        <!-- If provided, a trove satisfying any of these deps will be used by
+          Conary, rMake, or rBuilder to choose a *system* RPM to use to install
+          the product group. -->
+        <xsd:element name="rpmRequirement" type="rpd:conaryDepType"
+            minOccurs="0" maxOccurs="unbounded" />
+      </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:group name="commonDefinitionElements">
+      <xsd:sequence>
+        <xsd:element name="platformInformation" type="rpd:platformInformationType"
+            minOccurs="0" maxOccurs="1" />
+        <xsd:element name="searchPaths" type="rpd:searchPathListType"
+            minOccurs="0" maxOccurs="1" />
+        <xsd:element name="factorySources" type="rpd:factorySourceListType"
+            minOccurs="0" maxOccurs="1" />
+        <xsd:element name="autoLoadRecipes" type="rpd:autoLoadRecipesType"
+            minOccurs="0" maxOccurs="1" />
+        <xsd:element name="secondaryLabels" type="rpd:secondaryLabelsType"
+            minOccurs="0" maxOccurs="1" />
+        <xsd:element name="architectures" type="rpd:architecturesType"
+            minOccurs="0" maxOccurs="1" />
+        <xsd:element name="flavorSets" type="rpd:flavorSetsType"
+            minOccurs="0" maxOccurs="1" />
+        <xsd:element name="containerTemplates" type="rpd:containerTemplatesType"
+            minOccurs="0" maxOccurs="1" />
+        <xsd:element name="buildTemplates" type="rpd:buildTemplatesType"
+            minOccurs="0" maxOccurs="1" />
+      </xsd:sequence>
+    </xsd:group>
+
+
+    <!-- Complex types: Product definition specific -->
+
+
+    <!-- Complex types: Platform definition specific
+
+        This includes anything in a platform definition or in the platform
+        element embedded in a product definition, that is not also in a product
+        definition outside of the platform element.
+        -->
+
+    <xsd:complexType name="contentProviderType">
+      <xsd:sequence>
+        <xsd:element name="contentSourceType" type="contentSourceTypeType"
+            minOccurs="1" maxOccurs="unbounded" />
+        <xsd:element name="dataSource" type="dataSourceType"
+            minOccurs="1" maxOccurs="unbounded" />
+      </xsd:sequence>
+      <xsd:attribute name="name" type="xsd:string" use="required" />
+      <xsd:attribute name="description" type="xsd:string" use="required" />
+    </xsd:complexType>
+
+    <xsd:complexType name="dataSourceType">
+      <xsd:attribute name="name" type="xsd:string" use="required" />
+      <xsd:attribute name="description" type="xsd:string" use="required" />
+    </xsd:complexType>
+
+    <xsd:complexType name="contentSourceTypeType">
+      <xsd:attribute name="name" type="xsd:string" use="required" />
+      <xsd:attribute name="description" type="xsd:string" use="required" />
+      <xsd:attribute name="isSingleton" type="xsd:boolean" />
+    </xsd:complexType>
+
+    <xsd:group name="platformDefinitionElements">
+      <xsd:sequence>
+        <xsd:element name="platformName" type="xsd:string"
+            minOccurs="0" maxOccurs="1" />
+        <xsd:element name="platformUsageTerms" type="xsd:string"
+            minOccurs="0" maxOccurs="1" />
+        <xsd:element name="platformVersionTrove" type="xsd:string"
+            minOccurs="0" maxOccurs="1" />
+        <xsd:element name="baseFlavor" type="rpd:flavorStringType"
+            minOccurs="0" maxOccurs="1" />
+        <xsd:element name="contentProvider" type="rpd:contentProviderType"
+            minOccurs="0" maxOccurs="1" />
+      </xsd:sequence>
+    </xsd:group>
+
+    <xsd:complexType name="platformDefinitionType">
+      <!-- Platform definition proper -->
+      <xsd:sequence>
+        <xsd:group ref="rpd:platformDefinitionElements" />
+        <xsd:group ref="rpd:commonDefinitionElements" />
+      </xsd:sequence>
+      <xsd:attribute name="version" type="xsd:string" />
+    </xsd:complexType>
+
+    <xsd:complexType name="platformType">
+      <!-- Platform embedded in a product definition -->
+      <xsd:sequence>
+        <xsd:group ref="rpd:platformDefinitionElements" />
+        <xsd:group ref="rpd:commonDefinitionElements" />
+      </xsd:sequence>
+      <!-- Source of this platform. Will get filled in to a name-version trove
+      spec when the product definition is saved -->
+      <xsd:attribute name="sourceTrove" type="xsd:string" />
+      <!-- If useLatest is "true", the upstream platform is copied verbatim
+      here, with no settling to a specific version. This essentially is a
+      cache of the upstream platform.
+      -->
+      <xsd:attribute name="useLatest" type="xsd:boolean" />
+    </xsd:complexType>
+
+
+    <!-- Top-level elements -->
+
+    <xsd:element name="productDefinition">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="productName" type="xsd:string" />
+                <xsd:element name="productShortname" type="xsd:string" />
+                <xsd:element name="productDescription" type="xsd:string" />
+                <xsd:element name="productVersion" type="xsd:string" />
+                <xsd:element name="productVersionDescription" type="xsd:string" />
+                <xsd:element name="conaryRepositoryHostname" type="xsd:string" />
+                <xsd:element name="conaryNamespace" type="xsd:string" />
+                <xsd:sequence>
+                    <xsd:element name="imageGroup" type="rpd:troveSpecType"/>
+                    <xsd:element name="sourceGroup" type="rpd:troveSpecType" minOccurs="0" maxOccurs="1"/>
+                </xsd:sequence>
+                <!-- 1.3: explicit label when default is wrong (RPCL-18) -->
+                <xsd:element name="baseLabel" type="xsd:string" minOccurs="0" maxOccurs="1" />
+                <xsd:element name="baseFlavor" type="rpd:flavorStringType" minOccurs="0" maxOccurs="1" />
+                <xsd:element name="stages" type="rpd:stageListType" />
+                <xsd:group ref="rpd:commonDefinitionElements" />
+                <xsd:element name="buildDefinition" type="rpd:buildDefinitionType" minOccurs="0" maxOccurs="1" />
+                <xsd:element name="platform" type="rpd:platformType" minOccurs="0" maxOccurs="1" />
+            </xsd:sequence>
+            <xsd:attribute name="version" type="xsd:string" />
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="platformDefinition" type="rpd:platformDefinitionType" />
+
+</xsd:schema>
