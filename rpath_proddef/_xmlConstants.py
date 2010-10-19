@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2006-2008 rPath, Inc.
+# Copyright (c) 2006-2010 rPath, Inc.
 #
 # This program is distributed under the terms of the Common Public License,
 # version 1.0. A copy of this license should have been distributed with this
@@ -23,7 +23,7 @@
 @type xmlSchemaLocaltion: C{str}
 """
 
-version = '4.1'
+version = '4.2'
 defaultNamespaceList = [ "http://www.rpath.com/permanent/rpd-%s.xsd" % version ]
 xmlSchemaNamespace = "http://www.w3.org/2001/XMLSchema-instance"
 xmlSchemaLocation = ("http://www.rpath.com/permanent/rpd-%s.xsd rpd-%s.xsd" %

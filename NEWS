@@ -1,4 +1,4 @@
-Changes in @NEW@:
+Changes in 4.1:
   o New Feature:
     * EXPERIMENTAL: allow "labelSuffix" attribute for stages to
       include full labels.
