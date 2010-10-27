@@ -1,0 +1,24 @@
+# Copyright (c) 2008 rPath, Inc.
+# This file is distributed under the terms of the MIT License.
+# A copy is available at http://www.rpath.com/permanent/mit-license.html
+#
+
+class rPathProductDefinition(PackageRecipe):
+    name = 'rpath-product-definition'
+    version = '0.1'
+
+    buildRequires = [
+        'lxml:python',
+        'make:runtime',
+        'python:devel',
+        'util-linux:runtime',
+    ]
+
+    def setup(r):
+        r.addMercurialSnapshot('http://scc.eng.rpath.com/rpath-product-definition')
+
+        r.Make()
+        r.MakeInstall()
+
+        # Need :data for the schema definitions
+        r.ComponentRequires({'data': set(['python'])})
