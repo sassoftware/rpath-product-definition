@@ -2607,6 +2607,9 @@ class platformClassifierType(GeneratedsSuper):
             self.valueOf_ += child_.nodeValue
         elif child_.nodeType == Node.CDATA_SECTION_NODE:
             self.valueOf_ += '![CDATA['+child_.nodeValue+']]'
+
+    def getTagsAsSet(self):
+        return set(self.tags.split())
 # end class platformClassifierType
 
 
@@ -2758,6 +2761,24 @@ class platformInformationType(GeneratedsSuper):
                 rpmRequirement_ += text__content_.nodeValue
             self.rpmRequirement.append(rpmRequirement_)
             self.validate_rpmRequirement(self.rpmRequirement)    # validate type rpmRequirement
+
+    def getOriginLabel(self):
+        if self.originLabel is None:
+            return None
+        from conary import versions
+        return versions.Label(self.originLabel.encode('ascii'))
+
+    @property
+    def rpmRequirements(self):
+        from conary.deps import deps
+        return [ deps.parseDep(x.encode('ascii'))
+            for x in self.rpmRequirement ]
+
+    @property
+    def bootstrapTroves(self):
+        from conary.conaryclient import cmdline
+        return [ cmdline.parseTroveSpec(x.encode('ascii'))
+            for x in self.bootstrapTrove]
 # end class platformInformationType
 
 

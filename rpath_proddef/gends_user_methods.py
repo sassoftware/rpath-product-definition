@@ -208,6 +208,38 @@ contentProviderTypeMethods = MethodSpec('contentProviderTypeMethods',
     class_names = r'contentProviderType$',
     )
 
+platformInformationMethods = MethodSpec('platformInformationMethods',
+    source = '''
+    def getOriginLabel(self):
+        if self.originLabel is None:
+            return None
+        from conary import versions
+        return versions.Label(self.originLabel.encode('ascii'))
+
+    @property
+    def rpmRequirements(self):
+        from conary.deps import deps
+        return [ deps.parseDep(x.encode('ascii'))
+            for x in self.rpmRequirement ]
+
+    @property
+    def bootstrapTroves(self):
+        from conary.conaryclient import cmdline
+        return [ cmdline.parseTroveSpec(x.encode('ascii'))
+            for x in self.bootstrapTrove]
+''',
+    class_names = r'platformInformationType$',
+    )
+
+platformClassifierMethods = MethodSpec('platformClassifierMethods',
+    source = '''
+    def getTagsAsSet(self):
+        return set(self.tags.split())
+''',
+    class_names = r'platformClassifierType$',
+    )
+
+
 METHOD_SPECS = (
     getTroveTup,
     buildTypeMethods,
@@ -217,6 +249,8 @@ METHOD_SPECS = (
     promoteMapTypeMethods,
     nameLabelTypeMethods,
     contentProviderTypeMethods,
+    platformInformationMethods,
+    platformClassifierMethods,
 )
 
 def test():
