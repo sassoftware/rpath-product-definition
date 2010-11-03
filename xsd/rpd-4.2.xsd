@@ -141,7 +141,7 @@
         <xsd:attribute name="amiHugeDiskMountpoint" type="xsd:string" />
         <xsd:attribute name="anacondaCustomTrove" type="rpd:troveSpecType" />
         <xsd:attribute name="anacondaTemplatesTrove" type="rpd:troveSpecType" />
-        <xsd:attribute name="platformIsoKitTemplatesTrove" type="rpd:troveSpecType" />
+        <xsd:attribute name="platformIsoKitTrove" type="rpd:troveSpecType" />
         <xsd:attribute name="autoResolve" type="xsd:boolean" />
         <xsd:attribute name="baseFileName" type="xsd:string" />
         <xsd:attribute name="betaNag" type="xsd:boolean" />

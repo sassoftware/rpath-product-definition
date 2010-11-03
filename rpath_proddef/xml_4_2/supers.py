@@ -1061,7 +1061,7 @@ class buildDefinitionType(GeneratedsSuper):
 class imageType(GeneratedsSuper):
     member_data_items_ = [
         MemberSpec_('autoResolve', 'xsd:boolean', 0),
-        MemberSpec_('maxIsoSize', 'xsd:positiveInteger', 0),
+        MemberSpec_('platformIsoKitTrove', 'rpd:troveSpecType', 0),
         MemberSpec_('bugsUrl', 'xsd:string', 0),
         MemberSpec_('natNetworking', 'xsd:boolean', 0),
         MemberSpec_('vhdDiskType', 'xsd:string', 0),
@@ -1069,11 +1069,11 @@ class imageType(GeneratedsSuper):
         MemberSpec_('mediaTemplateTrove', 'rpd:troveSpecType', 0),
         MemberSpec_('baseFileName', 'xsd:string', 0),
         MemberSpec_('vmSnapshots', 'xsd:boolean', 0),
+        MemberSpec_('maxIsoSize', 'xsd:positiveInteger', 0),
         MemberSpec_('swapSize', 'xsd:nonNegativeInteger', 0),
         MemberSpec_('betaNag', 'xsd:boolean', 0),
         MemberSpec_('buildOVF10', 'xsd:boolean', 0),
         MemberSpec_('anacondaTemplatesTrove', 'rpd:troveSpecType', 0),
-        MemberSpec_('platformIsoKitTemplatesTrove', 'rpd:troveSpecType', 0),
         MemberSpec_('vmMemory', 'xsd:nonNegativeInteger', 0),
         MemberSpec_('installLabelPath', 'xsd:string', 0),
         MemberSpec_('unionfs', 'xsd:boolean', 0),
@@ -1088,9 +1088,9 @@ class imageType(GeneratedsSuper):
         ]
     subclass = None
     superclass = None
-    def __init__(self, autoResolve=None, maxIsoSize=None, bugsUrl=None, natNetworking=None, vhdDiskType=None, anacondaCustomTrove=None, mediaTemplateTrove=None, baseFileName=None, vmSnapshots=None, swapSize=None, betaNag=None, buildOVF10=None, anacondaTemplatesTrove=None, platformIsoKitTemplatesTrove=None, vmMemory=None, installLabelPath=None, unionfs=None, containerFormat=None, freespace=None, name=None, zisofs=None, diskAdapter=None, amiHugeDiskMountpoint=None, showMediaCheck=None, valueOf_=''):
+    def __init__(self, autoResolve=None, platformIsoKitTrove=None, bugsUrl=None, natNetworking=None, vhdDiskType=None, anacondaCustomTrove=None, mediaTemplateTrove=None, baseFileName=None, vmSnapshots=None, maxIsoSize=None, swapSize=None, betaNag=None, buildOVF10=None, anacondaTemplatesTrove=None, vmMemory=None, installLabelPath=None, unionfs=None, containerFormat=None, freespace=None, name=None, zisofs=None, diskAdapter=None, amiHugeDiskMountpoint=None, showMediaCheck=None, valueOf_=''):
         self.autoResolve = _cast(bool, autoResolve)
-        self.maxIsoSize = _cast(int, maxIsoSize)
+        self.platformIsoKitTrove = _cast(None, platformIsoKitTrove)
         self.bugsUrl = _cast(None, bugsUrl)
         self.natNetworking = _cast(bool, natNetworking)
         self.vhdDiskType = _cast(None, vhdDiskType)
@@ -1098,11 +1098,11 @@ class imageType(GeneratedsSuper):
         self.mediaTemplateTrove = _cast(None, mediaTemplateTrove)
         self.baseFileName = _cast(None, baseFileName)
         self.vmSnapshots = _cast(bool, vmSnapshots)
+        self.maxIsoSize = _cast(int, maxIsoSize)
         self.swapSize = _cast(int, swapSize)
         self.betaNag = _cast(bool, betaNag)
         self.buildOVF10 = _cast(bool, buildOVF10)
         self.anacondaTemplatesTrove = _cast(None, anacondaTemplatesTrove)
-        self.platformIsoKitTemplatesTrove = _cast(None, platformIsoKitTemplatesTrove)
         self.vmMemory = _cast(int, vmMemory)
         self.installLabelPath = _cast(None, installLabelPath)
         self.unionfs = _cast(bool, unionfs)
@@ -1122,8 +1122,8 @@ class imageType(GeneratedsSuper):
     factory = staticmethod(factory)
     def get_autoResolve(self): return self.autoResolve
     def set_autoResolve(self, autoResolve): self.autoResolve = autoResolve
-    def get_maxIsoSize(self): return self.maxIsoSize
-    def set_maxIsoSize(self, maxIsoSize): self.maxIsoSize = maxIsoSize
+    def get_platformIsoKitTrove(self): return self.platformIsoKitTrove
+    def set_platformIsoKitTrove(self, platformIsoKitTrove): self.platformIsoKitTrove = platformIsoKitTrove
     def get_bugsUrl(self): return self.bugsUrl
     def set_bugsUrl(self, bugsUrl): self.bugsUrl = bugsUrl
     def get_natNetworking(self): return self.natNetworking
@@ -1138,6 +1138,8 @@ class imageType(GeneratedsSuper):
     def set_baseFileName(self, baseFileName): self.baseFileName = baseFileName
     def get_vmSnapshots(self): return self.vmSnapshots
     def set_vmSnapshots(self, vmSnapshots): self.vmSnapshots = vmSnapshots
+    def get_maxIsoSize(self): return self.maxIsoSize
+    def set_maxIsoSize(self, maxIsoSize): self.maxIsoSize = maxIsoSize
     def get_swapSize(self): return self.swapSize
     def set_swapSize(self, swapSize): self.swapSize = swapSize
     def get_betaNag(self): return self.betaNag
@@ -1146,8 +1148,6 @@ class imageType(GeneratedsSuper):
     def set_buildOVF10(self, buildOVF10): self.buildOVF10 = buildOVF10
     def get_anacondaTemplatesTrove(self): return self.anacondaTemplatesTrove
     def set_anacondaTemplatesTrove(self, anacondaTemplatesTrove): self.anacondaTemplatesTrove = anacondaTemplatesTrove
-    def get_platformIsoKitTemplatesTrove(self): return self.platformIsoKitTemplatesTrove
-    def set_platformIsoKitTemplatesTrove(self, platformIsoKitTemplatesTrove): self.platformIsoKitTemplatesTrove = platformIsoKitTemplatesTrove
     def get_vmMemory(self): return self.vmMemory
     def set_vmMemory(self, vmMemory): self.vmMemory = vmMemory
     def get_installLabelPath(self): return self.installLabelPath
@@ -1183,8 +1183,8 @@ class imageType(GeneratedsSuper):
     def exportAttributes(self, outfile, level, namespace_='rpd:', name_='imageType'):
         if self.autoResolve is not None:
             outfile.write(' autoResolve="%s"' % self.format_boolean(str_lower(str(self.autoResolve)), input_name='autoResolve'))
-        if self.maxIsoSize is not None:
-            outfile.write(' maxIsoSize="%s"' % self.format_integer(self.maxIsoSize, input_name='maxIsoSize'))
+        if self.platformIsoKitTrove is not None:
+            outfile.write(' platformIsoKitTrove=%s' % (quote_attrib(self.platformIsoKitTrove), ))
         if self.bugsUrl is not None:
             outfile.write(' bugsUrl=%s' % (self.format_string(quote_attrib(self.bugsUrl).encode(ExternalEncoding), input_name='bugsUrl'), ))
         if self.natNetworking is not None:
@@ -1199,6 +1199,8 @@ class imageType(GeneratedsSuper):
             outfile.write(' baseFileName=%s' % (self.format_string(quote_attrib(self.baseFileName).encode(ExternalEncoding), input_name='baseFileName'), ))
         if self.vmSnapshots is not None:
             outfile.write(' vmSnapshots="%s"' % self.format_boolean(str_lower(str(self.vmSnapshots)), input_name='vmSnapshots'))
+        if self.maxIsoSize is not None:
+            outfile.write(' maxIsoSize="%s"' % self.format_integer(self.maxIsoSize, input_name='maxIsoSize'))
         if self.swapSize is not None:
             outfile.write(' swapSize="%s"' % self.format_integer(self.swapSize, input_name='swapSize'))
         if self.betaNag is not None:
@@ -1207,8 +1209,6 @@ class imageType(GeneratedsSuper):
             outfile.write(' buildOVF10="%s"' % self.format_boolean(str_lower(str(self.buildOVF10)), input_name='buildOVF10'))
         if self.anacondaTemplatesTrove is not None:
             outfile.write(' anacondaTemplatesTrove=%s' % (quote_attrib(self.anacondaTemplatesTrove), ))
-        if self.platformIsoKitTemplatesTrove is not None:
-            outfile.write(' platformIsoKitTemplatesTrove=%s' % (quote_attrib(self.platformIsoKitTemplatesTrove), ))
         if self.vmMemory is not None:
             outfile.write(' vmMemory="%s"' % self.format_integer(self.vmMemory, input_name='vmMemory'))
         if self.installLabelPath is not None:
@@ -1253,9 +1253,9 @@ class imageType(GeneratedsSuper):
         if self.autoResolve is not None:
             showIndent(outfile, level)
             outfile.write('autoResolve = %s,\n' % (self.autoResolve,))
-        if self.maxIsoSize is not None:
+        if self.platformIsoKitTrove is not None:
             showIndent(outfile, level)
-            outfile.write('maxIsoSize = %d,\n' % (self.maxIsoSize,))
+            outfile.write('platformIsoKitTrove = %s,\n' % (self.platformIsoKitTrove,))
         if self.bugsUrl is not None:
             showIndent(outfile, level)
             outfile.write('bugsUrl = "%s",\n' % (self.bugsUrl,))
@@ -1277,6 +1277,9 @@ class imageType(GeneratedsSuper):
         if self.vmSnapshots is not None:
             showIndent(outfile, level)
             outfile.write('vmSnapshots = %s,\n' % (self.vmSnapshots,))
+        if self.maxIsoSize is not None:
+            showIndent(outfile, level)
+            outfile.write('maxIsoSize = %d,\n' % (self.maxIsoSize,))
         if self.swapSize is not None:
             showIndent(outfile, level)
             outfile.write('swapSize = %d,\n' % (self.swapSize,))
@@ -1289,9 +1292,6 @@ class imageType(GeneratedsSuper):
         if self.anacondaTemplatesTrove is not None:
             showIndent(outfile, level)
             outfile.write('anacondaTemplatesTrove = %s,\n' % (self.anacondaTemplatesTrove,))
-        if self.platformIsoKitTemplatesTrove is not None:
-            showIndent(outfile, level)
-            outfile.write('platformIsoKitTemplatesTrove = %s,\n' % (self.platformIsoKitTemplatesTrove,))
         if self.vmMemory is not None:
             showIndent(outfile, level)
             outfile.write('vmMemory = %d,\n' % (self.vmMemory,))
@@ -1340,13 +1340,8 @@ class imageType(GeneratedsSuper):
                 self.autoResolve = False
             else:
                 raise ValueError('Bad boolean attribute (autoResolve)')
-        if attrs.get('maxIsoSize'):
-            try:
-                self.maxIsoSize = int(attrs.get('maxIsoSize').value)
-            except ValueError, exp:
-                raise ValueError('Bad integer attribute (maxIsoSize): %s' % exp)
-            if self.maxIsoSize <= 0:
-                raise ValueError('Invalid PositiveInteger (maxIsoSize)')
+        if attrs.get('platformIsoKitTrove'):
+            self.platformIsoKitTrove = attrs.get('platformIsoKitTrove').value
         if attrs.get('bugsUrl'):
             self.bugsUrl = attrs.get('bugsUrl').value
         if attrs.get('natNetworking'):
@@ -1371,6 +1366,13 @@ class imageType(GeneratedsSuper):
                 self.vmSnapshots = False
             else:
                 raise ValueError('Bad boolean attribute (vmSnapshots)')
+        if attrs.get('maxIsoSize'):
+            try:
+                self.maxIsoSize = int(attrs.get('maxIsoSize').value)
+            except ValueError, exp:
+                raise ValueError('Bad integer attribute (maxIsoSize): %s' % exp)
+            if self.maxIsoSize <= 0:
+                raise ValueError('Invalid PositiveInteger (maxIsoSize)')
         if attrs.get('swapSize'):
             try:
                 self.swapSize = int(attrs.get('swapSize').value)
@@ -1394,8 +1396,6 @@ class imageType(GeneratedsSuper):
                 raise ValueError('Bad boolean attribute (buildOVF10)')
         if attrs.get('anacondaTemplatesTrove'):
             self.anacondaTemplatesTrove = attrs.get('anacondaTemplatesTrove').value
-        if attrs.get('platformIsoKitTemplatesTrove'):
-            self.platformIsoKitTemplatesTrove = attrs.get('platformIsoKitTemplatesTrove').value
         if attrs.get('vmMemory'):
             try:
                 self.vmMemory = int(attrs.get('vmMemory').value)
