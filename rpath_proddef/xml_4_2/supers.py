@@ -1073,6 +1073,7 @@ class imageType(GeneratedsSuper):
         MemberSpec_('betaNag', 'xsd:boolean', 0),
         MemberSpec_('buildOVF10', 'xsd:boolean', 0),
         MemberSpec_('anacondaTemplatesTrove', 'rpd:troveSpecType', 0),
+        MemberSpec_('platformIsoKitTemplatesTrove', 'rpd:troveSpecType', 0),
         MemberSpec_('vmMemory', 'xsd:nonNegativeInteger', 0),
         MemberSpec_('installLabelPath', 'xsd:string', 0),
         MemberSpec_('unionfs', 'xsd:boolean', 0),
@@ -1087,7 +1088,7 @@ class imageType(GeneratedsSuper):
         ]
     subclass = None
     superclass = None
-    def __init__(self, autoResolve=None, maxIsoSize=None, bugsUrl=None, natNetworking=None, vhdDiskType=None, anacondaCustomTrove=None, mediaTemplateTrove=None, baseFileName=None, vmSnapshots=None, swapSize=None, betaNag=None, buildOVF10=None, anacondaTemplatesTrove=None, vmMemory=None, installLabelPath=None, unionfs=None, containerFormat=None, freespace=None, name=None, zisofs=None, diskAdapter=None, amiHugeDiskMountpoint=None, showMediaCheck=None, valueOf_=''):
+    def __init__(self, autoResolve=None, maxIsoSize=None, bugsUrl=None, natNetworking=None, vhdDiskType=None, anacondaCustomTrove=None, mediaTemplateTrove=None, baseFileName=None, vmSnapshots=None, swapSize=None, betaNag=None, buildOVF10=None, anacondaTemplatesTrove=None, platformIsoKitTemplatesTrove=None, vmMemory=None, installLabelPath=None, unionfs=None, containerFormat=None, freespace=None, name=None, zisofs=None, diskAdapter=None, amiHugeDiskMountpoint=None, showMediaCheck=None, valueOf_=''):
         self.autoResolve = _cast(bool, autoResolve)
         self.maxIsoSize = _cast(int, maxIsoSize)
         self.bugsUrl = _cast(None, bugsUrl)
@@ -1101,6 +1102,7 @@ class imageType(GeneratedsSuper):
         self.betaNag = _cast(bool, betaNag)
         self.buildOVF10 = _cast(bool, buildOVF10)
         self.anacondaTemplatesTrove = _cast(None, anacondaTemplatesTrove)
+        self.platformIsoKitTemplatesTrove = _cast(None, platformIsoKitTemplatesTrove)
         self.vmMemory = _cast(int, vmMemory)
         self.installLabelPath = _cast(None, installLabelPath)
         self.unionfs = _cast(bool, unionfs)
@@ -1144,6 +1146,8 @@ class imageType(GeneratedsSuper):
     def set_buildOVF10(self, buildOVF10): self.buildOVF10 = buildOVF10
     def get_anacondaTemplatesTrove(self): return self.anacondaTemplatesTrove
     def set_anacondaTemplatesTrove(self, anacondaTemplatesTrove): self.anacondaTemplatesTrove = anacondaTemplatesTrove
+    def get_platformIsoKitTemplatesTrove(self): return self.platformIsoKitTemplatesTrove
+    def set_platformIsoKitTemplatesTrove(self, platformIsoKitTemplatesTrove): self.platformIsoKitTemplatesTrove = platformIsoKitTemplatesTrove
     def get_vmMemory(self): return self.vmMemory
     def set_vmMemory(self, vmMemory): self.vmMemory = vmMemory
     def get_installLabelPath(self): return self.installLabelPath
@@ -1203,6 +1207,8 @@ class imageType(GeneratedsSuper):
             outfile.write(' buildOVF10="%s"' % self.format_boolean(str_lower(str(self.buildOVF10)), input_name='buildOVF10'))
         if self.anacondaTemplatesTrove is not None:
             outfile.write(' anacondaTemplatesTrove=%s' % (quote_attrib(self.anacondaTemplatesTrove), ))
+        if self.platformIsoKitTemplatesTrove is not None:
+            outfile.write(' platformIsoKitTemplatesTrove=%s' % (quote_attrib(self.platformIsoKitTemplatesTrove), ))
         if self.vmMemory is not None:
             outfile.write(' vmMemory="%s"' % self.format_integer(self.vmMemory, input_name='vmMemory'))
         if self.installLabelPath is not None:
@@ -1283,6 +1289,9 @@ class imageType(GeneratedsSuper):
         if self.anacondaTemplatesTrove is not None:
             showIndent(outfile, level)
             outfile.write('anacondaTemplatesTrove = %s,\n' % (self.anacondaTemplatesTrove,))
+        if self.platformIsoKitTemplatesTrove is not None:
+            showIndent(outfile, level)
+            outfile.write('platformIsoKitTemplatesTrove = %s,\n' % (self.platformIsoKitTemplatesTrove,))
         if self.vmMemory is not None:
             showIndent(outfile, level)
             outfile.write('vmMemory = %d,\n' % (self.vmMemory,))
@@ -1385,6 +1394,8 @@ class imageType(GeneratedsSuper):
                 raise ValueError('Bad boolean attribute (buildOVF10)')
         if attrs.get('anacondaTemplatesTrove'):
             self.anacondaTemplatesTrove = attrs.get('anacondaTemplatesTrove').value
+        if attrs.get('platformIsoKitTemplatesTrove'):
+            self.platformIsoKitTemplatesTrove = attrs.get('platformIsoKitTemplatesTrove').value
         if attrs.get('vmMemory'):
             try:
                 self.vmMemory = int(attrs.get('vmMemory').value)
