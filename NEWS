@@ -1,3 +1,12 @@
+Changes in 4.2:
+  o New Features:
+    * Added support for specifying Windows image types, adds 4.2 schema
+      version. (RBL-6962)
+
+  o Bug Fixes:
+    * Creating a platform from a product works properly with
+      platformInformation nodes. (RBL-7550)
+
 Changes in 4.1:
   o New Feature:
     * EXPERIMENTAL: allow "labelSuffix" attribute for stages to
