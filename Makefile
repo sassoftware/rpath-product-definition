@@ -71,6 +71,8 @@ html: default-subdirs
 checkversion:
 	@echo $(VERSION) | grep "^$(schemaversion)" || { echo "version mismatch between latest schema $(schemaversion) and product version $(VERSION)"; exit 1; }
 
+show-version:
+	@echo $(VERSION)
 
 forcetag: checkversion
 	hg tag -f product-definition-$(VERSION)
