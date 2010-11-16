@@ -2876,7 +2876,7 @@ class BaseMigration(object):
             return None
         toObj = self.copyFrom(fromObj, newModule)
         if fromObj.__class__.__name__ == 'platformDefinitionTypeSub':
-            mFalseethod = self.migrateBackPlatform
+            method = self.migrateBackPlatform
         else:
             method = self.migrateBackProduct
         self.migrateBackCommon(fromObj, toObj, newModule)
