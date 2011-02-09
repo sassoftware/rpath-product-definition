@@ -217,8 +217,8 @@ supermod.platformType.subclass = platformTypeSub
 
 
 class productDefinitionSub(supermod.productDefinition):
-    def __init__(self, version=None, productName=None, productShortname=None, productDescription=None, productVersion=None, productVersionDescription=None, conaryRepositoryHostname=None, conaryNamespace=None, imageGroup=None, sourceGroup=None, baseLabel=None, baseFlavor=None, stages=None, platformInformation=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None, buildDefinition=None, platform=None):
-        supermod.productDefinition.__init__(self, version, productName, productShortname, productDescription, productVersion, productVersionDescription, conaryRepositoryHostname, conaryNamespace, imageGroup, sourceGroup, baseLabel, baseFlavor, stages, platformInformation, searchPaths, factorySources, autoLoadRecipes, secondaryLabels, architectures, flavorSets, containerTemplates, buildTemplates, buildDefinition, platform)
+    def __init__(self, version=None, productName=None, productShortname=None, productDescription=None, productVersion=None, productVersionDescription=None, conaryRepositoryHostname=None, conaryNamespace=None, imageGroup=None, sourceGroup=None, baseLabel=None, baseFlavor=None, publishUpstreamPlatformSearchPaths=None, stages=None, platformInformation=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None, buildDefinition=None, platform=None):
+        supermod.productDefinition.__init__(self, version, productName, productShortname, productDescription, productVersion, productVersionDescription, conaryRepositoryHostname, conaryNamespace, imageGroup, sourceGroup, baseLabel, baseFlavor, publishUpstreamPlatformSearchPaths, stages, platformInformation, searchPaths, factorySources, autoLoadRecipes, secondaryLabels, architectures, flavorSets, containerTemplates, buildTemplates, buildDefinition, platform)
 supermod.productDefinition.subclass = productDefinitionSub
 # end class productDefinitionSub
 
