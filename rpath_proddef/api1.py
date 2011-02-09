@@ -223,7 +223,6 @@ class BaseDefinition(object):
         if validate and os.path.exists(self.schemaDir):
             tree = self.validate(bsio, self.schemaDir, rootObj.get_version())
         elif validate:
-            import sys
             sys.stderr.write("Warning: unable to validate schema: directory %s missing"
                 % self.schemaDir)
             tree = etree.parse(bsio)
@@ -837,7 +836,7 @@ class BaseDefinition(object):
             return fileContents[0].get(), thawTrvCs.getNewNameVersionFlavor()
 
         # Couldn't find the file we expected; die
-        raise ProductDefinitionFileNotFoundError("%s=%s" % (troveName, label))
+        raise ProductDefinitionFileNotFoundError("%s=%s" % (n, label))
 
     def xmlFactory(self):
         return self.loadModule(self.version)
