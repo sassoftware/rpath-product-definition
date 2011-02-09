@@ -1334,8 +1334,6 @@ class ProductDefinitionRecipe(PackageRecipe):
         @rtype: C{list} of C{_SearchPath} objects
         """
         searchPaths = self.getSearchPaths()
-        if not searchPaths:
-            searchPaths = self.getPlatformSearchPaths()
         if searchPaths:
             searchPaths = [x for x in searchPaths
                            if x.isResolveTrove or x.isResolveTrove is None]
