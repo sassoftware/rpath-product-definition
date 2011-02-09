@@ -147,7 +147,6 @@ class BaseDefinition(object):
             # XXX default to the current version, hope for the best
             version = self.version
         self._preMigrateVersion = version
-        xmlns = rootNode.attributes.get('xmlns')
 
         module = self.loadModule(version)
 
@@ -1168,7 +1167,6 @@ class ProductDefinitionRecipe(PackageRecipe):
         @rtype: C{_Stage} or C{None} if not found
         @raises StageNotFoundError: if no such stage exists
         """
-        ret = None
         stages = self.getStages()
         for stage in stages:
             if stage.name == stageName:
@@ -1238,7 +1236,6 @@ class ProductDefinitionRecipe(PackageRecipe):
         #       Eventually the XML schema will explicitly define the
         #       default label, either via a 'default' attribute on
         #       the stage or via the stage's order.
-        ret = None
         stages = self.getStages()
         for stage in stages:
             if stage.labelSuffix == '-devel':
@@ -1256,7 +1253,6 @@ class ProductDefinitionRecipe(PackageRecipe):
         secondaryLabels = self.getSecondaryLabels()
         if not secondaryLabels:
             return []
-        prefix = self.getProductDefinitionLabel()
         labelSuffix = stageObj.labelSuffix or '' # this can be blank
 
         ret = []
@@ -2823,7 +2819,6 @@ class MigrationManager(object):
             return rootObj
         transPath = self._path[:]
         v = transPath.pop(0)
-        className = rootObj.__class__.__name__
         while transPath:
             nv = transPath.pop(0)
             transitions = self._transitions[v][nv]
