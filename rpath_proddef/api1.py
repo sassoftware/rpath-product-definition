@@ -147,7 +147,6 @@ class BaseDefinition(object):
             # XXX default to the current version, hope for the best
             version = self.version
         self._preMigrateVersion = version
-        xmlns = rootNode.attributes.get('xmlns')
 
         module = self.loadModule(version)
 
@@ -223,7 +222,6 @@ class BaseDefinition(object):
         if validate and os.path.exists(self.schemaDir):
             tree = self.validate(bsio, self.schemaDir, rootObj.get_version())
         elif validate:
-            import sys
             sys.stderr.write("Warning: unable to validate schema: directory %s missing"
                 % self.schemaDir)
             tree = etree.parse(bsio)
@@ -837,7 +835,7 @@ class BaseDefinition(object):
             return fileContents[0].get(), thawTrvCs.getNewNameVersionFlavor()
 
         # Couldn't find the file we expected; die
-        raise ProductDefinitionFileNotFoundError("%s=%s" % (troveName, label))
+        raise ProductDefinitionFileNotFoundError("%s=%s" % (n, label))
 
     def xmlFactory(self):
         return self.loadModule(self.version)
@@ -1169,7 +1167,6 @@ class ProductDefinitionRecipe(PackageRecipe):
         @rtype: C{_Stage} or C{None} if not found
         @raises StageNotFoundError: if no such stage exists
         """
-        ret = None
         stages = self.getStages()
         for stage in stages:
             if stage.name == stageName:
@@ -1239,7 +1236,6 @@ class ProductDefinitionRecipe(PackageRecipe):
         #       Eventually the XML schema will explicitly define the
         #       default label, either via a 'default' attribute on
         #       the stage or via the stage's order.
-        ret = None
         stages = self.getStages()
         for stage in stages:
             if stage.labelSuffix == '-devel':
@@ -1257,7 +1253,6 @@ class ProductDefinitionRecipe(PackageRecipe):
         secondaryLabels = self.getSecondaryLabels()
         if not secondaryLabels:
             return []
-        prefix = self.getProductDefinitionLabel()
         labelSuffix = stageObj.labelSuffix or '' # this can be blank
 
         ret = []
@@ -1339,8 +1334,6 @@ class ProductDefinitionRecipe(PackageRecipe):
         @rtype: C{list} of C{_SearchPath} objects
         """
         searchPaths = self.getSearchPaths()
-        if not searchPaths:
-            searchPaths = self.getPlatformSearchPaths()
         if searchPaths:
             searchPaths = [x for x in searchPaths
                            if x.isResolveTrove or x.isResolveTrove is None]
@@ -1897,6 +1890,18 @@ class ProductDefinitionRecipe(PackageRecipe):
         """
         return cls._troveName
 
+    def getPublishUpstreamPlatformSearchPaths(self):
+        if self._rootObj.publishUpstreamPlatformSearchPaths is None:
+            return True
+        return bool(self._rootObj.publishUpstreamPlatformSearchPaths)
+
+    def setPublishUpstreamPlatformSearchPaths(self, value):
+        self._rootObj.publishUpstreamPlatformSearchPaths = bool(value)
+    
+    publishUpstreamPlatformSearchPaths = property(
+        getPublishUpstreamPlatformSearchPaths,
+        setPublishUpstreamPlatformSearchPaths)
+
     #{ Internal methods
     def _getLabelForStage(self, stageObj):
         """
@@ -1913,9 +1918,10 @@ class ProductDefinitionRecipe(PackageRecipe):
             return labelSuffix
         return str(prefix + labelSuffix)
 
-    def toPlatformDefinition(self, copyAll = False):
+    def toPlatformDefinition(self, copyAll=False):
         """
         Create a PlatformDefinition object from this ProductDefinition.
+
         If copyAll is set to True, all architectures, flavor sets, container
         templates and build templates are copied from the existing product
         definition (as well as its platform) into the new platform.
@@ -1934,13 +1940,17 @@ class ProductDefinitionRecipe(PackageRecipe):
 
         # Build new search path
         label = self.getProductDefinitionLabel()
-        sPathsList = []
-        sPathsSet = set()
+        sPathsList = self.UniqueList()
 
         archRefs = set()
         containerTemplateRefs = set()
         flavorSetRefs = set()
         buildTemplateRefs = set()
+
+        # Because addSearchPath defaults these to True, we need to default
+        # them to True too
+        defaultAttrs = (('isResolveTrove', True),
+            ('isGroupSearchPathTrove', True), )
 
         # Iterate over all builds, and add the image group
         for build in self.buildDefinition:
@@ -1952,10 +1962,8 @@ class ProductDefinitionRecipe(PackageRecipe):
                 build.containerTemplateRef, build.flavorSetRef))
             if not build.imageGroup:
                 continue
-            key = (build.imageGroup, label, tuple())
-            if key not in sPathsSet:
-                sPathsList.append(key)
-                sPathsSet.add(key)
+            key = (build.imageGroup, label, defaultAttrs)
+            sPathsList.append(key)
 
         if not archRefs or copyAll:
             # No build definition in the product. Copy everything from current
@@ -1969,27 +1977,29 @@ class ProductDefinitionRecipe(PackageRecipe):
                 for x in self.iterAllBuildTemplates())
 
         # Append the global image group
-        key = (self.getImageGroup(), label, tuple())
-        if key not in sPathsSet:
-            sPathsList.append(key)
-            sPathsSet.add(key)
+        key = (self.getImageGroup(), label, defaultAttrs)
+        sPathsList.append(key)
         # Now append the search paths from this object, if available, or from
         # the upstream platform, if available
 
         # We are purposely dropping the versions from the platform definition
         # on creation.
 
-        sPaths = self.getSearchPaths()
+        # RPCL-78 - if the flag is not set, only copy search paths from this
+        # product definition into the final platform
+        if self.publishUpstreamPlatformSearchPaths:
+            sPaths = self.getSearchPaths()
+        else:
+            sPaths = BaseDefinition.getSearchPaths(self)
         for sp in sPaths or []:
             attrs = []
             for key in ('isResolveTrove', 'isGroupSearchPathTrove'):
-                val = sp.__getattribute__(key)
-                if val is not None:
-                    attrs.append((key, val))
+                val = getattr(sp, key)
+                if val is None:
+                    val = True
+                attrs.append((key, val))
             key = (sp.troveName, sp.label, tuple(attrs))
-            if key not in sPathsSet:
-                sPathsList.append(key)
-                sPathsSet.add(key)
+            sPathsList.append(key)
 
         for troveName, label, attrs in sPathsList:
             nplat.addSearchPath(troveName=troveName, label=label, **dict(attrs))
@@ -2023,8 +2033,8 @@ class ProductDefinitionRecipe(PackageRecipe):
 
         return nplat
 
-    def savePlatformToRepository(self, client, message = None):
-        nplat = self.toPlatformDefinition()
+    def savePlatformToRepository(self, client, message = None, **kwargs):
+        nplat = self.toPlatformDefinition(**kwargs)
         label = self.getProductDefinitionLabel()
         nplat.saveToRepository(client, label, message = message)
 
@@ -2215,6 +2225,28 @@ class ProductDefinitionRecipe(PackageRecipe):
         # the fields were not set in the platform or product
         _addPlatformDefaults(self.platform)
 
+    class UniqueList(object):
+        __slots__ = [ '_uq', '_list' ]
+        def __init__(self):
+            self._uq = set()
+            self._list = []
+
+        def extend(self, iterator):
+            for obj in iterator:
+                if obj in self._uq:
+                    continue
+                self._uq.add(obj)
+                self._list.append(obj)
+            return self
+
+        def append(self, obj):
+            return self.extend([obj])
+
+        def __iter__(self):
+            return self._list.__iter__()
+
+        def __repr__(self):
+            return repr(self._list)
     #}
 
 class BasePlatform(BaseDefinition):
@@ -2824,7 +2856,6 @@ class MigrationManager(object):
             return rootObj
         transPath = self._path[:]
         v = transPath.pop(0)
-        className = rootObj.__class__.__name__
         while transPath:
             nv = transPath.pop(0)
             transitions = self._transitions[v][nv]
@@ -2876,7 +2907,7 @@ class BaseMigration(object):
             return None
         toObj = self.copyFrom(fromObj, newModule)
         if fromObj.__class__.__name__ == 'platformDefinitionTypeSub':
-            mFalseethod = self.migrateBackPlatform
+            method = self.migrateBackPlatform
         else:
             method = self.migrateBackProduct
         self.migrateBackCommon(fromObj, toObj, newModule)

@@ -3787,6 +3787,7 @@ class productDefinition(GeneratedsSuper):
         MemberSpec_('sourceGroup', ['troveSpecType', 'xsd:string'], 0),
         MemberSpec_('baseLabel', 'xsd:string', 0),
         MemberSpec_('baseFlavor', ['flavorStringType', 'xsd:string'], 0),
+        MemberSpec_('publishUpstreamPlatformSearchPaths', 'xsd:boolean', 0),
         MemberSpec_('stages', 'stageListType', 0),
         MemberSpec_('platformInformation', 'platformInformationType', 0),
         MemberSpec_('searchPaths', 'searchPathListType', 0),
@@ -3802,7 +3803,7 @@ class productDefinition(GeneratedsSuper):
         ]
     subclass = None
     superclass = None
-    def __init__(self, version=None, productName=None, productShortname=None, productDescription=None, productVersion=None, productVersionDescription=None, conaryRepositoryHostname=None, conaryNamespace=None, imageGroup=None, sourceGroup=None, baseLabel=None, baseFlavor=None, stages=None, platformInformation=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None, buildDefinition=None, platform=None):
+    def __init__(self, version=None, productName=None, productShortname=None, productDescription=None, productVersion=None, productVersionDescription=None, conaryRepositoryHostname=None, conaryNamespace=None, imageGroup=None, sourceGroup=None, baseLabel=None, baseFlavor=None, publishUpstreamPlatformSearchPaths=None, stages=None, platformInformation=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None, buildDefinition=None, platform=None):
         self.version = _cast(None, version)
         self.productName = productName
         self.productShortname = productShortname
@@ -3815,6 +3816,7 @@ class productDefinition(GeneratedsSuper):
         self.sourceGroup = sourceGroup
         self.baseLabel = baseLabel
         self.baseFlavor = baseFlavor
+        self.publishUpstreamPlatformSearchPaths = publishUpstreamPlatformSearchPaths
         self.stages = stages
         self.platformInformation = platformInformation
         self.searchPaths = searchPaths
@@ -3864,6 +3866,8 @@ class productDefinition(GeneratedsSuper):
     def validate_baseFlavor(self, value):
         # validate type baseFlavor
         pass
+    def get_publishUpstreamPlatformSearchPaths(self): return self.publishUpstreamPlatformSearchPaths
+    def set_publishUpstreamPlatformSearchPaths(self, publishUpstreamPlatformSearchPaths): self.publishUpstreamPlatformSearchPaths = publishUpstreamPlatformSearchPaths
     def get_stages(self): return self.stages
     def set_stages(self, stages): self.stages = stages
     def get_platformInformation(self): return self.platformInformation
@@ -3938,6 +3942,9 @@ class productDefinition(GeneratedsSuper):
         if self.baseFlavor is not None:
             showIndent(outfile, level)
             outfile.write('<%sbaseFlavor>%s</%sbaseFlavor>\n' % (namespace_, self.format_string(quote_xml(self.baseFlavor).encode(ExternalEncoding), input_name='baseFlavor'), namespace_))
+        if self.publishUpstreamPlatformSearchPaths is not None:
+            showIndent(outfile, level)
+            outfile.write('<%spublishUpstreamPlatformSearchPaths>%s</%spublishUpstreamPlatformSearchPaths>\n' % (namespace_, self.format_boolean(str_lower(str(self.publishUpstreamPlatformSearchPaths)), input_name='publishUpstreamPlatformSearchPaths'), namespace_))
         if self.stages:
             self.stages.export(outfile, level, namespace_, name_='stages', )
         if self.platformInformation:
@@ -3975,6 +3982,7 @@ class productDefinition(GeneratedsSuper):
             self.sourceGroup is not None or
             self.baseLabel is not None or
             self.baseFlavor is not None or
+            self.publishUpstreamPlatformSearchPaths is not None or
             self.stages is not None or
             self.platformInformation is not None or
             self.searchPaths is not None or
@@ -4034,6 +4042,9 @@ class productDefinition(GeneratedsSuper):
         if self.baseFlavor is not None:
             showIndent(outfile, level)
             outfile.write('baseFlavor=%s,\n' % quote_python(self.baseFlavor).encode(ExternalEncoding))
+        if self.publishUpstreamPlatformSearchPaths is not None:
+            showIndent(outfile, level)
+            outfile.write('publishUpstreamPlatformSearchPaths=%s,\n' % self.publishUpstreamPlatformSearchPaths)
         if self.stages is not None:
             showIndent(outfile, level)
             outfile.write('stages=model_.stageListType(\n')
@@ -4185,6 +4196,17 @@ class productDefinition(GeneratedsSuper):
                 baseFlavor_ += text__content_.nodeValue
             self.baseFlavor = baseFlavor_
             self.validate_baseFlavor(self.baseFlavor)    # validate type baseFlavor
+        elif child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'publishUpstreamPlatformSearchPaths':
+            if child_.firstChild:
+                sval_ = child_.firstChild.nodeValue
+                if sval_ in ('true', '1'):
+                    ival_ = True
+                elif sval_ in ('false', '0'):
+                    ival_ = False
+                else:
+                    raise ValueError('requires boolean -- %s' % child_.toxml())
+                self.publishUpstreamPlatformSearchPaths = ival_
         elif child_.nodeType == Node.ELEMENT_NODE and \
             nodeName_ == 'stages':
             obj_ = stageListType.factory()
