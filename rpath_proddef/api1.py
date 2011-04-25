@@ -352,12 +352,21 @@ class BaseDefinition(object):
         if sp is None:
             sp = xmlsubs.searchPathListTypeSub.factory()
             self._rootObj.set_searchPaths(sp)
+
+        kwargs = {
+            'isResolveTrove': isResolveTrove,
+            'isGroupSearchPathTrove': isGroupSearchPathTrove,
+            'isPlatformTrove': isPlatformTrove,
+        }
+
+        # Don't passs down flavors unless the schema version is greater
+        # than 4.1.
+        if tuple(int(x) for x in self.version.split('.')) > (4, 1):
+            kwargs['flavor'] = flavor
+
         self._addSource(troveName, label, version,
                 xmlsubs.searchPathTypeSub.factory, sp.add_searchPath,
-                flavor = flavor,
-                isResolveTrove = isResolveTrove,
-                isGroupSearchPathTrove = isGroupSearchPathTrove,
-                isPlatformTrove = isPlatformTrove)
+                **kwargs)
 
     def addFactorySource(self, troveName = None, label = None, version = None):
         """
