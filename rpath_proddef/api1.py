@@ -1969,7 +1969,7 @@ class ProductDefinitionRecipe(PackageRecipe):
                 for x in self.iterAllBuildTemplates())
 
         # Append the global image group
-        key = (self.getImageGroup(), label, tuple(('isPlatformTrove', True), ))
+        key = (self.getImageGroup(), label, (('isPlatformTrove', True), ))
         if key not in sPathsSet:
             sPathsList.append(key)
             sPathsSet.add(key)
