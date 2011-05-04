@@ -1986,7 +1986,7 @@ class ProductDefinitionRecipe(PackageRecipe):
                 for x in self.iterAllBuildTemplates())
 
         # Append the global image group
-        key = (self.getImageGroup(), label, defaultAttrs)
+        key = (self.getImageGroup(), label, defaultAttrs + (('isPlatformTrove', True), ))
         sPathsList.append(key)
         # Now append the search paths from this object, if available, or from
         # the upstream platform, if available
