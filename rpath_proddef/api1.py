@@ -1901,7 +1901,7 @@ class ProductDefinitionRecipe(PackageRecipe):
 
     def getPublishUpstreamPlatformSearchPaths(self):
         if self._rootObj.publishUpstreamPlatformSearchPaths is None:
-            return True
+            return False
         return bool(self._rootObj.publishUpstreamPlatformSearchPaths)
 
     def setPublishUpstreamPlatformSearchPaths(self, value):
