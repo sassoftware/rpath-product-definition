@@ -2410,6 +2410,7 @@ class PlatformDefinition(BasePlatform):
 
     # list of files to search for in the trove, ordered by priority.
     _troveFileNames = [
+        'platform-definition-4.3.xml',
         'platform-definition-4.2.xml',
         'platform-definition-4.1.xml',
         'platform-definition-4.0.xml',
@@ -3152,6 +3153,12 @@ class Migrate_41_42(BaseMigration):
     toVersion = '4.2'
     CanMigrateBack = True
 MigrationManager.register(Migrate_41_42)
+
+class Migrate_42_43(BaseMigration):
+    fromVersion = '4.2'
+    toVersion = '4.3'
+    CanMigrateBack = True
+MigrationManager.register(Migrate_42_43)
 
 # export all things that do not have a leading underscore and aren't imported
 # from another module.
