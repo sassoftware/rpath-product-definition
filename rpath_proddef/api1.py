@@ -2002,7 +2002,7 @@ class ProductDefinitionRecipe(PackageRecipe):
             sPaths = BaseDefinition.getSearchPaths(self)
         for sp in sPaths or []:
             attrs = []
-            for key in ('isResolveTrove', 'isGroupSearchPathTrove'):
+            for key in ('isResolveTrove', 'isGroupSearchPathTrove', 'version'):
                 val = getattr(sp, key)
                 if val is None:
                     val = True
