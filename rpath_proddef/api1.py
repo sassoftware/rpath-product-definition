@@ -2480,7 +2480,9 @@ class PlatformDefinitionRecipe(PackageRecipe):
         # XXX We are ignoring the flavors for now.
         for sp in itertools.chain(self.getSearchPaths(),
                                   self.getFactorySources()):
-            troveSpecs.add(self._getTroveTup(sp, platformVersion))
+            if sp.version is None:
+                # Only snapshot if a previous version was not found
+                troveSpecs.add(self._getTroveTup(sp, platformVersion))
         troveSpecs = sorted(troveSpecs)
         try:
             troves = repos.findTroves(None, troveSpecs, allowMissing = True)
@@ -2489,6 +2491,8 @@ class PlatformDefinitionRecipe(PackageRecipe):
 
         for sp in itertools.chain(self.getSearchPaths(),
                                   self.getFactorySources()):
+            if sp.version is not None:
+                continue
             key = self._getTroveTup(sp, platformVersion)
             if key not in troves:
                 raise SearchPathTroveNotFoundError("%s=%s" % key[:2])
