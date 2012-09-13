@@ -26,11 +26,14 @@ from testrunner import suite
 class Suite(suite.TestSuite):
     testsuite_module = sys.modules[__name__]
 
-
-    def getCoverageExclusions(self, environ):
+    def getCoverageExclusions(self, handler, environ):
         return [r'generatedssuper\.py',
                 r'gends_user_methods\.py',
-                r'xml_.*/.*\.py']
+                r'xml_.*/.*\.py',
+                ]
+
+    def getCoverageDirs(self, handler, environ):
+        return ['rpath_proddef']
 
     def sortTests(self, tests):
         order = {'smoketest': 0, 
