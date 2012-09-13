@@ -18,8 +18,6 @@
 
 
 import sys
-import os
-import pwd
 from testrunner import suite
 
 
