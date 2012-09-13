@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<productDefinition xmlns="http://www.rpath.com/permanent/rpd-1.0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.rpath.com/permanent/rpd-1.0.xsd rpd-1.0.xsd" version="1.0">
+  <productName>AppCreator Test</productName>
+  <productShortname>appcreator</productShortname>
+  <productDescription></productDescription>
+  <productVersion>1</productVersion>
+  <productVersionDescription></productVersionDescription>
+  <conaryRepositoryHostname>appcreator.rpath.local</conaryRepositoryHostname>
+  <conaryNamespace>apc</conaryNamespace>
+  <imageGroup>group-appcreator-appliance</imageGroup>
+  <baseFlavor>
+~MySQL-python.threadsafe, X, ~!alternatives, ~!bootstrap,
+~builddocs, ~buildtests, desktop, emacs, gcj, ~glibc.tls,
+gnome, gtk, ipv6, kde, ~kernel.debugdata, krb, ldap, nptl,
+~!openssh.smartcard, ~!openssh.static_libcrypto, pam, pcre,
+perl, ~!pie, ~!postfix.mysql, python, qt, readline, sasl,
+~!selinux, ~sqlite.threadsafe, ssl, tcl, tcpwrappers, ~!tk,
+~!xorg-x11.xprint
+</baseFlavor>
+  <stages>
+    <stage labelSuffix="-devel" name="Development"/>
+    <stage labelSuffix="-qa" name="QA"/>
+    <stage labelSuffix="" name="Release"/>
+  </stages>
+  <upstreamSources>
+    <upstreamSource troveName="group-os" label="conary.rpath.com@rpl:2"/>
+  </upstreamSources>
+  <factorySources>
+    <factorySource troveName="group-factories" label="conary.rpath.com@rpl:2"/>
+  </factorySources>
+  <buildDefinition>
+    <build baseFlavor="!dom0, !domU, !xen, !vmware is: x86" name="Image 1">
+      <installableIsoImage autoResolve="false" maxIsoSize="681574400" bugsUrl="http://issues.rpath.com/" anacondaCustomTrove="" betaNag="false" mediaTemplateTrove="" installLabelPath="" anacondaTemplatesTrove="" baseFileName="" showMediaCheck="false"/>
+      <stage ref="Development"/>
+      <stage ref="QA"/>
+      <stage ref="Release"/>
+      <imageGroup>group-iso</imageGroup>
+    </build>
+    <build baseFlavor="!dom0, !domU, !xen, !vmware is: x86_64" name="Image 2">
+      <installableIsoImage autoResolve="false" maxIsoSize="681574400" bugsUrl="http://issues.rpath.com/" anacondaCustomTrove="" betaNag="false" mediaTemplateTrove="" installLabelPath="" anacondaTemplatesTrove="" baseFileName="" showMediaCheck="false"/>
+      <stage ref="Development"/>
+      <stage ref="QA"/>
+      <stage ref="Release"/>
+    </build>
+  </buildDefinition>
+</productDefinition>

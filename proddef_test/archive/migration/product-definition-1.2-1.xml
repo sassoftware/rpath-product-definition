@@ -1,0 +1,62 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<productDefinition xmlns="http://www.rpath.com/permanent/rpd-1.2.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.rpath.com/permanent/rpd-1.2.xsd rpd-1.2.xsd" version="1.2">
+  <productName>AppCreator Test</productName>
+  <productShortname>appcreator</productShortname>
+  <productDescription></productDescription>
+  <productVersion>1</productVersion>
+  <productVersionDescription></productVersionDescription>
+  <conaryRepositoryHostname>appcreator.rpath.local</conaryRepositoryHostname>
+  <conaryNamespace>apc</conaryNamespace>
+  <imageGroup>group-appcreator-appliance</imageGroup>
+  <baseFlavor>
+~MySQL-python.threadsafe, X, ~!alternatives, ~!bootstrap,
+~builddocs, ~buildtests, desktop, emacs, gcj, ~glibc.tls,
+gnome, gtk, ipv6, kde, ~kernel.debugdata, krb, ldap, nptl,
+~!openssh.smartcard, ~!openssh.static_libcrypto, pam, pcre,
+perl, ~!pie, ~!postfix.mysql, python, qt, readline, sasl,
+~!selinux, ~sqlite.threadsafe, ssl, tcl, tcpwrappers, ~!tk,
+~!xorg-x11.xprint
+</baseFlavor>
+  <stages>
+    <stage labelSuffix="-devel" name="Development"/>
+    <stage labelSuffix="-qa" name="QA"/>
+    <stage labelSuffix="" name="Release"/>
+  </stages>
+  <searchPaths>
+    <searchPath troveName="group-os" label="conary.rpath.com@rpl:2"/>
+  </searchPaths>
+  <factorySources>
+    <factorySource troveName="group-factories" label="conary.rpath.com@rpl:2" version="1.0"/>
+  </factorySources>
+  <architectures>
+    <architecture name="x86" flavor="is: x86"/>
+    <architecture name="x86_64" flavor="is: x86_64"/>
+  </architectures>
+  <imageTemplates>
+    <imageTemplate name="dom0" flavor="dom0, !domU, !vmware"/>
+  </imageTemplates>
+  <buildDefinition>
+    <build name="Image 1" architectureRef="x86" flavor="~ssl">
+      <installableIsoImage autoResolve="false" maxIsoSize="681574400" bugsUrl="http://issues.rpath.com/" anacondaCustomTrove="" betaNag="false" mediaTemplateTrove="" installLabelPath="" anacondaTemplatesTrove="" baseFileName="" showMediaCheck="false"/>
+      <stage ref="Development"/>
+      <stage ref="QA"/>
+      <stage ref="Release"/>
+      <imageGroup>group-iso</imageGroup>
+    </build>
+    <build name="Image 2" architectureRef="x86_64" imageTemplateRef="dom0" flavor="~ssl">
+      <installableIsoImage autoResolve="false" maxIsoSize="681574400" bugsUrl="http://issues.rpath.com/" anacondaCustomTrove="" betaNag="false" mediaTemplateTrove="" installLabelPath="" anacondaTemplatesTrove="" baseFileName="" showMediaCheck="false"/>
+      <stage ref="Development"/>
+      <stage ref="QA"/>
+      <stage ref="Release"/>
+    </build>
+  </buildDefinition>
+  <platform sourceTrove="aa" useLatest="true">
+    <baseFlavor>~ssl</baseFlavor>
+    <searchPaths>
+      <searchPath troveName="group-os" label="conary.rpath.com@rpl:2"/>
+    </searchPaths>
+    <factorySources>
+      <factorySource troveName="group-factories" label="conary.rpath.com@rpl:2" version="1.0"/>
+    </factorySources>
+  </platform>
+</productDefinition>

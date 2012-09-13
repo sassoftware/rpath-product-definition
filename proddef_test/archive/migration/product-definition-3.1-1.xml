@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<productDefinition xmlns="http://www.rpath.com/permanent/rpd-3.1.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.rpath.com/permanent/rpd-3.1.xsd rpd-3.1.xsd" version="3.1">
+  <productName>AppCreator Test</productName>
+  <productShortname>appcreator</productShortname>
+  <productDescription></productDescription>
+  <productVersion>1</productVersion>
+  <productVersionDescription></productVersionDescription>
+  <conaryRepositoryHostname>appcreator.rpath.local</conaryRepositoryHostname>
+  <conaryNamespace>apc</conaryNamespace>
+  <imageGroup>group-appcreator-appliance</imageGroup>
+  <baseFlavor>
+~MySQL-python.threadsafe, X, ~!alternatives, ~!bootstrap,
+~builddocs, ~buildtests, desktop, emacs, gcj, ~glibc.tls,
+gnome, gtk, ipv6, kde, ~kernel.debugdata, krb, ldap, nptl,
+~!openssh.smartcard, ~!openssh.static_libcrypto, pam, pcre,
+perl, ~!pie, ~!postfix.mysql, python, qt, readline, sasl,
+~!selinux, ~sqlite.threadsafe, ssl, tcl, tcpwrappers, ~!tk,
+~!xorg-x11.xprint
+</baseFlavor>
+  <stages>
+    <stage labelSuffix="-devel" name="Development"/>
+    <stage labelSuffix="-qa" name="QA"/>
+    <stage labelSuffix="" name="Release"/>
+  </stages>
+  <buildDefinition>
+    <build containerTemplateRef="installableIsoImage" name="Image 1">
+      <image maxIsoSize="681574400" autoResolve="false" bugsUrl="http://issues.rpath.com/" anacondaCustomTrove="" betaNag="false" mediaTemplateTrove="" installLabelPath="" anacondaTemplatesTrove="" baseFileName="" showMediaCheck="false"/>
+      <stage ref="Development"/>
+      <stage ref="QA"/>
+      <stage ref="Release"/>
+    </build>
+    <build containerTemplateRef="installableIsoImage" name="Image 2">
+      <image maxIsoSize="681574400" autoResolve="false" bugsUrl="http://issues.rpath.com/" anacondaCustomTrove="" betaNag="false" mediaTemplateTrove="" installLabelPath="" anacondaTemplatesTrove="" baseFileName="" showMediaCheck="false"/>
+      <stage ref="Development"/>
+      <stage ref="QA"/>
+      <stage ref="Release"/>
+    </build>
+  </buildDefinition>
+  <platform sourceTrove="platform-definition=/conary.rpath.com@rpl:2/2.0.beta1-3">
+    <baseFlavor>~X, ~!alternatives, !bootstrap, ~builddocs, ~buildtests, !cross, ~desktop, ~!dom0, ~!domU, ~emacs, ~!gcj, ~gnome, ~gtk, ~ipv6, ~krb, ~ldap, ~nptl, pam, ~pcre, ~perl, ~!pie, ~python, ~readline, ~!sasl, ~!selinux, ~ssl, ~tcl, ~tk, ~!vmware, ~!xen, ~!xfce</baseFlavor>
+    <searchPaths>
+      <searchPath troveName="group-os" label="conary.rpath.com@rpl:2"/>
+    </searchPaths>
+    <factorySources>
+      <factorySource troveName="group-factories-package-creator" label="package-creator.rb.rpath.com@factories:devel"/>
+    </factorySources>
+    <containerTemplates>
+      <image containerFormat="installableIsoImage"/>
+    </containerTemplates>
+  </platform>
+</productDefinition>
