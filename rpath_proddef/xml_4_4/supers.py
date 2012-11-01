@@ -561,24 +561,30 @@ class stageListType(GeneratedsSuper):
 class searchPathType(GeneratedsSuper):
     member_data_items_ = [
         MemberSpec_('isPlatformTrove', 'xsd:boolean', 0),
+        MemberSpec_('ref', 'xsd:string', 0),
         MemberSpec_('label', 'xsd:string', 0),
+        MemberSpec_('pinned', 'xsd:boolean', 0),
         MemberSpec_('troveName', 'xsd:string', 0),
         MemberSpec_('version', 'xsd:string', 0),
         MemberSpec_('isGroupSearchPathTrove', 'xsd:boolean', 0),
         MemberSpec_('flavor', 'rpd:flavorStringType', 0),
         MemberSpec_('isResolveTrove', 'xsd:boolean', 0),
+        MemberSpec_('id', 'xsd:string', 0),
         MemberSpec_('valueOf_', [], 0),
         ]
     subclass = None
     superclass = None
-    def __init__(self, isPlatformTrove=None, label=None, troveName=None, version=None, isGroupSearchPathTrove=None, flavor=None, isResolveTrove=None, valueOf_=''):
+    def __init__(self, isPlatformTrove=None, ref=None, label=None, pinned=None, troveName=None, version=None, isGroupSearchPathTrove=None, flavor=None, isResolveTrove=None, id=None, valueOf_=''):
         self.isPlatformTrove = _cast(bool, isPlatformTrove)
+        self.ref = _cast(None, ref)
         self.label = _cast(None, label)
+        self.pinned = _cast(bool, pinned)
         self.troveName = _cast(None, troveName)
         self.version = _cast(None, version)
         self.isGroupSearchPathTrove = _cast(bool, isGroupSearchPathTrove)
         self.flavor = _cast(None, flavor)
         self.isResolveTrove = _cast(bool, isResolveTrove)
+        self.id = _cast(None, id)
         self.valueOf_ = valueOf_
     def factory(*args_, **kwargs_):
         if searchPathType.subclass:
@@ -588,8 +594,12 @@ class searchPathType(GeneratedsSuper):
     factory = staticmethod(factory)
     def get_isPlatformTrove(self): return self.isPlatformTrove
     def set_isPlatformTrove(self, isPlatformTrove): self.isPlatformTrove = isPlatformTrove
+    def get_ref(self): return self.ref
+    def set_ref(self, ref): self.ref = ref
     def get_label(self): return self.label
     def set_label(self, label): self.label = label
+    def get_pinned(self): return self.pinned
+    def set_pinned(self, pinned): self.pinned = pinned
     def get_troveName(self): return self.troveName
     def set_troveName(self, troveName): self.troveName = troveName
     def get_version(self): return self.version
@@ -600,6 +610,8 @@ class searchPathType(GeneratedsSuper):
     def set_flavor(self, flavor): self.flavor = flavor
     def get_isResolveTrove(self): return self.isResolveTrove
     def set_isResolveTrove(self, isResolveTrove): self.isResolveTrove = isResolveTrove
+    def get_id(self): return self.id
+    def set_id(self, id): self.id = id
     def getValueOf_(self): return self.valueOf_
     def setValueOf_(self, valueOf_): self.valueOf_ = valueOf_
     def export(self, outfile, level, namespace_='rpd:', name_='searchPathType', namespacedef_=''):
@@ -615,8 +627,12 @@ class searchPathType(GeneratedsSuper):
     def exportAttributes(self, outfile, level, namespace_='rpd:', name_='searchPathType'):
         if self.isPlatformTrove is not None:
             outfile.write(' isPlatformTrove="%s"' % self.format_boolean(str_lower(str(self.isPlatformTrove)), input_name='isPlatformTrove'))
+        if self.ref is not None:
+            outfile.write(' ref=%s' % (self.format_string(quote_attrib(self.ref).encode(ExternalEncoding), input_name='ref'), ))
         if self.label is not None:
             outfile.write(' label=%s' % (self.format_string(quote_attrib(self.label).encode(ExternalEncoding), input_name='label'), ))
+        if self.pinned is not None:
+            outfile.write(' pinned="%s"' % self.format_boolean(str_lower(str(self.pinned)), input_name='pinned'))
         if self.troveName is not None:
             outfile.write(' troveName=%s' % (self.format_string(quote_attrib(self.troveName).encode(ExternalEncoding), input_name='troveName'), ))
         if self.version is not None:
@@ -627,6 +643,8 @@ class searchPathType(GeneratedsSuper):
             outfile.write(' flavor=%s' % (quote_attrib(self.flavor), ))
         if self.isResolveTrove is not None:
             outfile.write(' isResolveTrove="%s"' % self.format_boolean(str_lower(str(self.isResolveTrove)), input_name='isResolveTrove'))
+        if self.id is not None:
+            outfile.write(' id=%s' % (self.format_string(quote_attrib(self.id).encode(ExternalEncoding), input_name='id'), ))
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='searchPathType'):
         if self.valueOf_.find('![CDATA') > -1:
             value=quote_xml('%s' % self.valueOf_)
@@ -651,9 +669,15 @@ class searchPathType(GeneratedsSuper):
         if self.isPlatformTrove is not None:
             showIndent(outfile, level)
             outfile.write('isPlatformTrove = %s,\n' % (self.isPlatformTrove,))
+        if self.ref is not None:
+            showIndent(outfile, level)
+            outfile.write('ref = "%s",\n' % (self.ref,))
         if self.label is not None:
             showIndent(outfile, level)
             outfile.write('label = "%s",\n' % (self.label,))
+        if self.pinned is not None:
+            showIndent(outfile, level)
+            outfile.write('pinned = %s,\n' % (self.pinned,))
         if self.troveName is not None:
             showIndent(outfile, level)
             outfile.write('troveName = "%s",\n' % (self.troveName,))
@@ -669,6 +693,9 @@ class searchPathType(GeneratedsSuper):
         if self.isResolveTrove is not None:
             showIndent(outfile, level)
             outfile.write('isResolveTrove = %s,\n' % (self.isResolveTrove,))
+        if self.id is not None:
+            showIndent(outfile, level)
+            outfile.write('id = "%s",\n' % (self.id,))
     def exportLiteralChildren(self, outfile, level, name_):
         showIndent(outfile, level)
         outfile.write('valueOf_ = """%s""",\n' % (self.valueOf_,))
@@ -687,8 +714,17 @@ class searchPathType(GeneratedsSuper):
                 self.isPlatformTrove = False
             else:
                 raise ValueError('Bad boolean attribute (isPlatformTrove)')
+        if attrs.get('ref'):
+            self.ref = attrs.get('ref').value
         if attrs.get('label'):
             self.label = attrs.get('label').value
+        if attrs.get('pinned'):
+            if attrs.get('pinned').value in ('true', '1'):
+                self.pinned = True
+            elif attrs.get('pinned').value in ('false', '0'):
+                self.pinned = False
+            else:
+                raise ValueError('Bad boolean attribute (pinned)')
         if attrs.get('troveName'):
             self.troveName = attrs.get('troveName').value
         if attrs.get('version'):
@@ -709,6 +745,8 @@ class searchPathType(GeneratedsSuper):
                 self.isResolveTrove = False
             else:
                 raise ValueError('Bad boolean attribute (isResolveTrove)')
+        if attrs.get('id'):
+            self.id = attrs.get('id').value
     def buildChildren(self, child_, nodeName_):
         if child_.nodeType == Node.TEXT_NODE:
             self.valueOf_ += child_.nodeValue
@@ -736,11 +774,13 @@ class searchPathType(GeneratedsSuper):
 
 class searchPathListType(GeneratedsSuper):
     member_data_items_ = [
+        MemberSpec_('id', 'xsd:string', 0),
         MemberSpec_('searchPath', 'searchPathType', 1),
         ]
     subclass = None
     superclass = None
-    def __init__(self, searchPath=None):
+    def __init__(self, id=None, searchPath=None):
+        self.id = _cast(None, id)
         if searchPath is None:
             self.searchPath = []
         else:
@@ -755,6 +795,8 @@ class searchPathListType(GeneratedsSuper):
     def set_searchPath(self, searchPath): self.searchPath = searchPath
     def add_searchPath(self, value): self.searchPath.append(value)
     def insert_searchPath(self, index, value): self.searchPath[index] = value
+    def get_id(self): return self.id
+    def set_id(self, id): self.id = id
     def export(self, outfile, level, namespace_='rpd:', name_='searchPathListType', namespacedef_=''):
         showIndent(outfile, level)
         outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
@@ -767,7 +809,8 @@ class searchPathListType(GeneratedsSuper):
         else:
             outfile.write('/>\n')
     def exportAttributes(self, outfile, level, namespace_='rpd:', name_='searchPathListType'):
-        pass
+        if self.id is not None:
+            outfile.write(' id=%s' % (self.format_string(quote_attrib(self.id).encode(ExternalEncoding), input_name='id'), ))
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='searchPathListType'):
         for searchPath_ in self.searchPath:
             searchPath_.export(outfile, level, namespace_, name_='searchPath')
@@ -784,7 +827,9 @@ class searchPathListType(GeneratedsSuper):
         if self.hasContent_():
             self.exportLiteralChildren(outfile, level, name_)
     def exportLiteralAttributes(self, outfile, level, name_):
-        pass
+        if self.id is not None:
+            showIndent(outfile, level)
+            outfile.write('id = "%s",\n' % (self.id,))
     def exportLiteralChildren(self, outfile, level, name_):
         showIndent(outfile, level)
         outfile.write('searchPath=[\n')
@@ -805,7 +850,8 @@ class searchPathListType(GeneratedsSuper):
             nodeName_ = child_.nodeName.split(':')[-1]
             self.buildChildren(child_, nodeName_)
     def buildAttributes(self, attrs):
-        pass
+        if attrs.get('id'):
+            self.id = attrs.get('id').value
     def buildChildren(self, child_, nodeName_):
         if child_.nodeType == Node.ELEMENT_NODE and \
             nodeName_ == 'searchPath':

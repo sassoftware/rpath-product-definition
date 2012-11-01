@@ -63,19 +63,22 @@
     </xsd:complexType>
 
     <xsd:complexType name="searchPathType">
-        <!-- <xsd:attribute name="id" type="xsd:id" /> -->
+        <xsd:attribute name="id" type="xsd:ID" />
+        <xsd:attribute name="ref" type="xsd:IDREF" />
         <xsd:attributeGroup ref="attrGroupNameLabel" />
         <xsd:attribute name="version" type="xsd:string" />
         <xsd:attribute name="flavor" type="rpd:flavorStringType" />
         <xsd:attribute name="isResolveTrove" type="xsd:boolean" />
         <xsd:attribute name="isGroupSearchPathTrove" type="xsd:boolean" />
         <xsd:attribute name="isPlatformTrove" type="xsd:boolean" />
+        <xsd:attribute name="pinned" type="xsd:boolean" />
     </xsd:complexType>
 
     <xsd:complexType name="searchPathListType">
         <xsd:sequence>
             <xsd:element name="searchPath" type="searchPathType" minOccurs="1" maxOccurs="unbounded" />
         </xsd:sequence>
+        <xsd:attribute name="id" type="xsd:ID" />
     </xsd:complexType>
 
     <xsd:complexType name="factorySourceListType">

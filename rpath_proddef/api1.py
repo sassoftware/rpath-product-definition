@@ -37,7 +37,7 @@ from conary import trove
 from conary import versions as conaryVersions
 from conary.conaryclient import filetypes, cmdline
 from conary.deps import deps as conaryDeps
-from conary.lib import util
+from conary.lib import digestlib, util
 from conary.repository import errors as repositoryErrors
 from conary.repository import changeset
 
@@ -56,6 +56,9 @@ class MissingInformationError(ProductDefinitionError):
 
 class StageNotFoundError(ProductDefinitionError):
     "Raised when no such stage exists."
+
+class SearchPathNotFoundError(ProductDefinitionError):
+    "Raised when the search path does not exist"
 
 class ArchitectureNotFoundError(ProductDefinitionError):
     "Raised when no such architecture exists."
@@ -96,6 +99,39 @@ class SchemaValidationError(ProductDefinitionError):
     "XML document does not validate against the XML schema"
 
 #}
+
+class _IdGenerator(object):
+    __slots__ = [ '_map', '_values', '_namespace' ]
+    def __init__(self, namespace=None):
+        self._map = {}
+        self._values = set()
+        if namespace is None:
+            namespace = file("/dev/urandom").read(6)
+            namespace = digestlib.sha(namespace).hexdigest()[:8]
+        self._namespace = namespace
+
+    def getId(self, name, label):
+        key = (name, label)
+        value = self._map.get(key, None)
+        if value is not None:
+            return value
+        value = name
+        if value is None:
+            value = label
+        value = value.replace(':', '_')
+        if value in self._values:
+            # Collision. Start adding suffixes
+            templ = value
+            idx = 0
+            while 1:
+                value = "%s_%d" % (templ, idx)
+                if value in self._values:
+                    continue
+                break
+        value = "%s_%s" % (namespace, value)
+        self._map[key] = value
+        self._values.add(value)
+        return value
 
 class BaseDefinition(object):
     version = _xmlConstants.version
@@ -265,6 +301,17 @@ class BaseDefinition(object):
 
     searchPaths = property(getSearchPaths)
 
+    def getSearchPathById(self, id):
+        """
+        @return: the search path with the specified id, or None if not found
+        """
+        if id is None:
+            return None
+        for sp in self.getSearchPaths():
+            if sp.get_id() == id:
+                return sp
+        return None
+
     def getResolveTroves(self):
         """
         @return: the search paths from this product definition, filtering
@@ -332,7 +379,8 @@ class BaseDefinition(object):
     def addSearchPath(self, troveName = None, label = None, version = None,
                       flavor = None,
                       isResolveTrove = True, isGroupSearchPathTrove = True,
-                      isPlatformTrove = None):
+                      isPlatformTrove = None,
+                      id = None):
         """
         Add an search path.
         @param troveName: the trove name for the search path.
@@ -350,18 +398,17 @@ class BaseDefinition(object):
         @param isPlatformTrove: set to True if this element should
                be pinned to a specific version as part of a rebase operation
                that specifies a version (defaults to False)
+        @param id: id of this search path
+        @type id: C{str}
         """
         assert(isResolveTrove or isGroupSearchPathTrove)
         xmlsubs = self.xmlFactory()
-        sp = self._rootObj.get_searchPaths()
-        if sp is None:
-            sp = xmlsubs.searchPathListTypeSub.factory()
-            self._rootObj.set_searchPaths(sp)
 
         kwargs = {
             'isResolveTrove': isResolveTrove,
             'isGroupSearchPathTrove': isGroupSearchPathTrove,
             'isPlatformTrove': isPlatformTrove,
+            'id': id,
         }
 
         # Don't passs down flavors unless the schema version is greater
@@ -369,7 +416,8 @@ class BaseDefinition(object):
         if tuple(int(x) for x in self.version.split('.')) > (4, 1):
             kwargs['flavor'] = flavor
 
-        self._addSource(troveName, label, version,
+        sp = self._getSearchPathsNode()
+        return self._addSource(troveName, label, version,
                 xmlsubs.searchPathTypeSub.factory, sp.add_searchPath,
                 **kwargs)
 
@@ -388,7 +436,7 @@ class BaseDefinition(object):
         if sp is None:
             sp = xmlsubs.factorySourceListTypeSub.factory()
             self._rootObj.set_factorySources(sp)
-        self._addSource(troveName, label, version,
+        return self._addSource(troveName, label, version,
             xmlsubs.searchPathTypeSub.factory, sp.add_factorySource)
 
     def getArchitectures(self):
@@ -718,6 +766,13 @@ class BaseDefinition(object):
             return str(label)
         return verstr.split('/', 1)[0]
 
+    def _getSearchPathsNode(self):
+        sp = self._rootObj.get_searchPaths()
+        if sp is None:
+            sp = self.xmlFactory().searchPathListTypeSub.factory()
+            self._rootObj.set_searchPaths(sp)
+        return sp
+
     def _addSource(self, troveName, label, version, factory, addMethod, **kwargs):
         "Internal function for adding a Source"
         if label is not None:
@@ -726,6 +781,7 @@ class BaseDefinition(object):
         obj = factory(troveName = troveName, label = label, version = version,
                 **kwargs)
         addMethod(obj)
+        return obj
 
     def _getTroveContents(self, repos, trvTup):
         pathDict = {}
@@ -1337,8 +1393,39 @@ class ProductDefinitionRecipe(PackageRecipe):
         """
         sp = BaseDefinition.getSearchPaths(self)
         if sp:
-            return sp
+            return self._resolveSearchPaths(sp)
         return self.getPlatformSearchPaths()
+    searchPaths = property(getSearchPaths)
+
+    def copyPlatformSearchPaths(self):
+        """
+        Copy the platform search paths into this product
+        """
+        if self.platform is None or self.platform._rootObj.get_searchPaths() is None:
+            raise SearchPathNotFoundError()
+        sp = self._getSearchPathsNode()
+        sp.add_searchPath(self.xmlFactory().searchPathTypeSub.factory(
+            ref=PlatformDefinition.SearchPathsId))
+
+    def addSearchPath(self, *args, **kwargs):
+        """
+        @param ref: reference to the ID of another search path
+        @type ref: C{str}
+        """
+        ref = kwargs.pop('ref', None)
+        if ref is not None:
+            # A reference is requested. Let's make sure we have the referred
+            # entity
+            sp = self.getPlatformSearchPathById(ref)
+            if sp is None:
+                raise SearchPathNotFoundError(ref)
+            # The only thing we add is the ref
+            sp = self._getSearchPathsNode()
+            obj = self.xmlFactory().searchPathTypeSub.factory(ref=ref)
+            sp.add_searchPath(obj)
+            return obj
+
+        return BaseDefinition.addSearchPath(self, *args, **kwargs)
 
     def getResolveTroves(self):
         """
@@ -1524,6 +1611,11 @@ class ProductDefinitionRecipe(PackageRecipe):
             return []
         return self.platform.searchPaths
 
+    def getPlatformSearchPathById(self, id):
+        if self.platform is None:
+            return None
+        return self.platform.getSearchPathById(id)
+
     def clearPlatformSearchPaths(self):
         """
         Delete all searchPaths.
@@ -1536,7 +1628,7 @@ class ProductDefinitionRecipe(PackageRecipe):
 
     def addPlatformSearchPath(self, troveName = None, label = None,
                               version = None, isResolveTrove = True,
-                              isGroupSearchPathTrove = True):
+                              isGroupSearchPathTrove = True, id=None):
         """
         Add an search path.
         @param troveName: the trove name for the search path.
@@ -1549,11 +1641,13 @@ class ProductDefinitionRecipe(PackageRecipe):
                be returned for getResolveTroves()  (defaults to True)
         @param isGroupSearchPathTrove: set to False if this element should be 
                not be returned for getGroupSearchPath() (defaults to True)
+        @param id: id for the search paty
+        @type id: C{str}
         """
         self._ensurePlatformExists()
         self.platform.addSearchPath(troveName = troveName, label = label,
             version = version, isResolveTrove = isResolveTrove,
-            isGroupSearchPathTrove = isGroupSearchPathTrove)
+            isGroupSearchPathTrove = isGroupSearchPathTrove, id=id)
 
     def getPlatformFactorySources(self):
         """
@@ -2261,6 +2355,22 @@ class ProductDefinitionRecipe(PackageRecipe):
 
         def __repr__(self):
             return repr(self._list)
+
+    def _resolveSearchPaths(self, searchPathList):
+        ret = []
+        for sp in searchPathList:
+            ref = sp.ref
+            if ref == PlatformDefinition.SearchPathsId:
+                ret.extend(x.__copy__() for x in self.getPlatformSearchPaths())
+                continue
+            if ref:
+                sp = self.getPlatformSearchPathById(ref)
+                if sp is None:
+                    # Dangling reference; skip it
+                    continue
+                sp = sp.__copy__()
+            ret.append(sp)
+        return ret
     #}
 
 class BasePlatform(BaseDefinition):
@@ -2422,6 +2532,8 @@ class PlatformDefinition(BasePlatform):
         'platform-definition-4.0.xml',
         'platform-definition.xml',
     ]
+
+    SearchPathsId = '__platformSearchPaths'
 
     _recipe = '''
 #
