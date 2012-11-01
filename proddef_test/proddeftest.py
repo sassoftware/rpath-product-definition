@@ -1733,12 +1733,12 @@ class ProductDefinitionTest(BaseTest):
         pld.serialize(sio)
         self.assertXMLEquals(sio.getvalue(), refPlatSerialize2)
 
-    def testToPlatformDefinition3(self):
+    def testToPlatformDefinition1(self):
         prd = proddef.ProductDefinition(fromStream = refSerialize4)
         pld = prd.toPlatformDefinition()
 
         # migration code wipes baseFlavor if it appears to need to be migrated
-        self.failUnlessEqual(pld.getBaseFlavor(), '')
+        self.failUnlessEqual(pld.getBaseFlavor(), 'black-coffee,!cream,~sugar is: x86 x86_64')
 
     def testToPlatformDefinition4(self):
         """Override platformInformation in product"""
