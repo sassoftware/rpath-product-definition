@@ -108,39 +108,6 @@ def generateId(*components):
         dig.update(str(component))
     return 'a-' + dig.hexdigest()[:10]
 
-class _IdGenerator(object):
-    __slots__ = [ '_map', '_values', '_namespace' ]
-    def __init__(self, namespace=None):
-        self._map = {}
-        self._values = set()
-        if namespace is None:
-            namespace = file("/dev/urandom").read(6)
-            namespace = digestlib.sha(namespace).hexdigest()[:8]
-        self._namespace = namespace
-
-    def getId(self, name, label):
-        key = (name, label)
-        value = self._map.get(key, None)
-        if value is not None:
-            return value
-        value = name
-        if value is None:
-            value = label
-        value = value.replace(':', '_')
-        if value in self._values:
-            # Collision. Start adding suffixes
-            templ = value
-            idx = 0
-            while 1:
-                value = "%s_%d" % (templ, idx)
-                if value in self._values:
-                    continue
-                break
-        value = "%s_%s" % (namespace, value)
-        self._map[key] = value
-        self._values.add(value)
-        return value
-
 class BaseDefinition(object):
     version = _xmlConstants.version
     Versioned = True
