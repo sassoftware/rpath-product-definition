@@ -71,7 +71,6 @@
         <xsd:attribute name="isResolveTrove" type="xsd:boolean" />
         <xsd:attribute name="isGroupSearchPathTrove" type="xsd:boolean" />
         <xsd:attribute name="isPlatformTrove" type="xsd:boolean" />
-        <xsd:attribute name="pinned" type="xsd:boolean" />
     </xsd:complexType>
 
     <xsd:complexType name="searchPathListType">

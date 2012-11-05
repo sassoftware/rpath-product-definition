@@ -563,7 +563,6 @@ class searchPathType(GeneratedsSuper):
         MemberSpec_('isPlatformTrove', 'xsd:boolean', 0),
         MemberSpec_('ref', 'xsd:string', 0),
         MemberSpec_('label', 'xsd:string', 0),
-        MemberSpec_('pinned', 'xsd:boolean', 0),
         MemberSpec_('troveName', 'xsd:string', 0),
         MemberSpec_('version', 'xsd:string', 0),
         MemberSpec_('isGroupSearchPathTrove', 'xsd:boolean', 0),
@@ -574,11 +573,10 @@ class searchPathType(GeneratedsSuper):
         ]
     subclass = None
     superclass = None
-    def __init__(self, isPlatformTrove=None, ref=None, label=None, pinned=None, troveName=None, version=None, isGroupSearchPathTrove=None, flavor=None, isResolveTrove=None, id=None, valueOf_=''):
+    def __init__(self, isPlatformTrove=None, ref=None, label=None, troveName=None, version=None, isGroupSearchPathTrove=None, flavor=None, isResolveTrove=None, id=None, valueOf_=''):
         self.isPlatformTrove = _cast(bool, isPlatformTrove)
         self.ref = _cast(None, ref)
         self.label = _cast(None, label)
-        self.pinned = _cast(bool, pinned)
         self.troveName = _cast(None, troveName)
         self.version = _cast(None, version)
         self.isGroupSearchPathTrove = _cast(bool, isGroupSearchPathTrove)
@@ -598,8 +596,6 @@ class searchPathType(GeneratedsSuper):
     def set_ref(self, ref): self.ref = ref
     def get_label(self): return self.label
     def set_label(self, label): self.label = label
-    def get_pinned(self): return self.pinned
-    def set_pinned(self, pinned): self.pinned = pinned
     def get_troveName(self): return self.troveName
     def set_troveName(self, troveName): self.troveName = troveName
     def get_version(self): return self.version
@@ -631,8 +627,6 @@ class searchPathType(GeneratedsSuper):
             outfile.write(' ref=%s' % (self.format_string(quote_attrib(self.ref).encode(ExternalEncoding), input_name='ref'), ))
         if self.label is not None:
             outfile.write(' label=%s' % (self.format_string(quote_attrib(self.label).encode(ExternalEncoding), input_name='label'), ))
-        if self.pinned is not None:
-            outfile.write(' pinned="%s"' % self.format_boolean(str_lower(str(self.pinned)), input_name='pinned'))
         if self.troveName is not None:
             outfile.write(' troveName=%s' % (self.format_string(quote_attrib(self.troveName).encode(ExternalEncoding), input_name='troveName'), ))
         if self.version is not None:
@@ -675,9 +669,6 @@ class searchPathType(GeneratedsSuper):
         if self.label is not None:
             showIndent(outfile, level)
             outfile.write('label = "%s",\n' % (self.label,))
-        if self.pinned is not None:
-            showIndent(outfile, level)
-            outfile.write('pinned = %s,\n' % (self.pinned,))
         if self.troveName is not None:
             showIndent(outfile, level)
             outfile.write('troveName = "%s",\n' % (self.troveName,))
@@ -718,13 +709,6 @@ class searchPathType(GeneratedsSuper):
             self.ref = attrs.get('ref').value
         if attrs.get('label'):
             self.label = attrs.get('label').value
-        if attrs.get('pinned'):
-            if attrs.get('pinned').value in ('true', '1'):
-                self.pinned = True
-            elif attrs.get('pinned').value in ('false', '0'):
-                self.pinned = False
-            else:
-                raise ValueError('Bad boolean attribute (pinned)')
         if attrs.get('troveName'):
             self.troveName = attrs.get('troveName').value
         if attrs.get('version'):

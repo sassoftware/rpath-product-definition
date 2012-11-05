@@ -100,6 +100,14 @@ class SchemaValidationError(ProductDefinitionError):
 
 #}
 
+def generateId(*components):
+    dig = digestlib.md5()
+    for component in components:
+        if component is None:
+            continue
+        dig.update(str(component))
+    return 'a-' + dig.hexdigest()[:10]
+
 class _IdGenerator(object):
     __slots__ = [ '_map', '_values', '_namespace' ]
     def __init__(self, namespace=None):
@@ -2057,8 +2065,8 @@ class ProductDefinitionRecipe(PackageRecipe):
 
         # Because addSearchPath defaults these to True, we need to default
         # them to True too
-        defaultAttrs = (('isResolveTrove', True),
-            ('isGroupSearchPathTrove', True), )
+        defaultAttrs = dict(isResolveTrove=True,
+                isGroupSearchPathTrove=True)
 
         # Iterate over all builds, and add the image group
         for build in self.buildDefinition:
@@ -2070,7 +2078,7 @@ class ProductDefinitionRecipe(PackageRecipe):
                 build.containerTemplateRef, build.flavorSetRef))
             if not build.imageGroup:
                 continue
-            key = (build.imageGroup, label, defaultAttrs)
+            key = self.SearchPathItem(build.imageGroup, label, defaultAttrs)
             sPathsList.append(key)
 
         if not archRefs or copyAll:
@@ -2085,7 +2093,8 @@ class ProductDefinitionRecipe(PackageRecipe):
                 for x in self.iterAllBuildTemplates())
 
         # Append the global image group
-        key = (self.getImageGroup(), label, defaultAttrs + (('isPlatformTrove', True), ))
+        key = self.SearchPathItem(self.getImageGroup(), label,
+                dict(defaultAttrs, isPlatformTrove=True))
         sPathsList.append(key)
         # Now append the search paths from this object, if available, or from
         # the upstream platform, if available
@@ -2099,17 +2108,25 @@ class ProductDefinitionRecipe(PackageRecipe):
             sPaths = self.getSearchPaths()
         else:
             sPaths = BaseDefinition.getSearchPaths(self)
+        spAttrKeys = [ 'isResolveTrove', 'isGroupSearchPathTrove', 'version', 'id' ]
         for sp in sPaths or []:
-            attrs = []
-            for key in ('isResolveTrove', 'isGroupSearchPathTrove', 'version'):
+            attrs = {}
+            for key in spAttrKeys:
                 val = getattr(sp, key)
                 if val is None:
+                    if key in ('id', 'version'):
+                        # Don't pass empty versions, to force the dedup
+                        # to work properly
+                        continue
                     val = True
-                attrs.append((key, val))
-            key = (sp.troveName, sp.label, tuple(attrs))
+                attrs[key] = val
+            key = self.SearchPathItem(sp.troveName, sp.label, attrs)
             sPathsList.append(key)
 
-        for troveName, label, attrs in sPathsList:
+        for sP in sPathsList:
+            troveName, label, attrs = sP.troveName, sP.label, sP.attributes
+            if 'id' not in attrs:
+                attrs.update(id=generateId(label, troveName))
             nplat.addSearchPath(troveName=troveName, label=label, **dict(attrs))
 
         nplat.addArchitectures([ x for x in self.iterAllArchitectures()
@@ -2278,6 +2295,8 @@ class ProductDefinitionRecipe(PackageRecipe):
         else:
             self.platform = Platform()
             self.platform._rootObj = platform
+            if self.platform._rootObj.searchPaths:
+                self.platform._rootObj.searchPaths.id = PlatformDefinition.SearchPathsId
         # Pass some parent information into the build objects
         for build in self.getBuildDefinitions():
             build.parentImageGroup = self.getImageGroup()
@@ -2333,17 +2352,36 @@ class ProductDefinitionRecipe(PackageRecipe):
         # the fields were not set in the platform or product
         _addPlatformDefaults(self.platform)
 
+    class SearchPathItem(object):
+        __slots__ = [ 'troveName', 'label', 'attributes' ]
+        def __init__(self, troveName, label, attributes):
+            self.troveName = troveName
+            self.label = label
+            self.attributes = attributes
+
+        @property
+        def key(self):
+            return self.troveName, self.label
+
+        def update(self, other):
+            assert self.troveName == other.troveName
+            assert self.label == other.label
+            self.attributes.update(other.attributes)
+
     class UniqueList(object):
         __slots__ = [ '_uq', '_list' ]
         def __init__(self):
-            self._uq = set()
+            self._uq = dict()
             self._list = []
 
         def extend(self, iterator):
             for obj in iterator:
-                if obj in self._uq:
+                key = obj.key
+                prevObj = self._uq.get(key)
+                if prevObj is not None:
+                    prevObj.update(obj)
                     continue
-                self._uq.add(obj)
+                self._uq[key] = obj
                 self._list.append(obj)
             return self
 
