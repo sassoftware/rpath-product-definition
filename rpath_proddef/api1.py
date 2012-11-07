@@ -383,8 +383,11 @@ class BaseDefinition(object):
             'isResolveTrove': isResolveTrove,
             'isGroupSearchPathTrove': isGroupSearchPathTrove,
             'isPlatformTrove': isPlatformTrove,
-            'id': id,
         }
+        if id is not None:
+            # Do not pass id down unconditionally, older versions of
+            # schema versions don't support it
+            kwargs.update(id=id)
 
         # Don't passs down flavors unless the schema version is greater
         # than 4.1.
