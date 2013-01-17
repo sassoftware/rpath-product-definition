@@ -1108,6 +1108,7 @@ class imageType(GeneratedsSuper):
         MemberSpec_('vmMemory', 'xsd:nonNegativeInteger', 0),
         MemberSpec_('installLabelPath', 'xsd:string', 0),
         MemberSpec_('unionfs', 'xsd:boolean', 0),
+        MemberSpec_('ebsBacked', 'xsd:boolean', 0),
         MemberSpec_('containerFormat', 'xsd:string', 0),
         MemberSpec_('freespace', 'xsd:nonNegativeInteger', 0),
         MemberSpec_('name', 'xsd:string', 0),
@@ -1119,7 +1120,7 @@ class imageType(GeneratedsSuper):
         ]
     subclass = None
     superclass = None
-    def __init__(self, autoResolve=None, platformIsoKitTrove=None, baseImageTrove=None, bugsUrl=None, natNetworking=None, vhdDiskType=None, anacondaCustomTrove=None, mediaTemplateTrove=None, baseFileName=None, vmSnapshots=None, maxIsoSize=None, swapSize=None, betaNag=None, buildOVF10=None, anacondaTemplatesTrove=None, vmMemory=None, installLabelPath=None, unionfs=None, containerFormat=None, freespace=None, name=None, zisofs=None, diskAdapter=None, amiHugeDiskMountpoint=None, showMediaCheck=None, valueOf_=''):
+    def __init__(self, autoResolve=None, platformIsoKitTrove=None, baseImageTrove=None, bugsUrl=None, natNetworking=None, vhdDiskType=None, anacondaCustomTrove=None, mediaTemplateTrove=None, baseFileName=None, vmSnapshots=None, maxIsoSize=None, swapSize=None, betaNag=None, buildOVF10=None, anacondaTemplatesTrove=None, vmMemory=None, installLabelPath=None, unionfs=None, ebsBacked=None, containerFormat=None, freespace=None, name=None, zisofs=None, diskAdapter=None, amiHugeDiskMountpoint=None, showMediaCheck=None, valueOf_=''):
         self.autoResolve = _cast(bool, autoResolve)
         self.platformIsoKitTrove = _cast(None, platformIsoKitTrove)
         self.baseImageTrove = _cast(None, baseImageTrove)
@@ -1138,6 +1139,7 @@ class imageType(GeneratedsSuper):
         self.vmMemory = _cast(int, vmMemory)
         self.installLabelPath = _cast(None, installLabelPath)
         self.unionfs = _cast(bool, unionfs)
+        self.ebsBacked = _cast(bool, ebsBacked)
         self.containerFormat = _cast(None, containerFormat)
         self.freespace = _cast(int, freespace)
         self.name = _cast(None, name)
@@ -1188,6 +1190,8 @@ class imageType(GeneratedsSuper):
     def set_installLabelPath(self, installLabelPath): self.installLabelPath = installLabelPath
     def get_unionfs(self): return self.unionfs
     def set_unionfs(self, unionfs): self.unionfs = unionfs
+    def get_ebsBacked(self): return self.ebsBacked
+    def set_ebsBacked(self, ebsBacked): self.ebsBacked = ebsBacked
     def get_containerFormat(self): return self.containerFormat
     def set_containerFormat(self, containerFormat): self.containerFormat = containerFormat
     def get_freespace(self): return self.freespace
@@ -1251,6 +1255,8 @@ class imageType(GeneratedsSuper):
             outfile.write(' installLabelPath=%s' % (self.format_string(quote_attrib(self.installLabelPath).encode(ExternalEncoding), input_name='installLabelPath'), ))
         if self.unionfs is not None:
             outfile.write(' unionfs="%s"' % self.format_boolean(str_lower(str(self.unionfs)), input_name='unionfs'))
+        if self.ebsBacked is not None:
+            outfile.write(' ebsBacked="%s"' % self.format_boolean(str_lower(str(self.ebsBacked)), input_name='ebsBacked'))
         if self.containerFormat is not None:
             outfile.write(' containerFormat=%s' % (self.format_string(quote_attrib(self.containerFormat).encode(ExternalEncoding), input_name='containerFormat'), ))
         if self.freespace is not None:
@@ -1340,6 +1346,9 @@ class imageType(GeneratedsSuper):
         if self.unionfs is not None:
             showIndent(outfile, level)
             outfile.write('unionfs = %s,\n' % (self.unionfs,))
+        if self.ebsBacked is not None:
+            showIndent(outfile, level)
+            outfile.write('ebsBacked = %s,\n' % (self.ebsBacked,))
         if self.containerFormat is not None:
             showIndent(outfile, level)
             outfile.write('containerFormat = "%s",\n' % (self.containerFormat,))
@@ -1453,6 +1462,13 @@ class imageType(GeneratedsSuper):
                 self.unionfs = False
             else:
                 raise ValueError('Bad boolean attribute (unionfs)')
+        if attrs.get('ebsBacked'):
+            if attrs.get('ebsBacked').value in ('true', '1'):
+                self.ebsBacked = True
+            elif attrs.get('ebsBacked').value in ('false', '0'):
+                self.ebsBacked = False
+            else:
+                raise ValueError('Bad boolean attribute (ebsBacked)')
         if attrs.get('containerFormat'):
             self.containerFormat = attrs.get('containerFormat').value
         if attrs.get('freespace'):
