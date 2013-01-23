@@ -23,11 +23,6 @@ class rPathProductDefinitionTest(TestPackageRecipe):
 
     Flags.coverage = True
 
-    # testpackage configuration
-    codeDirs = {
-        'rpath-product-definition' : '%(libdir)s/python2.4/site-packages/rpath_proddef',
-    }
-
     buildRequires = [
         'conary-test:python',
         'lxml:python',
@@ -36,3 +31,8 @@ class rPathProductDefinitionTest(TestPackageRecipe):
 
     def setupSource(r):
         r.addMercurialSnapshot()
+
+    def install(r):
+        r.macros.sitepkg = '%(libdir)s/python%(pyver)s/site-packages'
+        r.MakeDirs('%(sitepkg)s')
+        r.Run('cp -a proddef_test %(destdir)s%(sitepkg)s/')
