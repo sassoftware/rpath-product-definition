@@ -1066,6 +1066,7 @@ class ProductDefinitionTest(BaseTest):
                 ('bugsUrl', str),
                 ('buildOVF10', bool),
                 ('diskAdapter', str),
+                ('ebsBacked', bool),
                 ('freespace', int),
                 ('installLabelPath', str),
                 ('maxIsoSize', int),
