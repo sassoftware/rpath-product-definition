@@ -1,18 +1,17 @@
 #
-# Copyright (c) rPath, Inc.
+# Copyright (c) SAS Institute Inc.
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 #
 
 
@@ -459,6 +458,17 @@ class BaseTest(testhelp.TestCase):
         for name, labelSuffix in stages:
             prd.addStage(name=name, labelSuffix=labelSuffix)
         return prd
+
+    def newPlatformDefinition(self, **kwargs):
+        defaults = dict(
+            platformName = 'product name',
+        )
+        defaults.update(dict((k, v) for (k, v) in kwargs.items() if k in defaults))
+        pld = proddef.PlatformDefinition()
+        for k, v in defaults.items():
+            method = getattr(pld, "set%s%s" % (k[0].upper(), k[1:]))
+            method(v)
+        return pld
 
 class RepositoryBasedTest(rephelp.RepositoryHelper, BaseTest):
     def setUp(self):
@@ -1055,6 +1065,7 @@ class ProductDefinitionTest(BaseTest):
                 ('bugsUrl', str),
                 ('buildOVF10', bool),
                 ('diskAdapter', str),
+                ('ebsBacked', bool),
                 ('freespace', int),
                 ('installLabelPath', str),
                 ('maxIsoSize', int),
@@ -1733,6 +1744,13 @@ class ProductDefinitionTest(BaseTest):
         pld.serialize(sio)
         self.assertXMLEquals(sio.getvalue(), refPlatSerialize2)
 
+    def testToPlatformDefinition1(self):
+        prd = proddef.ProductDefinition(fromStream = refSerialize4)
+        pld = prd.toPlatformDefinition()
+
+        # migration code wipes baseFlavor if it appears to need to be migrated
+        self.failUnlessEqual(pld.getBaseFlavor(), 'black-coffee,!cream,~sugar is: x86 x86_64')
+
     def testToPlatformDefinition4(self):
         """Override platformInformation in product"""
         prd = proddef.ProductDefinition(fromStream = refToPlat4)
@@ -1870,7 +1888,24 @@ class ProductDefinitionTest(BaseTest):
     def testToPlatformDefinition3(self):
         # Platform definition exists, overrides don't
         prd = proddef.ProductDefinition(fromStream = refSerialize1)
+        exp = [('group-foo', 'localhost@s:1', '1-1-1'), ('group-bar', 'localhost@s:2', '1-1-1')]
+        self.failUnlessEqual(
+            [ (x.troveName, x.label, x.version) for x in prd.getSearchPaths() ],
+            exp)
+
+        # The platform from this project will inherit the upstream
+        # platform's search paths (versioned) and the unversioned groups
         pl = prd.toPlatformDefinition()
+        exp = [
+            ('group-foo', 'product.example.com@exm:awesome-1.0', None),
+            ('group-awesome-dist', 'product.example.com@exm:awesome-1.0', None),
+            ('group-foo', 'localhost@s:1', '1-1-1'),
+            ('group-bar', 'localhost@s:2', '1-1-1'),
+        ]
+        self.failUnlessEqual(
+            [ (x.troveName, x.label, x.version) for x in pl.getSearchPaths() ],
+            exp)
+
         prd._rebase('some-label', pl, useLatest = False)
         # Get rid of the overrides
         bf = prd.getBaseFlavor()
@@ -1881,25 +1916,27 @@ class ProductDefinitionTest(BaseTest):
         prd.clearSearchPaths()
         prd.clearFactorySources()
 
-        pl2 = prd.toPlatformDefinition()
-        self.failUnlessEqual(pl2.getBaseFlavor(), bf)
-        # Make sure we get the base flavor from the platform
-        self.failUnlessEqual(prd._rootObj.baseFlavor, None)
-        self.failUnlessEqual(prd.getBaseFlavor(), bf)
-
-        self.failUnlessEqual(prd.searchPaths, [])
-        exp = [ ('group-foo', 'product.example.com@exm:awesome-1.0', None),
-            ('group-awesome-dist', 'product.example.com@exm:awesome-1.0', None)]
-        exp.extend((x.troveName, x.label, x.version) for x in psp)
+        # No changes, the product didn't have additional search paths
         self.failUnlessEqual(
             [ (x.troveName, x.label, x.version) for x in prd.getSearchPaths() ],
             exp)
 
-        self.failUnlessEqual(prd.factorySources, [])
+        pl2 = prd.toPlatformDefinition()
+        self.failUnlessEqual(pl2.getBaseFlavor(), bf)
+
+        # Make sure we get the base flavor from the platform
+        self.failUnlessEqual(pl2._rootObj.baseFlavor, 'is: x86 x86_64')
+        self.failUnlessEqual(pl2.getBaseFlavor(), bf)
+
+        self.failUnlessEqual(
+            [ (x.troveName, x.label, x.version) for x in pl2.getSearchPaths() ],
+            exp)
+
+        self.failUnlessEqual(pl2.factorySources, [])
         exp = []
         exp.extend((x.troveName, x.label, x.version) for x in pfs)
         self.failUnlessEqual(
-            [ (x.troveName, x.label, x.version) for x in prd.getFactorySources() ],
+            [ (x.troveName, x.label, x.version) for x in pl2.getFactorySources() ],
             exp)
 
     def testDefaultLabel(self):
@@ -3211,10 +3248,11 @@ class ProductDefinitionTest(BaseTest):
         newPlt.serialize(sio)
         sio.seek(0)
         newXml = ''.join([ "<platformDefinition>\n" ] + sio.readlines()[2:])
+        almostOrigXml = originalXml.replace('<searchPaths>', '<searchPaths id="__platformSearchPaths">')
         # keep in mind that since we're serializing the platdef objects to test
         # for equality, this test is sensitive to bugs in the serialization
         # codepaths. presumably such issues would be caught elsewhere
-        self.assertXMLEquals(originalXml, newXml)
+        self.assertXMLEquals(almostOrigXml, newXml)
 
     def testPlatformNamespace(self):
         pld = proddef.PlatformDefinition(fromStream = refPlatSerialize1)
@@ -3274,6 +3312,7 @@ version="%(version)s">
     </contentProvider>
     <searchPaths>
         <searchPath isPlatformTrove="true" isGroupSearchPathTrove="true" troveName="group-os"
+             id="a-1b5e263c34"
              isResolveTrove="true"
              label="conary.example.com@lnx:product short name-0.1"/>
     </searchPaths>
@@ -3622,6 +3661,83 @@ version="%(version)s">
               ('group-awesome-dist', 'product.example.com@exm:awesome-1.0', True, True),
             ])
 
+    def testSearchPathReferences(self):
+        pld = self.newPlatformDefinition()
+        pld.clearSearchPaths()
+        platformSearchPaths = [
+            ('platsp_1', 'group-plat1', 'localhost@plat:1'),
+            ('platsp_2', 'group-plat2', 'localhost@plat:2'),
+        ]
+        for id, troveName, label in platformSearchPaths:
+            # Add a version to the platform's search paths, so we can mimic
+            # retrieving the version through a reference
+            pld.addSearchPath(id=id, troveName=troveName, label=label,
+                version=label.rsplit(':', 1)[-1])
+        self.failUnlessEqual(
+            [ (x.id, x.troveName, x.label) for x in pld.searchPaths ],
+            platformSearchPaths)
+
+        prd = self.newProductDefinition()
+        prd.clearSearchPaths()
+        nlabel = 'some@label:1'
+        prd._rebase(nlabel, pld)
+        self.failUnlessEqual(
+            [ (x.id, x.troveName, x.label) for x in prd.searchPaths ],
+            platformSearchPaths)
+
+        # Add a regular search path
+        prd.addSearchPath(troveName="group-mine1", label="localhost@prod:1")
+        exp = [ (None, 'group-mine1', 'localhost@prod:1') ]
+        self.failUnlessEqual(
+            [ (x.id, x.troveName, x.label) for x in prd.searchPaths ],
+            exp)
+        # Add wholesale the platform search paths
+        prd.copyPlatformSearchPaths()
+        exp += platformSearchPaths
+        self.failUnlessEqual(
+            [ (x.id, x.troveName, x.label) for x in prd.searchPaths ],
+            exp)
+        # Add another one of ours
+        prd.addSearchPath(troveName="group-mine2", label="localhost@prod:2")
+        exp += [ (None, 'group-mine2', 'localhost@prod:2') ]
+        self.failUnlessEqual(
+            [ (x.id, x.troveName, x.label) for x in prd.searchPaths ],
+            exp)
+        self.failUnlessEqual(
+            [ x.version for x in prd.searchPaths ],
+            [None, '1', '2', None])
+        # Add a reference
+        prd.addSearchPath(ref="platsp_2")
+        exp += [ platformSearchPaths[1] ]
+        self.failUnlessEqual(
+            [ (x.id, x.troveName, x.label) for x in prd.searchPaths ],
+            exp)
+
+        # Failed reference
+        self.failUnlessRaises(proddef.SearchPathNotFoundError,
+            prd.addSearchPath, ref="no such ref")
+
+        sio = StringIO.StringIO()
+        prd.serialize(sio, validate=True)
+
+        # Now convert to platform definition; make sure the paths look
+        # sane
+        plt = prd.toPlatformDefinition()
+        sio.seek(0)
+        sio.truncate()
+        plt.serialize(sio, validate=True)
+
+        exp = []
+        self.assertEquals(
+            [ (x.id, x.troveName, x.label) for x in plt.searchPaths ],
+            [
+                ('a-1b5e263c34', 'group-os', 'conary.example.com@lnx:product short name-0.1'),
+                ('a-fef69ef457', 'group-mine1', 'localhost@prod:1'),
+                ('platsp_1', 'group-plat1', 'localhost@plat:1'),
+                ('platsp_2', 'group-plat2', 'localhost@plat:2'),
+                ('a-941b8124c1', 'group-mine2', 'localhost@prod:2'),
+            ])
+
 class MigrationTest(BaseTest):
     def testMigration1(self):
         xmlPath = os.path.join(self.getArchiveDir(), 'migration', 'old-1.xml')
@@ -3900,10 +4016,10 @@ refPlatSerialize1 = """\
     <originLabel>bar@baz:1</originLabel>
   </platformInformation>
   <searchPaths>
-    <searchPath isResolveTrove="true" troveName="group-foo" isGroupSearchPathTrove="true" label="product.example.com@exm:awesome-1.0"/>
-    <searchPath isPlatformTrove="true" isResolveTrove="true" troveName="group-awesome-dist" isGroupSearchPathTrove="true" label="product.example.com@exm:awesome-1.0"/>
-    <searchPath isResolveTrove="true" troveName="group-foo" isGroupSearchPathTrove="true" label="localhost@s:1" version="1-1-1"/>
-    <searchPath isResolveTrove="true" troveName="group-bar" isGroupSearchPathTrove="true" label="localhost@s:2" version="1-1-1"/>
+    <searchPath isResolveTrove="true" troveName="group-foo" isGroupSearchPathTrove="true" label="product.example.com@exm:awesome-1.0" id="a-a96388e2b0"/>
+    <searchPath isPlatformTrove="true" isResolveTrove="true" troveName="group-awesome-dist" isGroupSearchPathTrove="true" label="product.example.com@exm:awesome-1.0" id="a-909b335df4"/>
+    <searchPath isResolveTrove="true" troveName="group-foo" isGroupSearchPathTrove="true" label="localhost@s:1" version="1-1-1" id="a-e90abdeed4"/>
+    <searchPath isResolveTrove="true" troveName="group-bar" isGroupSearchPathTrove="true" label="localhost@s:2" version="1-1-1" id="a-fdb7c6f609"/>
   </searchPaths>
   <factorySources>
     <factorySource troveName="a" label="b"/>
@@ -4083,10 +4199,10 @@ refPlatSerialize6 = """<?xml version='1.0' encoding='UTF-8'?>
     <originLabel>bar@baz:1</originLabel>
   </platformInformation>
   <searchPaths>
-    <searchPath isResolveTrove="true" troveName="group-foo" isGroupSearchPathTrove="true" label="product.example.com@exm:awesome-1.0"/>
-    <searchPath isPlatformTrove="true" isResolveTrove="true" troveName="group-awesome-dist" isGroupSearchPathTrove="true" label="product.example.com@exm:awesome-1.0"/>
-    <searchPath isResolveTrove="true" troveName="group-foo" isGroupSearchPathTrove="true" label="localhost@s:1" version="1-1-1"/>
-    <searchPath isResolveTrove="true" troveName="group-bar" isGroupSearchPathTrove="true" label="localhost@s:2" version="1-1-1"/>
+    <searchPath isResolveTrove="true" troveName="group-foo" isGroupSearchPathTrove="true" label="product.example.com@exm:awesome-1.0" id="a-a96388e2b0"/>
+    <searchPath isPlatformTrove="true" isResolveTrove="true" troveName="group-awesome-dist" isGroupSearchPathTrove="true" label="product.example.com@exm:awesome-1.0" id="a-909b335df4"/>
+    <searchPath isResolveTrove="true" troveName="group-foo" isGroupSearchPathTrove="true" label="localhost@s:1" version="1-1-1" id="a-e90abdeed4"/>
+    <searchPath isResolveTrove="true" troveName="group-bar" isGroupSearchPathTrove="true" label="localhost@s:2" version="1-1-1" id="a-fdb7c6f609"/>
   </searchPaths>
   <factorySources>
     <factorySource troveName="a" label="b"/>

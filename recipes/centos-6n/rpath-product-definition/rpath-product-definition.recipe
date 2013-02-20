@@ -15,23 +15,21 @@
 #
 
 
-dist_files = Makefile $(SCHEMA_FILES)
-SCHEMA_FILES = $(wildcard *.xsd)
+class rPathProductDefinition(PackageRecipe):
+    name = 'rpath-product-definition'
+    version = '0.1'
 
-all: default-all
+    buildRequires = [
+        'make',
+        'python-devel',
+        'python-lxml',
+    ]
 
-include ../Make.rules
-include ../Make.defs
+    def setup(r):
+        r.addMercurialSnapshot()
 
-install: all default-install $(DESTDIR)$(datadir)/rpath_proddef
-	install -m644 $(SCHEMA_FILES) $(DESTDIR)$(datadir)/rpath_proddef/
+        r.Make()
+        r.MakeInstall()
 
-$(DESTDIR)$(datadir)/rpath_proddef:
-	install -d -m755 $@
-
-validate-schema:
-	xmllint -schema http://www.w3.org/2001/XMLSchema.xsd $(SCHEMA_FILES) > /dev/null
-
-dist: default-dist
-
-clean: default-clean
+        # Need :data for the schema definitions
+        r.ComponentRequires({'data': set(['python'])})

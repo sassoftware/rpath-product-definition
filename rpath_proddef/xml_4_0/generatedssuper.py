@@ -32,3 +32,19 @@ class GeneratedsSuper(object):
 
     def __ne__(self, obj):
         return not self.__eq__(obj)
+
+    def __copy__(self):
+        newobj = self.__class__()
+        fields = (x.name for x in self.member_data_items_)
+        for field in fields:
+            val = getattr(self, field)
+            if isinstance(val, list):
+                ret = []
+                for v in val:
+                    if hasattr(v, '__copy__'):
+                        v = v.__copy__()
+                    ret.append(v)
+            elif hasattr(val, '__copy__'):
+                val = val.__copy__()
+            setattr(newobj, field, val)
+        return newobj

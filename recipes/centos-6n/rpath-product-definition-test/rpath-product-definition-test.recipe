@@ -15,23 +15,20 @@
 #
 
 
-dist_files = Makefile $(SCHEMA_FILES)
-SCHEMA_FILES = $(wildcard *.xsd)
+loadSuperClass('testpackage')
+class rPathProductDefinitionTest(TestPackageRecipe):
+    name = 'rpath-product-definition-test'
+    version = '0.1'
 
-all: default-all
+    buildRequires = [
+        'conary-test:python',
+        'rpath-product-definition:python',
+    ]
 
-include ../Make.rules
-include ../Make.defs
+    def setupSource(r):
+        r.addMercurialSnapshot()
 
-install: all default-install $(DESTDIR)$(datadir)/rpath_proddef
-	install -m644 $(SCHEMA_FILES) $(DESTDIR)$(datadir)/rpath_proddef/
-
-$(DESTDIR)$(datadir)/rpath_proddef:
-	install -d -m755 $@
-
-validate-schema:
-	xmllint -schema http://www.w3.org/2001/XMLSchema.xsd $(SCHEMA_FILES) > /dev/null
-
-dist: default-dist
-
-clean: default-clean
+    def install(r):
+        r.macros.sitepkg = '%(libdir)s/python%(pyver)s/site-packages'
+        r.MakeDirs('%(sitepkg)s')
+        r.Run('cp -a proddef_test %(destdir)s%(sitepkg)s/')
