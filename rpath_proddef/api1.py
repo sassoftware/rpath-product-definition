@@ -2329,7 +2329,7 @@ class ProductDefinitionRecipe(PackageRecipe):
         def __init__(self, troveName, label, attributes):
             self.troveName = troveName
             self.label = label
-            self.attributes = attributes
+            self.attributes = dict(attributes)
 
         @property
         def key(self):
