@@ -2062,10 +2062,12 @@ class ProductDefinitionRecipe(PackageRecipe):
                 (x.architectureRef, x.containerTemplateRef, x.flavorSetRef)
                 for x in self.iterAllBuildTemplates())
 
-        # Append the global image group
-        key = self.SearchPathItem(self.getImageGroup(), label,
-                dict(defaultAttrs, isPlatformTrove=True))
-        sPathsList.append(key)
+        globalImageGroup = self.getImageGroup()
+        if globalImageGroup:
+            # Append the global image group
+            key = self.SearchPathItem(self.getImageGroup(), label,
+                    dict(defaultAttrs, isPlatformTrove=True))
+            sPathsList.append(key)
         # Now append the search paths from this object, if available, or from
         # the upstream platform, if available
 

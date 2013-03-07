@@ -3153,20 +3153,20 @@ class ProductDefinitionTest(BaseTest):
         for i in range(3):
             res = plt.getSearchPaths()
             res = sorted(["%s=%s" % (x.troveName, x.label) for x in res])
-            self.assertEquals(res, ['None=NOM@NOM:NOM-NOM',
+            self.assertEquals(res, [
                                     'bar=test.rpath.local@foo:1',
                                     'baz=test.rpath.local@foo:1',
                                     'foo=test.rpath.local@foo:1'])
 
             res = plt.getResolveTroves()
             res = sorted(["%s=%s" % (x.troveName, x.label) for x in res])
-            self.assertEquals(res, ['None=NOM@NOM:NOM-NOM',
+            self.assertEquals(res, [
                                     'baz=test.rpath.local@foo:1',
                                     'foo=test.rpath.local@foo:1'])
 
             res = plt.getGroupSearchPaths()
             res = sorted(["%s=%s" % (x.troveName, x.label) for x in res])
-            self.assertEquals(res, ['None=NOM@NOM:NOM-NOM',
+            self.assertEquals(res, [
                                     'bar=test.rpath.local@foo:1',
                                     'foo=test.rpath.local@foo:1'])
             sio = StringIO.StringIO()
