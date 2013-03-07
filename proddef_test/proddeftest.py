@@ -1781,6 +1781,21 @@ class ProductDefinitionTest(BaseTest):
         self.failUnlessEqual(npld.getPlatformInformation().getOriginLabel(),
             versions.Label('bar@baz:1'))
 
+    def testToPlatformDefinition6(self):
+        # RCE-1416
+        prd = proddef.ProductDefinition(fromStream = refToPlat4)
+        prd.addBuildDefinition(name='Installable ISO Build 1',
+            architectureRef = 'x86_64',
+            imageGroup="group-foo1",
+            containerTemplateRef = 'installableIsoImage')
+        prd.addBuildDefinition(name='Installable ISO Build 2',
+            architectureRef = 'x86_64',
+            imageGroup="group-foo2",
+            containerTemplateRef = 'installableIsoImage')
+        npld = prd.toPlatformDefinition()
+        sio = StringIO.StringIO()
+        npld.serialize(sio)
+
     def testLoadPlatformDefinition(self):
         pld = proddef.PlatformDefinition(fromStream = refPlatSerialize1)
         sio = StringIO.StringIO()
@@ -3152,20 +3167,20 @@ class ProductDefinitionTest(BaseTest):
         for i in range(3):
             res = plt.getSearchPaths()
             res = sorted(["%s=%s" % (x.troveName, x.label) for x in res])
-            self.assertEquals(res, ['None=NOM@NOM:NOM-NOM',
+            self.assertEquals(res, [
                                     'bar=test.rpath.local@foo:1',
                                     'baz=test.rpath.local@foo:1',
                                     'foo=test.rpath.local@foo:1'])
 
             res = plt.getResolveTroves()
             res = sorted(["%s=%s" % (x.troveName, x.label) for x in res])
-            self.assertEquals(res, ['None=NOM@NOM:NOM-NOM',
+            self.assertEquals(res, [
                                     'baz=test.rpath.local@foo:1',
                                     'foo=test.rpath.local@foo:1'])
 
             res = plt.getGroupSearchPaths()
             res = sorted(["%s=%s" % (x.troveName, x.label) for x in res])
-            self.assertEquals(res, ['None=NOM@NOM:NOM-NOM',
+            self.assertEquals(res, [
                                     'bar=test.rpath.local@foo:1',
                                     'foo=test.rpath.local@foo:1'])
             sio = StringIO.StringIO()
