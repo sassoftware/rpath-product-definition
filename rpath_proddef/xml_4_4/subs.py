@@ -84,8 +84,8 @@ supermod.buildDefinitionType.subclass = buildDefinitionTypeSub
 
 
 class imageTypeSub(supermod.imageType):
-    def __init__(self, autoResolve=None, platformIsoKitTrove=None, baseImageTrove=None, bugsUrl=None, natNetworking=None, vhdDiskType=None, anacondaCustomTrove=None, mediaTemplateTrove=None, baseFileName=None, vmSnapshots=None, maxIsoSize=None, swapSize=None, betaNag=None, buildOVF10=None, anacondaTemplatesTrove=None, vmMemory=None, installLabelPath=None, unionfs=None, ebsBacked=None, containerFormat=None, freespace=None, name=None, zisofs=None, diskAdapter=None, amiHugeDiskMountpoint=None, showMediaCheck=None, valueOf_=''):
-        supermod.imageType.__init__(self, autoResolve, platformIsoKitTrove, baseImageTrove, bugsUrl, natNetworking, vhdDiskType, anacondaCustomTrove, mediaTemplateTrove, baseFileName, vmSnapshots, maxIsoSize, swapSize, betaNag, buildOVF10, anacondaTemplatesTrove, vmMemory, installLabelPath, unionfs, ebsBacked, containerFormat, freespace, name, zisofs, diskAdapter, amiHugeDiskMountpoint, showMediaCheck, valueOf_)
+    def __init__(self, autoResolve=None, platformIsoKitTrove=None, baseImageTrove=None, bugsUrl=None, natNetworking=None, vhdDiskType=None, anacondaCustomTrove=None, mediaTemplateTrove=None, baseFileName=None, vmSnapshots=None, vmCPUs=None, maxIsoSize=None, swapSize=None, betaNag=None, buildOVF10=None, anacondaTemplatesTrove=None, vmMemory=None, installLabelPath=None, unionfs=None, ebsBacked=None, containerFormat=None, freespace=None, name=None, zisofs=None, diskAdapter=None, amiHugeDiskMountpoint=None, showMediaCheck=None, valueOf_=''):
+        supermod.imageType.__init__(self, autoResolve, platformIsoKitTrove, baseImageTrove, bugsUrl, natNetworking, vhdDiskType, anacondaCustomTrove, mediaTemplateTrove, baseFileName, vmSnapshots, vmCPUs, maxIsoSize, swapSize, betaNag, buildOVF10, anacondaTemplatesTrove, vmMemory, installLabelPath, unionfs, ebsBacked, containerFormat, freespace, name, zisofs, diskAdapter, amiHugeDiskMountpoint, showMediaCheck, valueOf_)
 supermod.imageType.subclass = imageTypeSub
 # end class imageTypeSub
 

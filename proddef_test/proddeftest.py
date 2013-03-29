@@ -1077,6 +1077,7 @@ class ProductDefinitionTest(BaseTest):
                 ('swapSize', int),
                 ('unionfs', bool),
                 ('vhdDiskType', str),
+                ('vmCPUs', int),
                 ('vmMemory', int),
                 ('vmSnapshots', bool),
                 ('zisofs', bool),

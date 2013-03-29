@@ -1100,6 +1100,7 @@ class imageType(GeneratedsSuper):
         MemberSpec_('mediaTemplateTrove', 'rpd:troveSpecType', 0),
         MemberSpec_('baseFileName', 'xsd:string', 0),
         MemberSpec_('vmSnapshots', 'xsd:boolean', 0),
+        MemberSpec_('vmCPUs', 'xsd:nonNegativeInteger', 0),
         MemberSpec_('maxIsoSize', 'xsd:positiveInteger', 0),
         MemberSpec_('swapSize', 'xsd:nonNegativeInteger', 0),
         MemberSpec_('betaNag', 'xsd:boolean', 0),
@@ -1120,7 +1121,7 @@ class imageType(GeneratedsSuper):
         ]
     subclass = None
     superclass = None
-    def __init__(self, autoResolve=None, platformIsoKitTrove=None, baseImageTrove=None, bugsUrl=None, natNetworking=None, vhdDiskType=None, anacondaCustomTrove=None, mediaTemplateTrove=None, baseFileName=None, vmSnapshots=None, maxIsoSize=None, swapSize=None, betaNag=None, buildOVF10=None, anacondaTemplatesTrove=None, vmMemory=None, installLabelPath=None, unionfs=None, ebsBacked=None, containerFormat=None, freespace=None, name=None, zisofs=None, diskAdapter=None, amiHugeDiskMountpoint=None, showMediaCheck=None, valueOf_=''):
+    def __init__(self, autoResolve=None, platformIsoKitTrove=None, baseImageTrove=None, bugsUrl=None, natNetworking=None, vhdDiskType=None, anacondaCustomTrove=None, mediaTemplateTrove=None, baseFileName=None, vmSnapshots=None, vmCPUs=None, maxIsoSize=None, swapSize=None, betaNag=None, buildOVF10=None, anacondaTemplatesTrove=None, vmMemory=None, installLabelPath=None, unionfs=None, ebsBacked=None, containerFormat=None, freespace=None, name=None, zisofs=None, diskAdapter=None, amiHugeDiskMountpoint=None, showMediaCheck=None, valueOf_=''):
         self.autoResolve = _cast(bool, autoResolve)
         self.platformIsoKitTrove = _cast(None, platformIsoKitTrove)
         self.baseImageTrove = _cast(None, baseImageTrove)
@@ -1131,6 +1132,7 @@ class imageType(GeneratedsSuper):
         self.mediaTemplateTrove = _cast(None, mediaTemplateTrove)
         self.baseFileName = _cast(None, baseFileName)
         self.vmSnapshots = _cast(bool, vmSnapshots)
+        self.vmCPUs = _cast(int, vmCPUs)
         self.maxIsoSize = _cast(int, maxIsoSize)
         self.swapSize = _cast(int, swapSize)
         self.betaNag = _cast(bool, betaNag)
@@ -1174,6 +1176,8 @@ class imageType(GeneratedsSuper):
     def set_baseFileName(self, baseFileName): self.baseFileName = baseFileName
     def get_vmSnapshots(self): return self.vmSnapshots
     def set_vmSnapshots(self, vmSnapshots): self.vmSnapshots = vmSnapshots
+    def get_vmCPUs(self): return self.vmCPUs
+    def set_vmCPUs(self, vmCPUs): self.vmCPUs = vmCPUs
     def get_maxIsoSize(self): return self.maxIsoSize
     def set_maxIsoSize(self, maxIsoSize): self.maxIsoSize = maxIsoSize
     def get_swapSize(self): return self.swapSize
@@ -1239,6 +1243,8 @@ class imageType(GeneratedsSuper):
             outfile.write(' baseFileName=%s' % (self.format_string(quote_attrib(self.baseFileName).encode(ExternalEncoding), input_name='baseFileName'), ))
         if self.vmSnapshots is not None:
             outfile.write(' vmSnapshots="%s"' % self.format_boolean(str_lower(str(self.vmSnapshots)), input_name='vmSnapshots'))
+        if self.vmCPUs is not None:
+            outfile.write(' vmCPUs="%s"' % self.format_integer(self.vmCPUs, input_name='vmCPUs'))
         if self.maxIsoSize is not None:
             outfile.write(' maxIsoSize="%s"' % self.format_integer(self.maxIsoSize, input_name='maxIsoSize'))
         if self.swapSize is not None:
@@ -1322,6 +1328,9 @@ class imageType(GeneratedsSuper):
         if self.vmSnapshots is not None:
             showIndent(outfile, level)
             outfile.write('vmSnapshots = %s,\n' % (self.vmSnapshots,))
+        if self.vmCPUs is not None:
+            showIndent(outfile, level)
+            outfile.write('vmCPUs = %d,\n' % (self.vmCPUs,))
         if self.maxIsoSize is not None:
             showIndent(outfile, level)
             outfile.write('maxIsoSize = %d,\n' % (self.maxIsoSize,))
@@ -1416,6 +1425,13 @@ class imageType(GeneratedsSuper):
                 self.vmSnapshots = False
             else:
                 raise ValueError('Bad boolean attribute (vmSnapshots)')
+        if attrs.get('vmCPUs'):
+            try:
+                self.vmCPUs = int(attrs.get('vmCPUs').value)
+            except ValueError, exp:
+                raise ValueError('Bad integer attribute (vmCPUs): %s' % exp)
+            if self.vmCPUs < 0:
+                raise ValueError('Invalid NonNegativeInteger (vmCPUs)')
         if attrs.get('maxIsoSize'):
             try:
                 self.maxIsoSize = int(attrs.get('maxIsoSize').value)

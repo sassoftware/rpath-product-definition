@@ -160,6 +160,7 @@
         <xsd:attribute name="showMediaCheck" type="xsd:boolean" />
         <xsd:attribute name="swapSize" type="xsd:nonNegativeInteger" />
         <xsd:attribute name="unionfs" type="xsd:boolean" />
+        <xsd:attribute name="vmCPUs" type="xsd:nonNegativeInteger" />
         <xsd:attribute name="vmMemory" type="xsd:nonNegativeInteger" />
         <xsd:attribute name="vmSnapshots" type="xsd:boolean" />
         <xsd:attribute name="zisofs" type="xsd:boolean" />
