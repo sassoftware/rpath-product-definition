@@ -426,7 +426,6 @@ class BaseTest(testhelp.TestCase):
         self.setUpSchemaDir()
 
     def setUpSchemaDir(self):
-        schemaFile = "rpd-%s.xsd" % proddef.ProductDefinition.version
         schemaDir = resources.get_xsd()
         self.schemaDir = schemaDir
         self.mock(proddef.ProductDefinition, 'schemaDir', schemaDir)
