@@ -26,6 +26,14 @@ def get_archive(*subpath):
     return get_path('proddef_test', 'archive', *subpath)
 
 
+def get_xsd(*subpath):
+    if os.path.exists(get_path('xsd')):
+        return get_path('xsd', *subpath)
+    else:
+        assert os.path.isdir('/usr/share/rpath_proddef')
+        return os.path.join('/usr/share/rpath_proddef', *subpath)
+
+
 def _get_test_root():
     modname = __name__.split('.')
     modroot = os.path.abspath(__file__)

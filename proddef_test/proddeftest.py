@@ -427,11 +427,7 @@ class BaseTest(testhelp.TestCase):
 
     def setUpSchemaDir(self):
         schemaFile = "rpd-%s.xsd" % proddef.ProductDefinition.version
-        schemaDir = resources.get_path('xsd')
-        if not os.path.exists(os.path.join(schemaDir, schemaFile)):
-            # Not running from a checkout
-            schemaDir = os.path.join("/usr/share/rpath_proddef")
-            assert(os.path.exists(os.path.join(schemaDir, schemaFile)))
+        schemaDir = resources.get_xsd()
         self.schemaDir = schemaDir
         self.mock(proddef.ProductDefinition, 'schemaDir', schemaDir)
         self.mock(proddef.PlatformDefinition, 'schemaDir', schemaDir)
@@ -1084,24 +1080,12 @@ class ProductDefinitionTest(BaseTest):
             ])
 
     def testValidate(self):
-        schemaFiles = [
-            resources.get_path(
-                'xsd', 'rpd-%s.xsd' % proddef.ProductDefinition.version),
-            '/usr/share/rpath_proddef/rpd-%s.xsd' %
-                proddef.ProductDefinition.version
-        ]
+        schemaFile = resources.get_xsd('rpd-%s.xsd' % proddef.ProductDefinition.version)
         docs = [ XML, refSerialize1, refSerialize11, refSerialize12]
-        for schemaFile in schemaFiles:
-            if not os.path.exists(schemaFile):
-                continue
-            for doc in docs:
-                schema = proddef.etree.XMLSchema(file = schemaFile)
-                tree = proddef.etree.parse(StringIO.StringIO(doc))
-                self.failUnless(schema.validate(tree), str(schema.error_log))
-            break
-        else: # for
-            raise testhelp.SkipTestException("Unable to validate schema - "
-                                              "schema file not found")
+        for doc in docs:
+            schema = proddef.etree.XMLSchema(file = schemaFile)
+            tree = proddef.etree.parse(StringIO.StringIO(doc))
+            self.failUnless(schema.validate(tree), str(schema.error_log))
 
     def testLoad_MissingVersion(self):
         data = XML.replace('version="%s"' % proddef.ProductDefinition.version,
