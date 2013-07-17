@@ -19,6 +19,7 @@ import copy
 import os
 import sys
 import StringIO
+from lxml import etree
 
 from conary import conaryclient, versions
 from conary.deps import deps
@@ -2154,11 +2155,11 @@ class ProductDefinitionTest(BaseTest):
   <baseFlavor>Foo</baseFlavor>
 </platformDefinition>""" % dict(version = proddef.ProductDefinition.version))
 
-        alRecipes = [('trove1', 'foo:bar-1'), ('trove2', 'foo:bar-2')]
-        for troveName, label in alRecipes:
-            pld.addAutoLoadRecipe(troveName, label)
+        alRecipes = ['trove1', 'trove2']
+        for troveName in alRecipes:
+            pld.addAutoLoadRecipe(troveName)
         self.failUnlessEqual(
-            [ (x.getTroveName(), x.getLabel())
+            [ x.getTroveName()
                 for x in pld.getAutoLoadRecipes() ],
             alRecipes)
 
@@ -2169,8 +2170,8 @@ class ProductDefinitionTest(BaseTest):
 <platformDefinition xmlns="http://www.rpath.com/permanent/rpd-%(version)s.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.rpath.com/permanent/rpd-%(version)s.xsd rpd-%(version)s.xsd" version="%(version)s">
   <baseFlavor>Foo</baseFlavor>
   <autoLoadRecipes>
-    <autoLoadRecipe troveName="trove1" label="foo:bar-1"/>
-    <autoLoadRecipe troveName="trove2" label="foo:bar-2"/>
+    <autoLoadRecipe troveName="trove1"/>
+    <autoLoadRecipe troveName="trove2"/>
   </autoLoadRecipes>
 </platformDefinition>""" % dict(version = proddef.ProductDefinition.version))
 
@@ -2179,7 +2180,7 @@ class ProductDefinitionTest(BaseTest):
             schemaDir = self.schemaDir)
 
         self.failUnlessEqual(
-            [ (x.getTroveName(), x.getLabel())
+            [ x.getTroveName()
                 for x in pld.getAutoLoadRecipes() ],
             alRecipes)
 
@@ -2204,11 +2205,11 @@ class ProductDefinitionTest(BaseTest):
         prd.serialize(sio)
         self.assertXMLEquals(sio.getvalue(), refPlatAutoLoadRecipes1)
 
-        alRecipes = [('trove1', 'foo:bar-1'), ('trove2', 'foo:bar-2')]
-        for troveName, label in alRecipes:
-            prd.addPlatformAutoLoadRecipe(troveName, label)
+        alRecipes = ['trove1', 'trove2']
+        for troveName in alRecipes:
+            prd.addPlatformAutoLoadRecipe(troveName)
         self.failUnlessEqual(
-            [ (x.getTroveName(), x.getLabel())
+            [ x.getTroveName()
                 for x in prd.getPlatformAutoLoadRecipes() ],
             alRecipes)
 
@@ -2217,10 +2218,10 @@ class ProductDefinitionTest(BaseTest):
         self.failUnlessEqual(prd.getPlatformAutoLoadRecipes(), [])
 
         # Set them again
-        for troveName, label in alRecipes:
-            prd.addPlatformAutoLoadRecipe(troveName, label)
+        for troveName in alRecipes:
+            prd.addPlatformAutoLoadRecipe(troveName)
         self.failUnlessEqual(
-            [ (x.getTroveName(), x.getLabel())
+            [ x.getTroveName()
                 for x in prd.getPlatformAutoLoadRecipes() ],
             alRecipes)
 
@@ -2234,7 +2235,7 @@ class ProductDefinitionTest(BaseTest):
             schemaDir = self.schemaDir)
 
         self.failUnlessEqual(
-            [ (x.getTroveName(), x.getLabel())
+            [ x.getTroveName()
                 for x in prd.getPlatformAutoLoadRecipes() ],
             alRecipes)
 
@@ -2248,7 +2249,7 @@ class ProductDefinitionTest(BaseTest):
 
         pld = prd.toPlatformDefinition()
         self.failUnlessEqual(
-            [ (x.getTroveName(), x.getLabel())
+            [ x.getTroveName()
                 for x in pld.getAutoLoadRecipes() ],
             alRecipes)
 
@@ -2261,12 +2262,12 @@ class ProductDefinitionTest(BaseTest):
         prd.setProductVersion('NOM')
 
         plt = prd.toPlatformDefinition()
-        plt.addAutoLoadRecipe('nom', 'nom@nom:nom')
+        plt.addAutoLoadRecipe('nom')
 
         prd._rebase('nom', plt)
 
-        self.assertEquals(["%s=%s" % (x.getTroveName(), x.getLabel()) \
-                for x in prd.getPlatformAutoLoadRecipes()], ['nom=nom@nom:nom'])
+        self.assertEquals([x.getTroveName()
+                for x in prd.getPlatformAutoLoadRecipes()], ['nom'])
 
     def testGetPromoteMapsForStages(self):
         """
@@ -3206,7 +3207,7 @@ class ProductDefinitionTest(BaseTest):
                 "please set them in this test before adding them to the "
                 "whitelist: '%s'" % ("', '".join(attrs)))
         plt.addArchitecture('arch', 'arch', 'is: x86')
-        plt.addAutoLoadRecipe(troveName = 'foo', label = 'nom@nom:nom')
+        plt.addAutoLoadRecipe(troveName = 'foo')
         plt.setBaseFlavor('base,flavor')
         plt.addContainerTemplate(plt.imageType('installableIsoImage'))
         plt.addFlavorSet(name = 'flvSet', displayName = 'flvSet',
@@ -3922,6 +3923,26 @@ class MigrationTest(BaseTest):
         pd.serialize(sio, version = '3.0')
         self.assertXMLEquals(sio.getvalue(), file(xmlPath).read())
 
+    def testMigrationTo4_5(self):
+        # RCE-1915 Make sure label gets dropped
+        xmlPath = os.path.join(self.getArchiveDir(), 'migration',
+            'product-definition-1.3-1.xml')
+        pd = proddef.ProductDefinition(fromStream = file(xmlPath))
+        # verify we captured the old schema def correctly
+        self.failUnlessEqual(pd.preMigrateVersion, '1.3')
+
+        sio = StringIO.StringIO()
+        pd.serialize(sio)
+        sio.seek(0)
+        et = etree.parse(sio)
+        ns = "http://www.rpath.com/permanent/rpd-%s.xsd" % proddef.ProductDefinition.version
+        self.assertXMLEquals(etree.tostring(et.find('{%s}platform' % ns).find(
+            '{%s}autoLoadRecipes' % ns)),
+            """
+<autoLoadRecipes xmlns="%(ns)s" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <autoLoadRecipe troveName="group-superclasses"/>
+</autoLoadRecipes>""" % dict(ns=ns))
+
 refSerialize1 = """\
 <?xml version='1.0' encoding='UTF-8'?>
 <productDefinition xmlns="http://www.rpath.com/permanent/rpd-%(version)s.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.rpath.com/permanent/rpd-%(version)s.xsd rpd-%(version)s.xsd" version="%(version)s">
@@ -4310,8 +4331,8 @@ refPlatAutoLoadRecipes2 = """
   <platform>
     <baseFlavor>Foo</baseFlavor>
     <autoLoadRecipes>
-      <autoLoadRecipe troveName="trove1" label="foo:bar-1"/>
-      <autoLoadRecipe troveName="trove2" label="foo:bar-2"/>
+      <autoLoadRecipe troveName="trove1"/>
+      <autoLoadRecipe troveName="trove2"/>
     </autoLoadRecipes>
   </platform>
 </productDefinition>""" % dict(version = proddef.ProductDefinition.version)

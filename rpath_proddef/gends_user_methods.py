@@ -197,6 +197,13 @@ promoteMapTypeMethods = MethodSpec('promoteMapTypeMethods',
     class_names = r'^promoteMapType$',
     )
 
+nameOnlyTypeMethods = MethodSpec('nameOnlyTypeMethods',
+    source = '''
+    getTroveName = get_troveName
+''',
+    class_names = r'^nameOnlyType$',
+    )
+
 nameLabelTypeMethods = MethodSpec('nameLabelTypeMethods',
     source = '''
     getTroveName = get_troveName
@@ -261,6 +268,7 @@ METHOD_SPECS = (
     secondaryLabelMethods,
     stageTypeMethods,
     promoteMapTypeMethods,
+    nameOnlyTypeMethods,
     nameLabelTypeMethods,
     contentProviderTypeMethods,
     platformInformationMethods,

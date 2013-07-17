@@ -1705,16 +1705,14 @@ class ProductDefinitionRecipe(PackageRecipe):
             return []
         return self.platform.getAutoLoadRecipes()
 
-    def addPlatformAutoLoadRecipe(self, troveName, label):
+    def addPlatformAutoLoadRecipe(self, troveName):
         """
         Add an auto load recipe
         @param troveName: Trove name
         @type troveName: C{str}
-        @param label: Label for the trove
-        @type label: C{str}
         """
         self._ensurePlatformExists()
-        self.platform.addAutoLoadRecipe(troveName, label)
+        self.platform.addAutoLoadRecipe(troveName)
 
     def clearPlatformAutoLoadRecipes(self):
         """
@@ -2114,7 +2112,7 @@ class ProductDefinitionRecipe(PackageRecipe):
         nplat.setPlatformVersionTrove(self.getPlatformVersionTrove())
 
         for alr in self.getPlatformAutoLoadRecipes():
-            nplat.addAutoLoadRecipe(alr.getTroveName(), alr.getLabel())
+            nplat.addAutoLoadRecipe(alr.getTroveName())
 
         xmlsubs = self.xmlFactory()
         # Platform information is copied from the upstream platform, unless it
@@ -2438,18 +2436,16 @@ class BasePlatform(BaseDefinition):
         """
         self._rootObj.set_autoLoadRecipes(None)
 
-    def addAutoLoadRecipe(self, troveName = None, label = None):
+    def addAutoLoadRecipe(self, troveName = None):
         """
         Add an auto load recipe
         @param troveName: Trove name
         @type troveName: C{str}
-        @param label: Label for the trove
-        @type label: C{str}
         """
         xmlsubs = self.xmlFactory()
         vals = self._setDefault('autoLoadRecipes', xmlsubs.autoLoadRecipesTypeSub)
-        vals.add_autoLoadRecipe(xmlsubs.nameLabelTypeSub.factory(
-            troveName = troveName, label = label))
+        vals.add_autoLoadRecipe(xmlsubs.nameOnlyTypeSub.factory(
+            troveName = troveName))
 
     def getAutoLoadRecipes(self):
         """
@@ -2534,6 +2530,7 @@ class PlatformDefinition(BasePlatform):
 
     # list of files to search for in the trove, ordered by priority.
     _troveFileNames = [
+        'platform-definition-4.5.xml',
         'platform-definition-4.4.xml',
         'platform-definition-4.3.xml',
         'platform-definition-4.2.xml',
@@ -3296,6 +3293,31 @@ class Migrate_43_44(BaseMigration):
     toVersion = '4.4'
     CanMigrateBack = True
 MigrationManager.register(Migrate_43_44)
+
+class Migrate_44_45(BaseMigration):
+    fromVersion = '4.4'
+    toVersion = '4.5'
+    CanMigrateBack = True
+    def migrateProduct(self, fromObj, toObj, newModule):
+        fromPlatform = fromObj.get_platform()
+        if not fromPlatform:
+            return
+        toPlatform = toObj.get_platform()
+        if toPlatform is None:
+            toPlatform = newModule.platformTypeSub.factory()
+            toObj.set_platform(toPlatform)
+        self.migratePlatform(fromPlatform, toPlatform, newModule)
+
+    def migratePlatform(self, fromObj, toObj, newModule):
+        fromAlr = fromObj.get_autoLoadRecipes()
+        if fromAlr is None:
+            return
+        toAlr = toObj.get_autoLoadRecipes()
+        toAlr.set_autoLoadRecipe([])
+        for alrObj in fromAlr.autoLoadRecipe:
+            toAlr.add_autoLoadRecipe(newModule.nameOnlyTypeSub.factory(
+                troveName=alrObj.troveName))
+MigrationManager.register(Migrate_44_45)
 
 
 # export all things that do not have a leading underscore and aren't imported
