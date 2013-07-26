@@ -210,15 +210,15 @@ supermod.contentSourceTypeType.subclass = contentSourceTypeTypeSub
 
 
 class platformDefinitionTypeSub(supermod.platformDefinitionType):
-    def __init__(self, version=None, platformName=None, platformUsageTerms=None, platformVersionTrove=None, baseFlavor=None, contentProvider=None, platformInformation=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None):
-        supermod.platformDefinitionType.__init__(self, version, platformName, platformUsageTerms, platformVersionTrove, baseFlavor, contentProvider, platformInformation, searchPaths, factorySources, autoLoadRecipes, secondaryLabels, architectures, flavorSets, containerTemplates, buildTemplates)
+    def __init__(self, version=None, platformName=None, platformUsageTerms=None, platformVersionTrove=None, baseFlavor=None, contentProvider=None, stages=None, platformInformation=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None):
+        supermod.platformDefinitionType.__init__(self, version, platformName, platformUsageTerms, platformVersionTrove, baseFlavor, contentProvider, stages, platformInformation, searchPaths, factorySources, autoLoadRecipes, secondaryLabels, architectures, flavorSets, containerTemplates, buildTemplates)
 supermod.platformDefinitionType.subclass = platformDefinitionTypeSub
 # end class platformDefinitionTypeSub
 
 
 class platformTypeSub(supermod.platformType):
-    def __init__(self, sourceTrove=None, useLatest=None, platformName=None, platformUsageTerms=None, platformVersionTrove=None, baseFlavor=None, contentProvider=None, platformInformation=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None):
-        supermod.platformType.__init__(self, sourceTrove, useLatest, platformName, platformUsageTerms, platformVersionTrove, baseFlavor, contentProvider, platformInformation, searchPaths, factorySources, autoLoadRecipes, secondaryLabels, architectures, flavorSets, containerTemplates, buildTemplates)
+    def __init__(self, sourceTrove=None, useLatest=None, platformName=None, platformUsageTerms=None, platformVersionTrove=None, baseFlavor=None, contentProvider=None, stages=None, platformInformation=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None):
+        supermod.platformType.__init__(self, sourceTrove, useLatest, platformName, platformUsageTerms, platformVersionTrove, baseFlavor, contentProvider, stages, platformInformation, searchPaths, factorySources, autoLoadRecipes, secondaryLabels, architectures, flavorSets, containerTemplates, buildTemplates)
 supermod.platformType.subclass = platformTypeSub
 # end class platformTypeSub
 

@@ -24,6 +24,7 @@ character are public interfaces.
 
 
 import itertools
+import collections
 import os
 import StringIO
 import sys
@@ -42,6 +43,12 @@ from conary.repository import changeset
 
 from rpath_proddef import _xmlConstants
 
+Stage = collections.namedtuple("Stage", "name labelSuffix")
+DefaultStages = [
+        Stage(name='Development', labelSuffix='-devel'),
+        Stage(name='QA', labelSuffix='-qa'),
+        Stage(name='Release', labelSuffix=''),
+        ]
 
 #{ Exception classes
 class ProductDefinitionError(Exception):
@@ -706,6 +713,87 @@ class BaseDefinition(object):
         """
         self._rootObj.set_buildTemplates(None)
 
+    def getStages(self):
+        """
+        @return: the stages from this product definition
+        @rtype: C{list} of C{_Stage} objects
+        """
+        stages = self._rootObj.get_stages()
+        if stages is None:
+            return []
+        return stages.get_stage()
+
+    stages = property(getStages)
+
+    def getStage(self, stageName):
+        """
+        Returns a C{_Stage} object for the given stageName.
+        @return: the C{_Stage} object for stageName
+        @rtype: C{_Stage} or C{None} if not found
+        @raises StageNotFoundError: if no such stage exists
+        """
+        stages = self.getStages()
+        for stage in stages:
+            if stage.name == stageName:
+                return stage
+        raise StageNotFoundError(stageName)
+
+    def addStage(self, name = None, labelSuffix = None, promoteMaps = None):
+        """
+        Add a stage.
+        @param name: the stage's name
+        @type name: C{str} or C{None}
+        @param labelSuffix: Label suffix (e.g. '-devel') for the stage
+        @type labelSuffix: C{str} or C{None}
+        @param promoteMaps: list of promote maps for the stage
+        @type promoteMaps: C{list} of C{(mapName, mapLabel)} tuples
+        """
+        xmlsubs = self.xmlFactory()
+        stages = self._setDefault('stages', xmlsubs.stageListTypeSub)
+        if promoteMaps is None:
+            nvals = None
+        else:
+            nvals = xmlsubs.promoteMapsTypeSub.factory()
+            for pm in promoteMaps:
+                if isinstance(pm, tuple):
+                    pm = xmlsubs.promoteMapTypeSub.factory(name = pm[0],
+                        label = pm[1])
+                nvals.add_promoteMap(pm)
+        stages.add_stage(xmlsubs.stageTypeSub.factory(
+            name = name, labelSuffix = labelSuffix,
+            promoteMaps = nvals))
+
+    def clearStages(self):
+        """
+        Delete all stages.
+        @return: None
+        @rtype None
+        """
+        self._rootObj.set_stages(None)
+
+    def addDefaultStages(self):
+        self.copyStages(None, setDefaultStages=True)
+
+    def copyStages(self, src, setDefaultStages=False):
+        if src is None:
+            # We only set the defaults
+            srcStages = None
+        else:
+            srcStages = src.getStages()
+        xmlsubs = self.xmlFactory()
+        if not srcStages:
+            if not setDefaultStages:
+                return
+            srcStages = [ xmlsubs.stageTypeSub.factory(
+                    name=x.name, labelSuffix=x.labelSuffix)
+                for x in DefaultStages ]
+        stages = self._rootObj.get_stages()
+        if stages is None:
+            stages = xmlsubs.stageListTypeSub.factory()
+            self._rootObj.set_stages(stages)
+        for stage in srcStages:
+            stages.add_stage(stage)
+
     def imageType(self, name, fields = None):
         """
         Image type factory. Given an image type name, it will instantiate an
@@ -1194,64 +1282,6 @@ class ProductDefinitionRecipe(PackageRecipe):
     # This line is commented out because we inherit the base flavor from the
     # parent object.
     #baseFlavor = property(BaseDefinition.getBaseFlavor, BaseDefinition.setBaseFlavor)
-
-    def getStages(self):
-        """
-        @return: the stages from this product definition
-        @rtype: C{list} of C{_Stage} objects
-        """
-        stages = self._rootObj.get_stages()
-        if stages is None:
-            return []
-        return stages.get_stage()
-
-    stages = property(getStages)
-
-    def getStage(self, stageName):
-        """
-        Returns a C{_Stage} object for the given stageName.
-        @return: the C{_Stage} object for stageName
-        @rtype: C{_Stage} or C{None} if not found
-        @raises StageNotFoundError: if no such stage exists
-        """
-        stages = self.getStages()
-        for stage in stages:
-            if stage.name == stageName:
-                return stage
-        raise StageNotFoundError(stageName)
-
-    def addStage(self, name = None, labelSuffix = None, promoteMaps = None):
-        """
-        Add a stage.
-        @param name: the stage's name
-        @type name: C{str} or C{None}
-        @param labelSuffix: Label suffix (e.g. '-devel') for the stage
-        @type labelSuffix: C{str} or C{None}
-        @param promoteMaps: list of promote maps for the stage
-        @type promoteMaps: C{list} of C{(mapName, mapLabel)} tuples
-        """
-        xmlsubs = self.xmlFactory()
-        stages = self._setDefault('stages', xmlsubs.stageListTypeSub)
-        if promoteMaps is None:
-            nvals = None
-        else:
-            nvals = xmlsubs.promoteMapsTypeSub.factory()
-            for pm in promoteMaps:
-                if isinstance(pm, tuple):
-                    pm = xmlsubs.promoteMapTypeSub.factory(name = pm[0],
-                        label = pm[1])
-                nvals.add_promoteMap(pm)
-        stages.add_stage(xmlsubs.stageTypeSub.factory(
-            name = name, labelSuffix = labelSuffix,
-            promoteMaps = nvals))
-
-    def clearStages(self):
-        """
-        Delete all stages.
-        @return: None
-        @rtype None
-        """
-        self._rootObj.set_stages(None)
 
     def getLabelForStage(self, stageName):
         """
@@ -2118,6 +2148,7 @@ class ProductDefinitionRecipe(PackageRecipe):
                 upstream = xmlsubs.platformInformationTypeSub()
                 upstream.set_originLabel(self.getPlatformSourceLabel())
         nplat.setPlatformInformation(upstream)
+        nplat.copyStages(self, setDefaultStages=True)
 
         return nplat
 
@@ -3311,6 +3342,18 @@ class Migrate_44_45(BaseMigration):
         for alrObj in fromAlr.autoLoadRecipe:
             toAlr.add_autoLoadRecipe(newModule.nameOnlyTypeSub.factory(
                 troveName=alrObj.troveName))
+
+        # Add default stages
+        stages = toObj.get_stages()
+        if not stages:
+            stagesObj = newModule.stageListTypeSub.factory()
+            toObj.set_stages(stagesObj)
+            stages = [ newModule.stageTypeSub.factory(
+                    name=x.name, labelSuffix=x.labelSuffix)
+                for x in DefaultStages ]
+            for stage in stages:
+                stagesObj.add_stage(stage)
+
 MigrationManager.register(Migrate_44_45)
 
 

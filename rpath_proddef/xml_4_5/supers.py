@@ -3294,6 +3294,7 @@ class platformDefinitionType(GeneratedsSuper):
         MemberSpec_('platformVersionTrove', 'xsd:string', 0),
         MemberSpec_('baseFlavor', ['flavorStringType', 'xsd:string', 'xsd:string'], 0),
         MemberSpec_('contentProvider', 'contentProviderType', 0),
+        MemberSpec_('stages', 'stageListType', 0),
         MemberSpec_('platformInformation', 'platformInformationType', 0),
         MemberSpec_('searchPaths', 'searchPathListType', 0),
         MemberSpec_('factorySources', 'factorySourceListType', 0),
@@ -3306,13 +3307,14 @@ class platformDefinitionType(GeneratedsSuper):
         ]
     subclass = None
     superclass = None
-    def __init__(self, version=None, platformName=None, platformUsageTerms=None, platformVersionTrove=None, baseFlavor=None, contentProvider=None, platformInformation=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None):
+    def __init__(self, version=None, platformName=None, platformUsageTerms=None, platformVersionTrove=None, baseFlavor=None, contentProvider=None, stages=None, platformInformation=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None):
         self.version = _cast(None, version)
         self.platformName = platformName
         self.platformUsageTerms = platformUsageTerms
         self.platformVersionTrove = platformVersionTrove
         self.baseFlavor = baseFlavor
         self.contentProvider = contentProvider
+        self.stages = stages
         self.platformInformation = platformInformation
         self.searchPaths = searchPaths
         self.factorySources = factorySources
@@ -3341,6 +3343,8 @@ class platformDefinitionType(GeneratedsSuper):
         pass
     def get_contentProvider(self): return self.contentProvider
     def set_contentProvider(self, contentProvider): self.contentProvider = contentProvider
+    def get_stages(self): return self.stages
+    def set_stages(self, stages): self.stages = stages
     def get_platformInformation(self): return self.platformInformation
     def set_platformInformation(self, platformInformation): self.platformInformation = platformInformation
     def get_searchPaths(self): return self.searchPaths
@@ -3390,6 +3394,8 @@ class platformDefinitionType(GeneratedsSuper):
             outfile.write('<%sbaseFlavor>%s</%sbaseFlavor>\n' % (namespace_, self.format_string(quote_xml(self.baseFlavor).encode(ExternalEncoding), input_name='baseFlavor'), namespace_))
         if self.contentProvider:
             self.contentProvider.export(outfile, level, namespace_, name_='contentProvider')
+        if self.stages:
+            self.stages.export(outfile, level, namespace_, name_='stages', )
         if self.platformInformation:
             self.platformInformation.export(outfile, level, namespace_, name_='platformInformation')
         if self.searchPaths:
@@ -3415,6 +3421,7 @@ class platformDefinitionType(GeneratedsSuper):
             self.platformVersionTrove is not None or
             self.baseFlavor is not None or
             self.contentProvider is not None or
+            self.stages is not None or
             self.platformInformation is not None or
             self.searchPaths is not None or
             self.factorySources is not None or
@@ -3454,6 +3461,12 @@ class platformDefinitionType(GeneratedsSuper):
             showIndent(outfile, level)
             outfile.write('contentProvider=model_.contentProviderType(\n')
             self.contentProvider.exportLiteral(outfile, level, name_='contentProvider')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.stages is not None:
+            showIndent(outfile, level)
+            outfile.write('stages=model_.stageListType(\n')
+            self.stages.exportLiteral(outfile, level, name_='stages')
             showIndent(outfile, level)
             outfile.write('),\n')
         if self.platformInformation is not None:
@@ -3551,6 +3564,11 @@ class platformDefinitionType(GeneratedsSuper):
             obj_.build(child_)
             self.set_contentProvider(obj_)
         elif child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'stages':
+            obj_ = stageListType.factory()
+            obj_.build(child_)
+            self.set_stages(obj_)
+        elif child_.nodeType == Node.ELEMENT_NODE and \
             nodeName_ == 'platformInformation':
             obj_ = platformInformationType.factory()
             obj_.build(child_)
@@ -3607,6 +3625,7 @@ class platformType(GeneratedsSuper):
         MemberSpec_('platformVersionTrove', 'xsd:string', 0),
         MemberSpec_('baseFlavor', ['flavorStringType', 'xsd:string', 'xsd:string'], 0),
         MemberSpec_('contentProvider', 'contentProviderType', 0),
+        MemberSpec_('stages', 'stageListType', 0),
         MemberSpec_('platformInformation', 'platformInformationType', 0),
         MemberSpec_('searchPaths', 'searchPathListType', 0),
         MemberSpec_('factorySources', 'factorySourceListType', 0),
@@ -3619,7 +3638,7 @@ class platformType(GeneratedsSuper):
         ]
     subclass = None
     superclass = None
-    def __init__(self, sourceTrove=None, useLatest=None, platformName=None, platformUsageTerms=None, platformVersionTrove=None, baseFlavor=None, contentProvider=None, platformInformation=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None):
+    def __init__(self, sourceTrove=None, useLatest=None, platformName=None, platformUsageTerms=None, platformVersionTrove=None, baseFlavor=None, contentProvider=None, stages=None, platformInformation=None, searchPaths=None, factorySources=None, autoLoadRecipes=None, secondaryLabels=None, architectures=None, flavorSets=None, containerTemplates=None, buildTemplates=None):
         self.sourceTrove = _cast(None, sourceTrove)
         self.useLatest = _cast(bool, useLatest)
         self.platformName = platformName
@@ -3627,6 +3646,7 @@ class platformType(GeneratedsSuper):
         self.platformVersionTrove = platformVersionTrove
         self.baseFlavor = baseFlavor
         self.contentProvider = contentProvider
+        self.stages = stages
         self.platformInformation = platformInformation
         self.searchPaths = searchPaths
         self.factorySources = factorySources
@@ -3655,6 +3675,8 @@ class platformType(GeneratedsSuper):
         pass
     def get_contentProvider(self): return self.contentProvider
     def set_contentProvider(self, contentProvider): self.contentProvider = contentProvider
+    def get_stages(self): return self.stages
+    def set_stages(self, stages): self.stages = stages
     def get_platformInformation(self): return self.platformInformation
     def set_platformInformation(self, platformInformation): self.platformInformation = platformInformation
     def get_searchPaths(self): return self.searchPaths
@@ -3708,6 +3730,8 @@ class platformType(GeneratedsSuper):
             outfile.write('<%sbaseFlavor>%s</%sbaseFlavor>\n' % (namespace_, self.format_string(quote_xml(self.baseFlavor).encode(ExternalEncoding), input_name='baseFlavor'), namespace_))
         if self.contentProvider:
             self.contentProvider.export(outfile, level, namespace_, name_='contentProvider')
+        if self.stages:
+            self.stages.export(outfile, level, namespace_, name_='stages')
         if self.platformInformation:
             self.platformInformation.export(outfile, level, namespace_, name_='platformInformation')
         if self.searchPaths:
@@ -3733,6 +3757,7 @@ class platformType(GeneratedsSuper):
             self.platformVersionTrove is not None or
             self.baseFlavor is not None or
             self.contentProvider is not None or
+            self.stages is not None or
             self.platformInformation is not None or
             self.searchPaths is not None or
             self.factorySources is not None or
@@ -3775,6 +3800,12 @@ class platformType(GeneratedsSuper):
             showIndent(outfile, level)
             outfile.write('contentProvider=model_.contentProviderType(\n')
             self.contentProvider.exportLiteral(outfile, level, name_='contentProvider')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.stages is not None:
+            showIndent(outfile, level)
+            outfile.write('stages=model_.stageListType(\n')
+            self.stages.exportLiteral(outfile, level, name_='stages')
             showIndent(outfile, level)
             outfile.write('),\n')
         if self.platformInformation is not None:
@@ -3878,6 +3909,11 @@ class platformType(GeneratedsSuper):
             obj_ = contentProviderType.factory()
             obj_.build(child_)
             self.set_contentProvider(obj_)
+        elif child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'stages':
+            obj_ = stageListType.factory()
+            obj_.build(child_)
+            self.set_stages(obj_)
         elif child_.nodeType == Node.ELEMENT_NODE and \
             nodeName_ == 'platformInformation':
             obj_ = platformInformationType.factory()

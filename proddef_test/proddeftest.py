@@ -793,6 +793,7 @@ class RepositoryBasedTest(rephelp.RepositoryHelper, BaseTest):
         self.addCollection("bar", [":runtime"])
 
         pld = proddef.PlatformDefinition()
+        pld.addDefaultStages()
         pld.addSearchPath(troveName = "foo", label = str(self.defLabel))
         pld.addFactorySource(troveName = "bar", label = str(self.defLabel))
 
@@ -2062,6 +2063,7 @@ class ProductDefinitionTest(BaseTest):
     def testPlatformNameSourceTrove1(self):
         sio = StringIO.StringIO()
         pld = proddef.PlatformDefinition()
+        pld.addDefaultStages()
         self.failUnlessEqual(pld.getPlatformName(), None)
         self.failUnlessEqual(pld.getPlatformVersionTrove(), None)
 
@@ -2071,6 +2073,11 @@ class ProductDefinitionTest(BaseTest):
 <?xml version="1.0" encoding="UTF-8"?>
 <platformDefinition xmlns="http://www.rpath.com/permanent/rpd-%(version)s.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.rpath.com/permanent/rpd-%(version)s.xsd rpd-%(version)s.xsd" version="%(version)s">
   <baseFlavor>Foo</baseFlavor>
+  <stages>
+    <stage labelSuffix="-devel" name="Development"/>
+    <stage labelSuffix="-qa" name="QA"/>
+    <stage labelSuffix="" name="Release"/>
+  </stages>
 </platformDefinition>""" % dict(version = proddef.ProductDefinition.version))
 
         pName = 'some name'
@@ -2089,6 +2096,11 @@ class ProductDefinitionTest(BaseTest):
   <platformName>some name</platformName>
   <platformVersionTrove>some source trove</platformVersionTrove>
   <baseFlavor>Foo</baseFlavor>
+  <stages>
+    <stage labelSuffix="-devel" name="Development"/>
+    <stage labelSuffix="-qa" name="QA"/>
+    <stage labelSuffix="" name="Release"/>
+  </stages>
 </platformDefinition>""" % dict(version = proddef.ProductDefinition.version))
 
         sio.seek(0)
@@ -2148,6 +2160,7 @@ class ProductDefinitionTest(BaseTest):
     def testPlaformAutoLoadRecipes1(self):
         sio = StringIO.StringIO()
         pld = proddef.PlatformDefinition()
+        pld.addDefaultStages()
         self.failUnlessEqual(pld.getAutoLoadRecipes(), [])
 
         pld.setBaseFlavor("Foo")
@@ -2156,6 +2169,11 @@ class ProductDefinitionTest(BaseTest):
 <?xml version="1.0" encoding="UTF-8"?>
 <platformDefinition xmlns="http://www.rpath.com/permanent/rpd-%(version)s.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.rpath.com/permanent/rpd-%(version)s.xsd rpd-%(version)s.xsd" version="%(version)s">
   <baseFlavor>Foo</baseFlavor>
+  <stages>
+    <stage labelSuffix="-devel" name="Development"/>
+    <stage labelSuffix="-qa" name="QA"/>
+    <stage labelSuffix="" name="Release"/>
+  </stages>
 </platformDefinition>""" % dict(version = proddef.ProductDefinition.version))
 
         alRecipes = ['trove1', 'trove2']
@@ -2172,6 +2190,11 @@ class ProductDefinitionTest(BaseTest):
 <?xml version="1.0" encoding="UTF-8"?>
 <platformDefinition xmlns="http://www.rpath.com/permanent/rpd-%(version)s.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.rpath.com/permanent/rpd-%(version)s.xsd rpd-%(version)s.xsd" version="%(version)s">
   <baseFlavor>Foo</baseFlavor>
+  <stages>
+    <stage labelSuffix="-devel" name="Development"/>
+    <stage labelSuffix="-qa" name="QA"/>
+    <stage labelSuffix="" name="Release"/>
+  </stages>
   <autoLoadRecipes>
     <autoLoadRecipe troveName="trove1"/>
     <autoLoadRecipe troveName="trove2"/>
@@ -3227,6 +3250,7 @@ class ProductDefinitionTest(BaseTest):
                 version = '3.2')
         plt.sourceTrove = 'srcTrove'
         plt.useLatests = False
+        plt.addDefaultStages()
 
         sio = StringIO.StringIO()
         plt.serialize(sio)
@@ -3246,6 +3270,9 @@ class ProductDefinitionTest(BaseTest):
         # And we need to get rid of the source trove
         newPlt.sourceTrove = None
         newPlt._rootObj.get_version = lambda: prd.version
+
+        # Stages are required, so add default stages if not present
+        newPlt.addDefaultStages()
 
         sio = StringIO.StringIO()
         newPlt.serialize(sio)
@@ -3313,6 +3340,9 @@ version="%(version)s">
       <dataSource description="Red Hat Enterprise Linux (v. 5 for 32-bit x86)" name="rhel-i386-server-5" />
       <dataSource description="Red Hat Enterprise Linux (v. 5 for 64-bit x86_64)" name="rhel-x86_64-server-5" />
     </contentProvider>
+    <stages>
+      <stage labelSuffix="" name="release"/>
+    </stages>
     <searchPaths>
         <searchPath isPlatformTrove="true" isGroupSearchPathTrove="true" troveName="group-os"
              id="a-1b5e263c34"
@@ -4035,6 +4065,11 @@ refPlatSerialize1 = """\
 <platformDefinition xmlns="http://www.rpath.com/permanent/rpd-%(version)s.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.rpath.com/permanent/rpd-%(version)s.xsd rpd-%(version)s.xsd" version="%(version)s">
   <platformName>My Awesome Appliance</platformName>
   <baseFlavor>black-coffee,!cream,~sugar is: x86 x86_64</baseFlavor>
+  <stages>
+    <stage name="devel" labelSuffix="-devel"/>
+    <stage name="qa" labelSuffix="-qa"/>
+    <stage name="release" labelSuffix=""/>
+  </stages>
   <platformInformation>
     <originLabel>bar@baz:1</originLabel>
   </platformInformation>
@@ -4218,6 +4253,11 @@ refPlatSerialize6 = """<?xml version='1.0' encoding='UTF-8'?>
 <platformDefinition xmlns="http://www.rpath.com/permanent/rpd-%(version)s.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.rpath.com/permanent/rpd-%(version)s.xsd rpd-%(version)s.xsd" version="%(version)s">
   <platformName>My Awesome Appliance</platformName>
   <baseFlavor>black-coffee,!cream,~sugar is: x86 x86_64</baseFlavor>
+  <stages>
+    <stage labelSuffix="-devel" name="devel"/>
+    <stage labelSuffix="-qa" name="qa"/>
+    <stage labelSuffix="" name="release"/>
+  </stages>
   <platformInformation>
     <originLabel>bar@baz:1</originLabel>
   </platformInformation>

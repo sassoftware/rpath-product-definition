@@ -361,6 +361,7 @@
       <!-- Platform definition proper -->
       <xsd:sequence>
         <xsd:group ref="rpd:platformDefinitionElements" />
+        <xsd:element name="stages" type="rpd:stageListType" minOccurs="1" maxOccurs="1" />
         <xsd:group ref="rpd:commonDefinitionElements" />
       </xsd:sequence>
       <xsd:attribute name="version" type="xsd:string" />
@@ -370,6 +371,7 @@
       <!-- Platform embedded in a product definition -->
       <xsd:sequence>
         <xsd:group ref="rpd:platformDefinitionElements" />
+        <xsd:element name="stages" type="rpd:stageListType" minOccurs="0" maxOccurs="1" />
         <xsd:group ref="rpd:commonDefinitionElements" />
       </xsd:sequence>
       <!-- Source of this platform. Will get filled in to a name-version trove
@@ -403,7 +405,7 @@
                 <xsd:element name="baseLabel" type="xsd:string" minOccurs="0" maxOccurs="1" />
                 <xsd:element name="baseFlavor" type="rpd:flavorStringType" minOccurs="0" maxOccurs="1" />
                 <xsd:element name="publishUpstreamPlatformSearchPaths" type="xsd:boolean" minOccurs="0" maxOccurs="1" />
-                <xsd:element name="stages" type="rpd:stageListType" />
+                <xsd:element name="stages" type="rpd:stageListType" minOccurs="1" maxOccurs="1" />
                 <xsd:group ref="rpd:commonDefinitionElements" />
                 <xsd:element name="buildDefinition" type="rpd:buildDefinitionType" minOccurs="0" maxOccurs="1" />
                 <xsd:element name="platform" type="rpd:platformType" minOccurs="0" maxOccurs="1" />
