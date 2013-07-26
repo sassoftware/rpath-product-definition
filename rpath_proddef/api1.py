@@ -1277,16 +1277,10 @@ class ProductDefinitionRecipe(PackageRecipe):
         @raises MissingInformationError: if there isn't enough information
             in the object to generate the default label
         """
-        # TODO: Currently, this is the development stage's label,
-        #       i.e. the one with suffix '-devel'.
-        #
-        #       Eventually the XML schema will explicitly define the
-        #       default label, either via a 'default' attribute on
-        #       the stage or via the stage's order.
+        # Default stage is the first defined stage
         stages = self.getStages()
-        for stage in stages:
-            if stage.labelSuffix == '-devel':
-                return self._getLabelForStage(stage)
+        if stages:
+            return self._getLabelForStage(stages[0])
         raise StageNotFoundError
 
     def getSecondaryLabelsForStage(self, stageName):

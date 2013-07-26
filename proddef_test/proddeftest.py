@@ -1940,9 +1940,12 @@ class ProductDefinitionTest(BaseTest):
             exp)
 
     def testDefaultLabel(self):
-        prd = proddef.ProductDefinition(fromStream = refSerialize1)
+        # Change default label to no longer have -devel suffix
+        serialized = refSerialize1.replace('labelSuffix="-devel"',
+                'labelSuffix="-blippy"')
+        prd = proddef.ProductDefinition(fromStream = serialized)
         self.assertEquals(prd.getDefaultLabel(),
-                "product.example.com@exm:awesome-1.0-devel")
+                "product.example.com@exm:awesome-1.0-blippy")
 
     def testDefaultLabelEmptyProductDefinition(self):
         emptyprd = proddef.ProductDefinition()
