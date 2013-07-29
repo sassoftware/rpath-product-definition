@@ -670,10 +670,14 @@ class RepositoryBasedTest(rephelp.RepositoryHelper, BaseTest):
         pld.addSearchPath(troveName = "foo", label = str(self.defLabel))
         pld.clearFactorySources()
         pld.addFactorySource(troveName = "bar", label = str(self.defLabel))
+        pld.clearStages()
+        pld.addStage(name="Development", labelSuffix="-devel")
+        pld.addStage(name="Release", labelSuffix="")
         pld.saveToRepository(client, str(self.defLabel))
 
         pd = proddef.ProductDefinition(fromStream = refSerialize5)
-        pd.rebase(client, str(self.defLabel), useLatest = True)
+        pd.rebase(client, str(self.defLabel), useLatest = True,
+                overwriteStages=True)
         self.failUnlessEqual(pd.getPlatformUseLatest(), True)
 
         self.failUnlessEqual(pd.getPlatformBaseFlavor(),
@@ -687,6 +691,13 @@ class RepositoryBasedTest(rephelp.RepositoryHelper, BaseTest):
         self.failUnlessEqual(
             [x.getTroveTup() for x in pd.getPlatformFactorySources()],
             [('bar', 'localhost@rpl:linux', None)])
+
+        self.failUnlessEqual(
+                [ (x.name, x.labelSuffix) for x in pd.getStages() ],
+                [
+                    ('Development', '-devel'),
+                    ('Release', ''),
+                ])
 
         # Muck with the platform's version, to make sure we are properly
         # snapshotting it

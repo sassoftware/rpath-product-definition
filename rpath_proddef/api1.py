@@ -772,6 +772,8 @@ class BaseDefinition(object):
         self._rootObj.set_stages(None)
 
     def addDefaultStages(self):
+        if self.getStages():
+            return
         self.copyStages(None, setDefaultStages=True)
 
     def copyStages(self, src, setDefaultStages=False):
@@ -2158,7 +2160,7 @@ class ProductDefinitionRecipe(PackageRecipe):
         nplat.saveToRepository(client, label, message = message)
 
     def rebase(self, client, label = None, useLatest = None,
-            platformVersion = None):
+            platformVersion = None, overwriteStages=False):
         """
         @param label: A label string pointing to the new platform to be used
         as a base for this product definition.
@@ -2170,6 +2172,9 @@ class ProductDefinitionRecipe(PackageRecipe):
         @param platformVersion: A version string (like 1.2-3) to be used for
         platform trove search path elements.
         @type platformVersion: C{str}
+        @param overwriteStages: If set, the platform's stages will overwrite
+        the product's stages
+        @type overwriteStages: C{bool}
         """
         if useLatest and platformVersion:
             raise ProductDefinitionError("Conflicting arguments useLatest and "
@@ -2183,6 +2188,9 @@ class ProductDefinitionRecipe(PackageRecipe):
         if not useLatest:
             nplat.snapshotVersions(client, platformVersion = platformVersion)
         self._rebase(label, nplat, useLatest = useLatest)
+        if overwriteStages:
+            self.clearStages()
+            self.copyStages(nplat)
 
     def _rebase(self, label, nplat, useLatest = None):
         # Create a new platform
@@ -2304,6 +2312,7 @@ class ProductDefinitionRecipe(PackageRecipe):
         # Adding the platform was part of the migration from 1.3 to 2.0
         if self.platform:
             self._addPlatformDefaults()
+            self.platform.addDefaultStages()
         # Empty list objects are nullified
         listObjects = [
             ('autoLoadRecipes', 'get_autoLoadRecipe'),
