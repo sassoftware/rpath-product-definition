@@ -772,6 +772,10 @@ class BaseDefinition(object):
         self._rootObj.set_stages(None)
 
     def addDefaultStages(self):
+        # Starting with schema 4.5, we may have older platforms present,
+        # so stages may be missing
+        if not hasattr(self._rootObj, 'get_stages'):
+            return
         if self.getStages():
             return
         self.copyStages(None, setDefaultStages=True)
@@ -930,7 +934,7 @@ class BaseDefinition(object):
             raise ProductDefinitionTroveNotFoundError("%s=%s" % (troveName, label))
         return ret[troveSpec][0]
 
-    def _getStreamFromRepository(self, conaryClient, label):
+    def _getStreamFromRepository(self, conaryClient, label, schemaVersion=None):
         repos = conaryClient.getRepos()
         try:
             trvTup = self._getTroveTupFromRepository(conaryClient, label,
@@ -938,10 +942,19 @@ class BaseDefinition(object):
         except conaryErrors.RepositoryError, e:
             raise RepositoryError(str(e)), None, sys.exc_info()[2]
 
+        troveFileNames = self._troveFileNames
+        if schemaVersion:
+            # Do not load a schema version newer than what was specified
+            fname = "%s-%s.xml" % (self._troveName, schemaVersion)
+            for i, f in enumerate(self._troveFileNames):
+                if f != fname:
+                    continue
+                troveFileNames = troveFileNames[i:]
+                break
         n,v,f = trvTup
         if hasattr(repos, 'getFileContentsFromTrove'):
             contents = None
-            for troveFileName in self._troveFileNames:
+            for troveFileName in troveFileNames:
                 try:
                     contents = repos.getFileContentsFromTrove(n,v,f,
                                                   [troveFileName])[0]
@@ -956,7 +969,7 @@ class BaseDefinition(object):
         cs = conaryClient.createChangeSet([ trvCsSpec ], withFiles = True,
                                           withFileContents = True)
         troveFileNameMap = dict((x, i)
-            for (i, x) in enumerate(self._troveFileNames))
+            for (i, x) in enumerate(troveFileNames))
         for thawTrvCs in cs.iterNewTroveList():
             paths = [ x for x in thawTrvCs.getNewFileList()
                 if x[1] in troveFileNameMap ]
@@ -2160,7 +2173,7 @@ class ProductDefinitionRecipe(PackageRecipe):
         nplat.saveToRepository(client, label, message = message)
 
     def rebase(self, client, label = None, useLatest = None,
-            platformVersion = None, overwriteStages=False):
+            platformVersion = None, overwriteStages=False, schemaVersion=None):
         """
         @param label: A label string pointing to the new platform to be used
         as a base for this product definition.
@@ -2175,6 +2188,8 @@ class ProductDefinitionRecipe(PackageRecipe):
         @param overwriteStages: If set, the platform's stages will overwrite
         the product's stages
         @type overwriteStages: C{bool}
+        @param schemaVersion: Schema version to rebase to
+        @type schemaVersion: C{str}
         """
         if useLatest and platformVersion:
             raise ProductDefinitionError("Conflicting arguments useLatest and "
@@ -2184,17 +2199,20 @@ class ProductDefinitionRecipe(PackageRecipe):
         if label is None:
             raise PlatformLabelMissingError()
         nplat = self.toPlatformDefinition()
-        nplat.loadFromRepository(client, label)
+        nplat.loadFromRepository(client, label, schemaVersion=schemaVersion)
         if not useLatest:
             nplat.snapshotVersions(client, platformVersion = platformVersion)
-        self._rebase(label, nplat, useLatest = useLatest)
+        self._rebase(label, nplat, useLatest = useLatest, schemaVersion=schemaVersion)
         if overwriteStages:
             self.clearStages()
             self.copyStages(nplat)
 
-    def _rebase(self, label, nplat, useLatest = None):
+    def _rebase(self, label, nplat, useLatest = None, schemaVersion=None):
         # Create a new platform
-        xmlsubs = self.xmlFactory()
+        if schemaVersion:
+            xmlsubs = self.loadModule(schemaVersion)
+        else:
+            xmlsubs = self.xmlFactory()
         self.platform = Platform()
         uroot = nplat._rootObj
         platobj = xmlsubs.platformTypeSub.factory(
@@ -2608,7 +2626,7 @@ class PlatformDefinitionRecipe(PackageRecipe):
         return self._saveToRepository(client, label, message = message,
             version = version)
 
-    def loadFromRepository(self, client, label):
+    def loadFromRepository(self, client, label, schemaVersion=None):
         """
         Load a C{PlatformDefinition} object from a Conary repository.
         @param client: A Conary client object
@@ -2617,8 +2635,10 @@ class PlatformDefinitionRecipe(PackageRecipe):
         @raises C{ProductDefinitionTroveNotFoundError}:
         @raises C{ProductDefinitionFileNotFoundError}:
         """
-        stream, nvf = self._getStreamFromRepository(client, label)
+        stream, nvf = self._getStreamFromRepository(client, label, schemaVersion)
         stream.seek(0)
+        if schemaVersion:
+            self.version = schemaVersion
         self.parseStream(stream)
         # Set the source trove version we used
         self._sourceTrove = "%s=%s" % (self._troveName, nvf[1])

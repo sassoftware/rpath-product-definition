@@ -643,6 +643,33 @@ class RepositoryBasedTest(rephelp.RepositoryHelper, BaseTest):
         self.failUnlessEqual(nvf[0], 'product-definition:source')
         self.failUnlessEqual(str(nvf[1]), '/localhost@exm:awesome-1.0/2.0-1')
 
+    def testLoadFromRepository_olderVersion(self):
+        # RCE-2077
+        pld = self._newPlatform()
+
+        plfiles = []
+        for version in [ '4.5', '4.4', '4.3' ]:
+            sio = StringIO.StringIO()
+            pld.serialize(sio, version=version)
+            plfiles.append(('platform-definition-%s.xml' % version, sio.getvalue()))
+
+        label = 'localhost@sas:awesome-1.0'
+        pltrv = self.addComponent("platform-definition:source=%s" % label,
+            fileContents=plfiles)
+
+        client = conaryclient.ConaryClient(self.cfg)
+        pld2 = proddef.PlatformDefinition()
+        pld2.loadFromRepository(client, label=str(pltrv.getVersion()),
+                schemaVersion='4.4')
+        self.assertEquals(pld2._rootObj.version, '4.4')
+
+        prd = proddef.ProductDefinition(fromStream=refSerialize1)
+        prd.rebase(client, label=str(pltrv.getVersion()), schemaVersion='4.4')
+
+        self.assertEquals(prd._rootObj.version, prd.__class__.version)
+        self.assertEquals(prd.platform._rootObj.__class__.__module__,
+                'rpath_proddef.xml_4_4.subs')
+
     def testPlatformSaveToRepository(self):
         self.openRepository()
         client = conaryclient.ConaryClient(self.cfg)
@@ -793,9 +820,8 @@ class RepositoryBasedTest(rephelp.RepositoryHelper, BaseTest):
             [ (x.troveName, x.version) for x in pd.getSearchPaths() ],
             [('foo', '1.0-1-1'), ('group-snapshotted', '0.0.0')])
 
-    def testPlatformSnapshotVersions(self):
+    def _newPlatform(self):
         self.openRepository()
-        client = conaryclient.ConaryClient(self.cfg)
 
         self.addComponent("foo:runtime")
         self.addCollection("foo", [":runtime"])
@@ -807,6 +833,11 @@ class RepositoryBasedTest(rephelp.RepositoryHelper, BaseTest):
         pld.addDefaultStages()
         pld.addSearchPath(troveName = "foo", label = str(self.defLabel))
         pld.addFactorySource(troveName = "bar", label = str(self.defLabel))
+        return pld
+
+    def testPlatformSnapshotVersions(self):
+        client = conaryclient.ConaryClient(self.cfg)
+        pld = self._newPlatform()
 
         pld.snapshotVersions(client)
         def check(pld):
