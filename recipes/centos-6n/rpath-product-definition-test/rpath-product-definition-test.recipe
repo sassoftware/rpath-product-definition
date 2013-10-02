@@ -23,7 +23,6 @@ class rPathProductDefinitionTest(TestPackageRecipe):
     buildRequires = [
         'conary-test:python',
         'rpath-product-definition:python',
-        'gunicorn:runtime',
     ]
 
     def setupSource(r):
