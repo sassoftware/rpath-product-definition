@@ -3385,6 +3385,12 @@ class Migrate_44_45(BaseMigration):
 
 MigrationManager.register(Migrate_44_45)
 
+class Migrate_45_46(BaseMigration):
+    fromVersion = '4.5'
+    toVersion = '4.6'
+    CanMigrateBack = True
+MigrationManager.register(Migrate_45_46)
+
 
 # export all things that do not have a leading underscore and aren't imported
 # from another module.
