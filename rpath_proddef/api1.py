@@ -635,6 +635,9 @@ class BaseDefinition(object):
         """
         self._rootObj.set_containerTemplates(None)
 
+    def getPartitionScheme(self, ref):
+        return self._getFromDictById('partitionSchemes', 'partitionScheme', ref)
+
     def getBuildTemplates(self):
         """
         @return: all defined build templates
@@ -1044,6 +1047,16 @@ class BaseDefinition(object):
                 continue
             collectorMethod(obj)
             uniqueSet.remove(objKey)
+
+    def _getFromDictById(self, container, element, ref, idField='id'):
+        items = getattr(self._rootObj, container)
+        if items:
+            items = getattr(items, element)
+        for item in items or []:
+            if getattr(item, idField) == ref:
+                return item
+        raise KeyError("No such %s with %s '%s'" % (element, idField, ref))
+
 
 class ProductDefinition(BaseDefinition):
     """
@@ -2024,6 +2037,14 @@ class ProductDefinitionRecipe(PackageRecipe):
         getPublishUpstreamPlatformSearchPaths,
         setPublishUpstreamPlatformSearchPaths)
 
+    def _getFromDictById(self, container, element, ref, idField='id'):
+        try:
+            return BaseDefinition._getFromDictById(self, container, element, ref, idField)
+        except KeyError:
+            if self.platform:
+                return self.platform._getFromDictById(container, element, ref, idField)
+        raise KeyError("No such %s with %s '%s'" % (element, idField, ref))
+
     #{ Internal methods
     def _getLabelForStage(self, stageObj):
         """
@@ -2582,6 +2603,7 @@ class PlatformDefinition(BasePlatform):
 
     # list of files to search for in the trove, ordered by priority.
     _troveFileNames = [
+        'platform-definition-4.6.xml',
         'platform-definition-4.5.xml',
         'platform-definition-4.4.xml',
         'platform-definition-4.3.xml',
