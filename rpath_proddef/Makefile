@@ -56,6 +56,8 @@ rule-%:
                 -s $(call xmlDir,$@)/subs.py \
                 --user-methods=gends_user_methods \
                 ../xsd/rpd-$(call xmlVer,$@).xsd
+	echo "# pyflakes=ignore-file" >> $(call xmlDir,$@)/subs.py
+	echo "# pyflakes=ignore-file" >> $(call xmlDir,$@)/supers.py
 	$(GENERATE_DS) --version > gends_version.txt
 	[ -x /usr/bin/hg ] && [ -d "$(GENERATE_DS_ROOT)/.hg" ] \
 		&& ( echo -n "HG: "; hg -R "$(GENERATE_DS_ROOT)" parents --template "{node}\n"; ) \
