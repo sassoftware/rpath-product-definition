@@ -1152,6 +1152,7 @@ class ProductDefinitionRecipe(PackageRecipe):
         stream, nvf = self._getStreamFromRepository(client, label)
         stream.seek(0)
         self.parseStream(stream)
+        return nvf
 
     def getProductName(self):
         """
@@ -2664,6 +2665,7 @@ class PlatformDefinitionRecipe(PackageRecipe):
         self.parseStream(stream)
         # Set the source trove version we used
         self._sourceTrove = "%s=%s" % (self._troveName, nvf[1])
+        return nvf
 
     def snapshotVersions(self, conaryClient, platformVersion = None):
         """
