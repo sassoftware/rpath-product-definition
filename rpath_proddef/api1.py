@@ -34,6 +34,7 @@ from conary import changelog
 from conary import conarycfg
 from conary import errors as conaryErrors
 from conary import trove
+from conary import trovetup
 from conary import versions as conaryVersions
 from conary.conaryclient import filetypes, cmdline
 from conary.deps import deps as conaryDeps
@@ -937,13 +938,20 @@ class BaseDefinition(object):
             raise ProductDefinitionTroveNotFoundError("%s=%s" % (troveName, label))
         return ret[troveSpec][0]
 
-    def _getStreamFromRepository(self, conaryClient, label, schemaVersion=None):
+    def _getStreamFromRepository(self, conaryClient, label, schemaVersion,
+            sourceTrove):
         repos = conaryClient.getRepos()
-        try:
-            trvTup = self._getTroveTupFromRepository(conaryClient, label,
-                allowMissing = False)
-        except conaryErrors.RepositoryError, e:
-            raise RepositoryError(str(e)), None, sys.exc_info()[2]
+        if sourceTrove:
+            name = '%s:source' % self._troveName
+            version = conaryVersions.VersionFromString(
+                    trovetup.TroveSpec(str(sourceTrove))[1])
+            trvTup = (name, version, conaryDeps.Flavor())
+        else:
+            try:
+                trvTup = self._getTroveTupFromRepository(conaryClient, label,
+                    allowMissing = False)
+            except conaryErrors.RepositoryError, e:
+                raise RepositoryError(str(e)), None, sys.exc_info()[2]
 
         troveFileNames = self._troveFileNames
         if schemaVersion:
@@ -990,6 +998,9 @@ class BaseDefinition(object):
         # Couldn't find the file we expected; die
         raise ProductDefinitionFileNotFoundError("%s=%s" % (n, label))
 
+    def getLoadedTrove(self):
+        return self._sourceTrove
+
     def xmlFactory(self):
         return self.loadModule(self.version)
 
@@ -999,6 +1010,7 @@ class BaseDefinition(object):
         if self.Versioned:
             self._rootObj.set_version(self.version)
         self._preMigrateVersion = None
+        self._sourceTrove = None
 
     def _postinit(self):
         pass
@@ -1135,7 +1147,7 @@ class ProductDefinitionRecipe(PackageRecipe):
         return self._saveToRepository(client, label, message = message,
             version = version)
 
-    def loadFromRepository(self, client):
+    def loadFromRepository(self, client, sourceTrove=None):
         """
         Load a C{ProductDefinition} object from a Conary repository.
         Prior to calling this method, the C{ProductDefinition} object should
@@ -1144,14 +1156,18 @@ class ProductDefinitionRecipe(PackageRecipe):
         C{setConaryNamespace}.
         @param client: A Conary client object
         @type client: C{conaryclient.ConaryClient}
+        @param sourceTrove: An optional 'name=version' to load
+        @type  sourceTrove: str
         @raises C{RepositoryError}:
         @raises C{ProductDefinitionTroveNotFoundError}:
         @raises C{ProductDefinitionFileNotFoundError}:
         """
         label = self.getProductDefinitionLabel()
-        stream, nvf = self._getStreamFromRepository(client, label)
+        stream, nvf = self._getStreamFromRepository(client, label, None,
+                sourceTrove)
         stream.seek(0)
         self.parseStream(stream)
+        self._sourceTrove = "%s=%s" % (self._troveName, nvf[1])
         return nvf
 
     def getProductName(self):
@@ -2649,16 +2665,19 @@ class PlatformDefinitionRecipe(PackageRecipe):
         return self._saveToRepository(client, label, message = message,
             version = version)
 
-    def loadFromRepository(self, client, label, schemaVersion=None):
+    def loadFromRepository(self, client, label, schemaVersion=None, sourceTrove=None):
         """
         Load a C{PlatformDefinition} object from a Conary repository.
         @param client: A Conary client object
         @type client: C{conaryclient.ConaryClient}
+        @param sourceTrove: An optional 'name=version' to load
+        @type  sourceTrove: str
         @raises C{RepositoryError}:
         @raises C{ProductDefinitionTroveNotFoundError}:
         @raises C{ProductDefinitionFileNotFoundError}:
         """
-        stream, nvf = self._getStreamFromRepository(client, label, schemaVersion)
+        stream, nvf = self._getStreamFromRepository(client, label,
+                schemaVersion, sourceTrove)
         stream.seek(0)
         if schemaVersion:
             self.version = schemaVersion
@@ -2723,9 +2742,6 @@ class PlatformDefinitionRecipe(PackageRecipe):
 
     sourceTrove = property(getPlatformSourceTrove, setPlatformSourceTrove)
 
-    def _initFields(self):
-        BasePlatform._initFields(self)
-        self._sourceTrove = None
 
 def _addPlatformDefaults(platform):
     platform.setBaseFlavor('~X, ~!alternatives, !bootstrap, ~builddocs, ~buildtests, !cross, ~desktop, ~!dom0, ~!domU, ~emacs, ~!gcj, ~gnome, ~gtk, ~ipv6, ~krb, ~ldap, ~nptl, pam, ~pcre, ~perl, ~!pie, ~python, ~readline, ~!sasl, ~!selinux, ~ssl, ~tcl, ~tk, ~!vmware, ~!xen, ~!xfce')

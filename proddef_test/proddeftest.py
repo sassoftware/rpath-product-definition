@@ -482,7 +482,7 @@ class RepositoryBasedTest(rephelp.RepositoryHelper, BaseTest):
             self.cfg.configLine('repositoryMap localhost http://localhost:999999/conary/')
             client = conaryclient.ConaryClient(self.cfg)
             self.failUnlessRaises(proddef.RepositoryError,
-                pd._getStreamFromRepository, client, label)
+                pd._getStreamFromRepository, client, label, None, None)
         finally:
             self.cfg.repositoryMap = conaryclient.conarycfg.RepoMap()
 
@@ -490,7 +490,7 @@ class RepositoryBasedTest(rephelp.RepositoryHelper, BaseTest):
         client = conaryclient.ConaryClient(self.cfg)
 
         self.failUnlessRaises(proddef.ProductDefinitionTroveNotFoundError,
-            pd._getStreamFromRepository, client, label)
+            pd._getStreamFromRepository, client, label, None, None)
 
         pd._saveToRepository(client, label, message = "Boo!\n")
 
@@ -505,16 +505,16 @@ class RepositoryBasedTest(rephelp.RepositoryHelper, BaseTest):
         self.failIf("@NAME@" in recipe, recipe)
         self.failIf("@VERSION@" in recipe, recipe)
 
-        stream = pd._getStreamFromRepository(client, label)
+        stream = pd._getStreamFromRepository(client, label, None, None)
 
         # Test the exception code paths too
         self.failUnlessRaises(proddef.ProductDefinitionTroveNotFoundError,
-            pd._getStreamFromRepository, client, label + 'x')
+            pd._getStreamFromRepository, client, label + 'x', None, None)
 
         # Mangle the file name
         pd._troveFileNames[-1] += 'GARBLE'
         self.failUnlessRaises(proddef.ProductDefinitionFileNotFoundError,
-            pd._getStreamFromRepository, client, label)
+            pd._getStreamFromRepository, client, label, None, None)
 
     def testLoadFromRepository(self):
         labelHost = self.defLabel.getHost()
@@ -608,7 +608,10 @@ class RepositoryBasedTest(rephelp.RepositoryHelper, BaseTest):
         prodDef.setConaryRepositoryHostname(labelHost)
         prodDef.setConaryNamespace(conaryNamespace)
 
-        prodDef.loadFromRepository(client)
+        nvf1 = prodDef.loadFromRepository(client)
+        ver1 = prodDef.getLoadedTrove()
+        self.assertEqual(ver1, 'product-definition=/%s@%s:awesome-1.0/%s-1' %
+                (labelHost, conaryNamespace, prodDef.version))
         self.failUnlessEqual(prodDef.preMigrateVersion,
             proddef.ProductDefinition.version)
         sio2 = StringIO.StringIO()
@@ -639,9 +642,15 @@ class RepositoryBasedTest(rephelp.RepositoryHelper, BaseTest):
 
         # Now verify that the proddef trove version is 2.0 instead of latest
         label = prodDef.getProductDefinitionLabel()
-        stream, nvf = prodDef._getStreamFromRepository(client, label)
+        stream, nvf = prodDef._getStreamFromRepository(client, label, None, None)
         self.failUnlessEqual(nvf[0], 'product-definition:source')
         self.failUnlessEqual(str(nvf[1]), '/localhost@exm:awesome-1.0/2.0-1')
+
+        # Test loading the older revision
+        prodDef = proddef.ProductDefinition()
+        prodDef.setBaseLabel(str(nvf1[1].trailingLabel()))
+        prodDef.loadFromRepository(client, sourceTrove=ver1)
+        self.assertEqual(prodDef.preMigrateVersion, prodDef.version)
 
     def testLoadFromRepository_olderVersion(self):
         # RCE-2077
