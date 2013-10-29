@@ -83,6 +83,13 @@ supermod.autoLoadRecipesType.subclass = autoLoadRecipesTypeSub
 # end class autoLoadRecipesTypeSub
 
 
+class referenceTypeSub(supermod.referenceType):
+    def __init__(self, ref=None, valueOf_=''):
+        supermod.referenceType.__init__(self, ref, valueOf_)
+supermod.referenceType.subclass = referenceTypeSub
+# end class referenceTypeSub
+
+
 class partitionTypeSub(supermod.partitionType):
     def __init__(self, minSize=None, freeSpace=None, mount=None, name=None, fstype=None, valueOf_=''):
         supermod.partitionType.__init__(self, minSize, freeSpace, mount, name, fstype, valueOf_)
@@ -91,8 +98,8 @@ supermod.partitionType.subclass = partitionTypeSub
 
 
 class partitionSchemeTypeSub(supermod.partitionSchemeType):
-    def __init__(self, ref=None, id=None, partition=None):
-        supermod.partitionSchemeType.__init__(self, ref, id, partition)
+    def __init__(self, id=None, partition=None):
+        supermod.partitionSchemeType.__init__(self, id, partition)
 supermod.partitionSchemeType.subclass = partitionSchemeTypeSub
 # end class partitionSchemeTypeSub
 

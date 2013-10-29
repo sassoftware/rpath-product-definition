@@ -96,6 +96,11 @@
         </xsd:sequence>
     </xsd:complexType>
 
+    <xsd:complexType name="referenceType">
+        <!-- Generic element with a 'ref' attribute that points to the real element -->
+        <xsd:attribute name="ref" type="xsd:IDREF" use="required" />
+    </xsd:complexType>
+
     <xsd:complexType name="partitionType">
         <xsd:attribute name="name" type="xsd:string" />
         <xsd:attribute name="mount" type="xsd:string" use="required" />
@@ -108,8 +113,7 @@
         <xsd:sequence>
             <xsd:element name="partition" type="partitionType" minOccurs="0" maxOccurs="unbounded" />
         </xsd:sequence>
-        <xsd:attribute name="id" type="xsd:ID" />
-        <xsd:attribute name="ref" type="xsd:IDREF" />
+        <xsd:attribute name="id" type="xsd:ID" use="required" />
     </xsd:complexType>
 
     <xsd:complexType name="partitionSchemesType">
@@ -205,7 +209,7 @@
                 <xsd:element name="imageGroup" type="rpd:troveSpecType" minOccurs="0" maxOccurs="1"/>
                 <xsd:element name="sourceGroup" type="rpd:troveSpecType" minOccurs="0" maxOccurs="1"/>
             </xsd:sequence>
-            <xsd:element name="partitionScheme" type="rpd:partitionSchemeType" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="partitionScheme" type="rpd:referenceType" minOccurs="0" maxOccurs="1" />
         </xsd:sequence>
         <xsd:attribute name="name" type="xsd:string" use="required" />
         <xsd:attribute name="architectureRef" type="xsd:string" />

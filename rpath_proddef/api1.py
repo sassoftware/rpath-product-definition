@@ -637,7 +637,23 @@ class BaseDefinition(object):
         self._rootObj.set_containerTemplates(None)
 
     def getPartitionScheme(self, ref):
-        return self._getFromDictById('partitionSchemes', 'partitionScheme', ref)
+        for scheme in self.iterAllPartitionSchemes():
+            if scheme.id == ref:
+                return scheme
+        raise KeyError("No such partitionScheme with id '%s'" % ref)
+
+    def iterAllPartitionSchemes(self):
+        return self.getPartitionSchemes()
+
+    def getPartitionSchemes(self):
+        container = self._rootObj.get_partitionSchemes()
+        if container:
+            return container.get_partitionScheme() or []
+        else:
+            return []
+
+    def addPartitionSchemes(self, schemes):
+        return self._extendCollection(schemes, 'partitionScheme', ['id'])
 
     def getBuildTemplates(self):
         """
@@ -1060,14 +1076,21 @@ class BaseDefinition(object):
             collectorMethod(obj)
             uniqueSet.remove(objKey)
 
-    def _getFromDictById(self, container, element, ref, idField='id'):
-        items = getattr(self._rootObj, container)
-        if items:
-            items = getattr(items, element)
-        for item in items or []:
-            if getattr(item, idField) == ref:
-                return item
-        raise KeyError("No such %s with %s '%s'" % (element, idField, ref))
+    def _extendCollection(self, newItems, typeName, keys=['id']):
+        if not newItems:
+            return
+        typeFactoryName = typeName + 'TypeSub'
+        containerName = typeName + 's'
+        xmlsubs = self.xmlFactory()
+        typeFactory = getattr(xmlsubs, typeName + 'TypeSub')
+        containerFactory = getattr(xmlsubs, containerName + 'TypeSub')
+
+        oldContainer = getattr(self._rootObj, containerName)
+        oldItems = getattr(oldContainer, typeName, None) or []
+        newContainer = containerFactory.factory()
+        setattr(self._rootObj, containerName, newContainer)
+        appender = getattr(newContainer, typeName).append
+        self._addCollection(appender, oldItems, newItems, typeFactory, keys)
 
 
 class ProductDefinition(BaseDefinition):
@@ -2054,13 +2077,15 @@ class ProductDefinitionRecipe(PackageRecipe):
         getPublishUpstreamPlatformSearchPaths,
         setPublishUpstreamPlatformSearchPaths)
 
-    def _getFromDictById(self, container, element, ref, idField='id'):
-        try:
-            return BaseDefinition._getFromDictById(self, container, element, ref, idField)
-        except KeyError:
-            if self.platform:
-                return self.platform._getFromDictById(container, element, ref, idField)
-        raise KeyError("No such %s with %s '%s'" % (element, idField, ref))
+    def iterAllPartitionSchemes(self):
+        out = self.getPartitionSchemes()
+        ids = set(x.id for x in out)
+        if self.platform:
+            for item in self.platform.getPartitionSchemes():
+                if item.id and item.id in ids:
+                    continue
+                out.append(item)
+        return out
 
     #{ Internal methods
     def _getLabelForStage(self, stageObj):
@@ -2184,6 +2209,7 @@ class ProductDefinitionRecipe(PackageRecipe):
         nplat.addBuildTemplates([x for x in self.iterAllBuildTemplates()
             if (x.architectureRef, x.containerTemplateRef, x.flavorSetRef)
                 in buildTemplateRefs])
+        nplat.addPartitionSchemes(self.iterAllPartitionSchemes())
 
         nplat.setPlatformName(self.getProductName())
         nplat.setPlatformVersionTrove(self.getPlatformVersionTrove())
@@ -2256,21 +2282,26 @@ class ProductDefinitionRecipe(PackageRecipe):
         platobj = xmlsubs.platformTypeSub.factory(
             sourceTrove = nplat.getPlatformSourceTrove(),
             useLatest = useLatest,
-            platformName = uroot.get_platformName(),
-            platformUsageTerms = uroot.get_platformUsageTerms(),
-            platformVersionTrove = uroot.get_platformVersionTrove(),
-            platformInformation = uroot.get_platformInformation(),
-            baseFlavor = uroot.get_baseFlavor(),
-            contentProvider = uroot.get_contentProvider(),
-            searchPaths = uroot.get_searchPaths(),
-            factorySources = uroot.get_factorySources(),
-            autoLoadRecipes = uroot.get_autoLoadRecipes(),
-            secondaryLabels = uroot.get_secondaryLabels(),
-            architectures = uroot.get_architectures(),
-            flavorSets = uroot.get_flavorSets(),
-            containerTemplates = uroot.get_containerTemplates(),
-            buildTemplates = uroot.get_buildTemplates(),
             )
+        for elem in [
+                'architectures',
+                'autoLoadRecipes',
+                'baseFlavor',
+                'buildTemplates',
+                'containerTemplates',
+                'contentProvider',
+                'factorySources',
+                'flavorSets',
+                'partitionSchemes',
+                'platformInformation',
+                'platformName',
+                'platformUsageTerms',
+                'platformVersionTrove',
+                'searchPaths',
+                'secondaryLabels',
+                ]:
+            if hasattr(platobj, elem):
+                setattr(platobj, elem, getattr(uroot, elem))
         self._rootObj.set_platform(platobj)
         self.platform._rootObj = platobj
         self._postinit()
@@ -2369,6 +2400,13 @@ class ProductDefinitionRecipe(PackageRecipe):
         if self.platform:
             self._addPlatformDefaults()
             self.platform.addDefaultStages()
+        # Remove partition schemes from the platform that are overridden by the
+        # product
+        if platform and getattr(platform, 'partitionSchemes', None):
+            prodSchemes = set(x.id for x in self.getPartitionSchemes() if x.id)
+            platSchemes = platform.partitionSchemes.partitionScheme or []
+            platform.partitionSchemes.partitionScheme = [
+                    x for x in platSchemes if x.id not in prodSchemes]
         # Empty list objects are nullified
         listObjects = [
             ('autoLoadRecipes', 'get_autoLoadRecipe'),
@@ -2377,6 +2415,7 @@ class ProductDefinitionRecipe(PackageRecipe):
             ('factorySources', 'get_factorySource'),
             ('secondaryLabels', 'get_secondaryLabel'),
             ('containerTemplates', 'get_image'),
+            ('partitionSchemes', 'get_partitionScheme'),
         ]
         for listObj, listObjMethodName in listObjects:
             obj = getattr(self._rootObj, listObj)

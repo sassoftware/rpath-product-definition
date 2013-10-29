@@ -1087,6 +1087,83 @@ class autoLoadRecipesType(GeneratedsSuper):
 # end class autoLoadRecipesType
 
 
+class referenceType(GeneratedsSuper):
+    member_data_items_ = [
+        MemberSpec_('ref', 'xsd:string', 0),
+        MemberSpec_('valueOf_', [], 0),
+        ]
+    subclass = None
+    superclass = None
+    def __init__(self, ref=None, valueOf_=''):
+        self.ref = _cast(None, ref)
+        self.valueOf_ = valueOf_
+    def factory(*args_, **kwargs_):
+        if referenceType.subclass:
+            return referenceType.subclass(*args_, **kwargs_)
+        else:
+            return referenceType(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_ref(self): return self.ref
+    def set_ref(self, ref): self.ref = ref
+    def getValueOf_(self): return self.valueOf_
+    def setValueOf_(self, valueOf_): self.valueOf_ = valueOf_
+    def export(self, outfile, level, namespace_='rpd:', name_='referenceType', namespacedef_=''):
+        showIndent(outfile, level)
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        self.exportAttributes(outfile, level, namespace_, name_='referenceType')
+        if self.hasContent_():
+            outfile.write('>')
+            self.exportChildren(outfile, level + 1, namespace_, name_)
+            outfile.write('</%s%s>\n' % (namespace_, name_))
+        else:
+            outfile.write('/>\n')
+    def exportAttributes(self, outfile, level, namespace_='rpd:', name_='referenceType'):
+        outfile.write(' ref=%s' % (self.format_string(quote_attrib(self.ref).encode(ExternalEncoding), input_name='ref'), ))
+    def exportChildren(self, outfile, level, namespace_='rpd:', name_='referenceType'):
+        if self.valueOf_.find('![CDATA') > -1:
+            value=quote_xml('%s' % self.valueOf_)
+            value=value.replace('![CDATA','<![CDATA')
+            value=value.replace(']]',']]>')
+            outfile.write(value.encode(ExternalEncoding))
+        else:
+            outfile.write(quote_xml('%s' % self.valueOf_.encode(ExternalEncoding)))
+    def hasContent_(self):
+        if (
+            self.valueOf_
+            ):
+            return True
+        else:
+            return False
+    def exportLiteral(self, outfile, level, name_='referenceType'):
+        level += 1
+        self.exportLiteralAttributes(outfile, level, name_)
+        if self.hasContent_():
+            self.exportLiteralChildren(outfile, level, name_)
+    def exportLiteralAttributes(self, outfile, level, name_):
+        if self.ref is not None:
+            showIndent(outfile, level)
+            outfile.write('ref = "%s",\n' % (self.ref,))
+    def exportLiteralChildren(self, outfile, level, name_):
+        showIndent(outfile, level)
+        outfile.write('valueOf_ = """%s""",\n' % (self.valueOf_,))
+    def build(self, node_):
+        attrs = node_.attributes
+        self.buildAttributes(attrs)
+        self.valueOf_ = ''
+        for child_ in node_.childNodes:
+            nodeName_ = child_.nodeName.split(':')[-1]
+            self.buildChildren(child_, nodeName_)
+    def buildAttributes(self, attrs):
+        if attrs.get('ref'):
+            self.ref = attrs.get('ref').value
+    def buildChildren(self, child_, nodeName_):
+        if child_.nodeType == Node.TEXT_NODE:
+            self.valueOf_ += child_.nodeValue
+        elif child_.nodeType == Node.CDATA_SECTION_NODE:
+            self.valueOf_ += '![CDATA['+child_.nodeValue+']]'
+# end class referenceType
+
+
 class partitionType(GeneratedsSuper):
     member_data_items_ = [
         MemberSpec_('minSize', 'xsd:string', 0),
@@ -1209,14 +1286,12 @@ class partitionType(GeneratedsSuper):
 
 class partitionSchemeType(GeneratedsSuper):
     member_data_items_ = [
-        MemberSpec_('ref', 'xsd:string', 0),
         MemberSpec_('id', 'xsd:string', 0),
         MemberSpec_('partition', 'partitionType', 1),
         ]
     subclass = None
     superclass = None
-    def __init__(self, ref=None, id=None, partition=None):
-        self.ref = _cast(None, ref)
+    def __init__(self, id=None, partition=None):
         self.id = _cast(None, id)
         if partition is None:
             self.partition = []
@@ -1232,8 +1307,6 @@ class partitionSchemeType(GeneratedsSuper):
     def set_partition(self, partition): self.partition = partition
     def add_partition(self, value): self.partition.append(value)
     def insert_partition(self, index, value): self.partition[index] = value
-    def get_ref(self): return self.ref
-    def set_ref(self, ref): self.ref = ref
     def get_id(self): return self.id
     def set_id(self, id): self.id = id
     def export(self, outfile, level, namespace_='rpd:', name_='partitionSchemeType', namespacedef_=''):
@@ -1248,10 +1321,7 @@ class partitionSchemeType(GeneratedsSuper):
         else:
             outfile.write('/>\n')
     def exportAttributes(self, outfile, level, namespace_='rpd:', name_='partitionSchemeType'):
-        if self.ref is not None:
-            outfile.write(' ref=%s' % (self.format_string(quote_attrib(self.ref).encode(ExternalEncoding), input_name='ref'), ))
-        if self.id is not None:
-            outfile.write(' id=%s' % (self.format_string(quote_attrib(self.id).encode(ExternalEncoding), input_name='id'), ))
+        outfile.write(' id=%s' % (self.format_string(quote_attrib(self.id).encode(ExternalEncoding), input_name='id'), ))
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='partitionSchemeType'):
         for partition_ in self.partition:
             partition_.export(outfile, level, namespace_, name_='partition')
@@ -1268,9 +1338,6 @@ class partitionSchemeType(GeneratedsSuper):
         if self.hasContent_():
             self.exportLiteralChildren(outfile, level, name_)
     def exportLiteralAttributes(self, outfile, level, name_):
-        if self.ref is not None:
-            showIndent(outfile, level)
-            outfile.write('ref = "%s",\n' % (self.ref,))
         if self.id is not None:
             showIndent(outfile, level)
             outfile.write('id = "%s",\n' % (self.id,))
@@ -1294,8 +1361,6 @@ class partitionSchemeType(GeneratedsSuper):
             nodeName_ = child_.nodeName.split(':')[-1]
             self.buildChildren(child_, nodeName_)
     def buildAttributes(self, attrs):
-        if attrs.get('ref'):
-            self.ref = attrs.get('ref').value
         if attrs.get('id'):
             self.id = attrs.get('id').value
     def buildChildren(self, child_, nodeName_):
@@ -1924,7 +1989,7 @@ class buildType(GeneratedsSuper):
         MemberSpec_('stage', 'stage', 1),
         MemberSpec_('imageGroup', ['troveSpecType', 'xsd:string'], 0),
         MemberSpec_('sourceGroup', ['troveSpecType', 'xsd:string'], 0),
-        MemberSpec_('partitionScheme', 'partitionSchemeType', 0),
+        MemberSpec_('partitionScheme', 'referenceType', 0),
         ]
     subclass = None
     superclass = None
@@ -2069,7 +2134,7 @@ class buildType(GeneratedsSuper):
             outfile.write('sourceGroup=%s,\n' % quote_python(self.sourceGroup).encode(ExternalEncoding))
         if self.partitionScheme is not None:
             showIndent(outfile, level)
-            outfile.write('partitionScheme=model_.partitionSchemeType(\n')
+            outfile.write('partitionScheme=model_.referenceType(\n')
             self.partitionScheme.exportLiteral(outfile, level, name_='partitionScheme')
             showIndent(outfile, level)
             outfile.write('),\n')
@@ -2117,7 +2182,7 @@ class buildType(GeneratedsSuper):
             self.validate_sourceGroup(self.sourceGroup)    # validate type sourceGroup
         elif child_.nodeType == Node.ELEMENT_NODE and \
             nodeName_ == 'partitionScheme':
-            obj_ = partitionSchemeType.factory()
+            obj_ = referenceType.factory()
             obj_.build(child_)
             self.set_partitionScheme(obj_)
 
