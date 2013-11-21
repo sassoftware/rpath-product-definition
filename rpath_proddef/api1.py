@@ -906,29 +906,38 @@ class BaseDefinition(object):
         repos = conaryClient.getRepos()
 
         # Get the previous version of the trove
-        pathDict = {}
+        oldPaths = {}
         trvTup = self._getTroveTupFromRepository(conaryClient, str(label),
             allowMissing = True)
         if trvTup:
-            pathDict.update(self._getTroveContents(repos, trvTup))
+            oldPaths.update(self._getTroveContents(repos, trvTup))
 
         recipe = self._recipe.replace('@NAME@', self._troveName)
         recipe = recipe.replace('@VERSION@', version)
 
         stream = StringIO.StringIO()
         self.serialize(stream, version = version)
-        pathDict.update({
+        newPaths = oldPaths.copy()
+        newPaths.update({
             "%s.recipe" % self._troveName : filetypes.RegularFile(
                 contents = recipe, config=True),
             self._troveFileNames[0] : filetypes.RegularFile(
                 contents = stream.getvalue(), config=True),
         })
+        oldIds = dict((path, helper.get(None).fileId())
+                for (path, helper) in oldPaths.items())
+        newIds = dict((path, helper.get(None).fileId())
+                for (path, helper) in newPaths.items())
+        if oldIds == newIds:
+            # No files changed
+            return
+
         cLog = changelog.ChangeLog(name = conaryClient.cfg.name,
                                    contact = conaryClient.cfg.contact,
                                    message = message)
         troveName = '%s:source' % self._troveName
         cs = conaryClient.createSourceTrove(troveName, str(label),
-            version, pathDict, cLog)
+            version, newPaths, cLog)
 
         # If there is a key for this label in the conary configuration, sign
         # the source trove (RPCL-68)
@@ -1079,7 +1088,6 @@ class BaseDefinition(object):
     def _extendCollection(self, newItems, typeName, keys=['id']):
         if not newItems:
             return
-        typeFactoryName = typeName + 'TypeSub'
         containerName = typeName + 's'
         xmlsubs = self.xmlFactory()
         typeFactory = getattr(xmlsubs, typeName + 'TypeSub')

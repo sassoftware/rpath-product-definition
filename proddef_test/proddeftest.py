@@ -962,6 +962,7 @@ class RepositoryBasedTest(rephelp.RepositoryHelper, BaseTest):
             os.chdir(origDir)
 
         # Save platform again
+        pld.setPlatformName("something")
         pld.saveToRepository(client, unicode(self.defLabel))
 
         repos = client.getRepos()
