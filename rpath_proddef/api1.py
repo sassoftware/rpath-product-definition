@@ -1100,6 +1100,11 @@ class BaseDefinition(object):
         appender = getattr(newContainer, typeName).append
         self._addCollection(appender, oldItems, newItems, typeFactory, keys)
 
+    def newPartition(self, **kwargs):
+        return self.xmlFactory().partitionTypeSub(**kwargs)
+
+    def newPartitionScheme(self, **kwargs):
+        return self.xmlFactory().partitionSchemeTypeSub(**kwargs)
 
 class ProductDefinition(BaseDefinition):
     """
@@ -1569,7 +1574,8 @@ class ProductDefinitionRecipe(PackageRecipe):
                            imageGroup = None, sourceGroup = None, 
                            architectureRef = None,
                            containerTemplateRef = None, buildTemplateRef = None,
-                           flavorSetRef = None, flavor = None):
+                           flavorSetRef = None, flavor = None,
+                           partitionSchemeRef = None):
         """
         Add a build definition.
         Image types are specified by calling C{ProductDefinition.imageType}.
@@ -1635,8 +1641,14 @@ class ProductDefinitionRecipe(PackageRecipe):
             containerTemplateRef)
         for stage in (stages or []):
             obj.add_stage(xmlsubs.stageSub.factory(ref = stage))
+        if partitionSchemeRef:
+            for ps in self.iterAllPartitionSchemes():
+                if ps.id == partitionSchemeRef:
+                    obj.partitionScheme = xmlsubs.referenceTypeSub(ref=partitionSchemeRef)
+                    break
         bdef = self._setDefault('buildDefinition', xmlsubs.buildDefinitionTypeSub)
         bdef.add_build(obj)
+        return obj
 
     def clearBuildDefinition(self):
         """

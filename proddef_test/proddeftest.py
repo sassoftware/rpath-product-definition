@@ -3823,6 +3823,58 @@ version="%(version)s">
                 ('a-941b8124c1', 'group-mine2', 'localhost@prod:2'),
             ])
 
+    def testPartitionSchemes(self):
+        prd = proddef.ProductDefinition(fromStream = refToPlat4)
+        items = [
+                ('partscheme-1', [
+                    ('boot', 'ext4', '/boot', '500M', None,),
+                    ('root', 'ext4', '/', '1G', '5G',),
+                    ('swap', 'swap', '', '1G', None,),
+                    ]),
+                ('partscheme-2', [
+                    ('boot', 'ext4', '/boot', '500M', None,),
+                    ('root', 'ext4', '/', '1G', '50G',),
+                    ('swap', 'swap', '', '1G', None,),
+                    ]),
+                ]
+        pschemes = []
+        for partSchemeId, parts in items:
+            partScheme = prd.newPartitionScheme(id=partSchemeId)
+            pschemes.append(partScheme)
+            for (name, fstype, mountPoint, minSize, freeSpace) in parts:
+                part = prd.newPartition(name=name, fstype=fstype,
+                        mount=mountPoint, minSize=minSize,
+                        freeSpace=freeSpace)
+                partScheme.add_partition(part)
+        prd.addPartitionSchemes(pschemes)
+        prd.addBuildDefinition(name='superspecial-1',
+            architectureRef = 'x86_64',
+            containerTemplateRef = 'installableIsoImage',
+            partitionSchemeRef = 'partscheme-1')
+        prd.addBuildDefinition(name='superspecial-2',
+            architectureRef = 'x86_64',
+            containerTemplateRef = 'installableIsoImage',
+            partitionSchemeRef = 'partscheme-nosuchthing')
+
+        for bdef in prd.buildDefinition:
+            if bdef.name == 'superspecial-1':
+                self.assertEquals(bdef.partitionScheme.ref, "partscheme-1")
+            elif bdef.name == 'superspecial-2':
+                self.assertEquals(bdef.partitionScheme, None)
+
+        sio = StringIO.StringIO()
+        prd.serialize(sio)
+        sio.seek(0)
+        prd = proddef.ProductDefinition(fromStream = sio)
+        self.assertEquals([x.id for x in prd.iterAllPartitionSchemes()],
+                ['partscheme-1', 'partscheme-2'])
+
+        for bdef in prd.buildDefinition:
+            if bdef.name == 'superspecial-1':
+                self.assertEquals(bdef.partitionScheme.ref, "partscheme-1")
+            elif bdef.name == 'superspecial-2':
+                self.assertEquals(bdef.partitionScheme, None)
+
 class MigrationTest(BaseTest):
     def testMigration1(self):
         xmlPath = os.path.join(self.getArchiveDir(), 'migration', 'old-1.xml')
