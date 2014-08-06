@@ -3847,9 +3847,13 @@ version="%(version)s">
                         freeSpace=freeSpace)
                 partScheme.add_partition(part)
         prd.addPartitionSchemes(pschemes)
+        img = prd.imageType(None, fields=dict(
+            buildOVF10=True, vmCPUs=2, vmMemory=16384))
         prd.addBuildDefinition(name='superspecial-1',
             architectureRef = 'x86_64',
             containerTemplateRef = 'installableIsoImage',
+            image=img,
+            stages=[x.name for x in prd.getStages()],
             partitionSchemeRef = 'partscheme-1')
         prd.addBuildDefinition(name='superspecial-2',
             architectureRef = 'x86_64',
@@ -3859,6 +3863,9 @@ version="%(version)s">
         for bdef in prd.buildDefinition:
             if bdef.name == 'superspecial-1':
                 self.assertEquals(bdef.partitionScheme.ref, "partscheme-1")
+                self.assertEquals(bdef.image.buildOVF10, True)
+                self.assertEquals(bdef.image.vmCPUs, 2)
+                self.assertEquals(bdef.image.vmMemory, 16384)
             elif bdef.name == 'superspecial-2':
                 self.assertEquals(bdef.partitionScheme, None)
 
