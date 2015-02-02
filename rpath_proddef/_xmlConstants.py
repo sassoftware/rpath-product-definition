@@ -27,7 +27,7 @@
 @type xmlSchemaLocaltion: C{str}
 """
 
-version = '4.6'
+from proddef_constants import _VERSION as version
 defaultNamespaceList = [ "http://www.rpath.com/permanent/rpd-%s.xsd" % version ]
 xmlSchemaNamespace = "http://www.w3.org/2001/XMLSchema-instance"
 xmlSchemaLocation = ("http://www.rpath.com/permanent/rpd-%s.xsd rpd-%s.xsd" %

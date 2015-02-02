@@ -2679,6 +2679,7 @@ class PlatformDefinition(BasePlatform):
 
     # list of files to search for in the trove, ordered by priority.
     _troveFileNames = [
+        'platform-definition-4.7.xml',
         'platform-definition-4.6.xml',
         'platform-definition-4.5.xml',
         'platform-definition-4.4.xml',
@@ -2936,6 +2937,8 @@ def _addPlatformDefaults(platform):
              "freespace": 1024,
              "swapSize": 512,
              "vmMemory": 256}))
+    platform.addContainerTemplate(platform.imageType("dockerImage",
+            {}))
 
     platform.addBuildTemplate(name="ami_large",
             displayName="EC2 AMI Large/Huge", architectureRef="x86_64",
@@ -3017,6 +3020,14 @@ def _addPlatformDefaults(platform):
             architectureRef="x86_64",
             containerTemplateRef="xenOvaImage",
             flavorSetRef="xen")
+    platform.addBuildTemplate(name="docker",
+            displayName="Docker",
+            architectureRef="x86",
+            containerTemplateRef="dockerImage")
+    platform.addBuildTemplate(name="docker",
+            displayName="Docker",
+            architectureRef="x86_64",
+            containerTemplateRef="dockerImage")
 
 def getMajorArch(flv):
     from conary.deps import arch
@@ -3490,6 +3501,11 @@ class Migrate_45_46(BaseMigration):
     CanMigrateBack = True
 MigrationManager.register(Migrate_45_46)
 
+class Migrate_46_47(BaseMigration):
+    fromVersion = '4.6'
+    toVersion = '4.7'
+    CanMigrateBack = True
+MigrationManager.register(Migrate_46_47)
 
 # export all things that do not have a leading underscore and aren't imported
 # from another module.

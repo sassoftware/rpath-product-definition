@@ -1114,6 +1114,7 @@ class ProductDefinitionTest(BaseTest):
                 ('bugsUrl', str),
                 ('buildOVF10', bool),
                 ('diskAdapter', str),
+                ('dockerfile', str),
                 ('ebsBacked', bool),
                 ('freespace', int),
                 ('installLabelPath', str),

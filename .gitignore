@@ -1,0 +1,15 @@
+*~
+*,cover
+*.o
+*.orig
+*.pyc
+*.pyo
+*.rej
+*.so
+*.swo
+*.swp
+rpath_proddef/proddef_constants.py*
+.coverage/
+.failed
+.times
+bin/
