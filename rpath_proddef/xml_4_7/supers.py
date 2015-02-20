@@ -1552,8 +1552,8 @@ class imageType(GeneratedsSuper):
         MemberSpec_('betaNag', 'xsd:boolean', 0),
         MemberSpec_('buildOVF10', 'xsd:boolean', 0),
         MemberSpec_('anacondaTemplatesTrove', 'rpd:troveSpecType', 0),
-        MemberSpec_('dockerfile', 'xsd:string', 0),
         MemberSpec_('vmMemory', 'xsd:nonNegativeInteger', 0),
+        MemberSpec_('dockerRepositoryName', 'xsd:string', 0),
         MemberSpec_('installLabelPath', 'xsd:string', 0),
         MemberSpec_('unionfs', 'xsd:boolean', 0),
         MemberSpec_('ebsBacked', 'xsd:boolean', 0),
@@ -1564,11 +1564,11 @@ class imageType(GeneratedsSuper):
         MemberSpec_('diskAdapter', 'xsd:string', 0),
         MemberSpec_('amiHugeDiskMountpoint', 'xsd:string', 0),
         MemberSpec_('showMediaCheck', 'xsd:boolean', 0),
-        MemberSpec_('valueOf_', [], 0),
+        MemberSpec_('dockerfile', 'xsd:string', 0),
         ]
     subclass = None
     superclass = None
-    def __init__(self, autoResolve=None, platformIsoKitTrove=None, baseImageTrove=None, bugsUrl=None, natNetworking=None, vhdDiskType=None, anacondaCustomTrove=None, mediaTemplateTrove=None, baseFileName=None, vmSnapshots=None, vmCPUs=None, maxIsoSize=None, swapSize=None, betaNag=None, buildOVF10=None, anacondaTemplatesTrove=None, dockerfile=None, vmMemory=None, installLabelPath=None, unionfs=None, ebsBacked=None, containerFormat=None, freespace=None, name=None, zisofs=None, diskAdapter=None, amiHugeDiskMountpoint=None, showMediaCheck=None, valueOf_=''):
+    def __init__(self, autoResolve=None, platformIsoKitTrove=None, baseImageTrove=None, bugsUrl=None, natNetworking=None, vhdDiskType=None, anacondaCustomTrove=None, mediaTemplateTrove=None, baseFileName=None, vmSnapshots=None, vmCPUs=None, maxIsoSize=None, swapSize=None, betaNag=None, buildOVF10=None, anacondaTemplatesTrove=None, vmMemory=None, dockerRepositoryName=None, installLabelPath=None, unionfs=None, ebsBacked=None, containerFormat=None, freespace=None, name=None, zisofs=None, diskAdapter=None, amiHugeDiskMountpoint=None, showMediaCheck=None, dockerfile=None):
         self.autoResolve = _cast(bool, autoResolve)
         self.platformIsoKitTrove = _cast(None, platformIsoKitTrove)
         self.baseImageTrove = _cast(None, baseImageTrove)
@@ -1585,8 +1585,8 @@ class imageType(GeneratedsSuper):
         self.betaNag = _cast(bool, betaNag)
         self.buildOVF10 = _cast(bool, buildOVF10)
         self.anacondaTemplatesTrove = _cast(None, anacondaTemplatesTrove)
-        self.dockerfile = _cast(None, dockerfile)
         self.vmMemory = _cast(int, vmMemory)
+        self.dockerRepositoryName = _cast(None, dockerRepositoryName)
         self.installLabelPath = _cast(None, installLabelPath)
         self.unionfs = _cast(bool, unionfs)
         self.ebsBacked = _cast(bool, ebsBacked)
@@ -1597,13 +1597,15 @@ class imageType(GeneratedsSuper):
         self.diskAdapter = _cast(None, diskAdapter)
         self.amiHugeDiskMountpoint = _cast(None, amiHugeDiskMountpoint)
         self.showMediaCheck = _cast(bool, showMediaCheck)
-        self.valueOf_ = valueOf_
+        self.dockerfile = dockerfile
     def factory(*args_, **kwargs_):
         if imageType.subclass:
             return imageType.subclass(*args_, **kwargs_)
         else:
             return imageType(*args_, **kwargs_)
     factory = staticmethod(factory)
+    def get_dockerfile(self): return self.dockerfile
+    def set_dockerfile(self, dockerfile): self.dockerfile = dockerfile
     def get_autoResolve(self): return self.autoResolve
     def set_autoResolve(self, autoResolve): self.autoResolve = autoResolve
     def get_platformIsoKitTrove(self): return self.platformIsoKitTrove
@@ -1636,10 +1638,10 @@ class imageType(GeneratedsSuper):
     def set_buildOVF10(self, buildOVF10): self.buildOVF10 = buildOVF10
     def get_anacondaTemplatesTrove(self): return self.anacondaTemplatesTrove
     def set_anacondaTemplatesTrove(self, anacondaTemplatesTrove): self.anacondaTemplatesTrove = anacondaTemplatesTrove
-    def get_dockerfile(self): return self.dockerfile
-    def set_dockerfile(self, dockerfile): self.dockerfile = dockerfile
     def get_vmMemory(self): return self.vmMemory
     def set_vmMemory(self, vmMemory): self.vmMemory = vmMemory
+    def get_dockerRepositoryName(self): return self.dockerRepositoryName
+    def set_dockerRepositoryName(self, dockerRepositoryName): self.dockerRepositoryName = dockerRepositoryName
     def get_installLabelPath(self): return self.installLabelPath
     def set_installLabelPath(self, installLabelPath): self.installLabelPath = installLabelPath
     def get_unionfs(self): return self.unionfs
@@ -1660,15 +1662,14 @@ class imageType(GeneratedsSuper):
     def set_amiHugeDiskMountpoint(self, amiHugeDiskMountpoint): self.amiHugeDiskMountpoint = amiHugeDiskMountpoint
     def get_showMediaCheck(self): return self.showMediaCheck
     def set_showMediaCheck(self, showMediaCheck): self.showMediaCheck = showMediaCheck
-    def getValueOf_(self): return self.valueOf_
-    def setValueOf_(self, valueOf_): self.valueOf_ = valueOf_
     def export(self, outfile, level, namespace_='rpd:', name_='imageType', namespacedef_=''):
         showIndent(outfile, level)
         outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         self.exportAttributes(outfile, level, namespace_, name_='imageType')
         if self.hasContent_():
-            outfile.write('>')
+            outfile.write('>\n')
             self.exportChildren(outfile, level + 1, namespace_, name_)
+            showIndent(outfile, level)
             outfile.write('</%s%s>\n' % (namespace_, name_))
         else:
             outfile.write('/>\n')
@@ -1705,10 +1706,10 @@ class imageType(GeneratedsSuper):
             outfile.write(' buildOVF10="%s"' % self.format_boolean(str_lower(str(self.buildOVF10)), input_name='buildOVF10'))
         if self.anacondaTemplatesTrove is not None:
             outfile.write(' anacondaTemplatesTrove=%s' % (quote_attrib(self.anacondaTemplatesTrove), ))
-        if self.dockerfile is not None:
-            outfile.write(' dockerfile=%s' % (self.format_string(quote_attrib(self.dockerfile).encode(ExternalEncoding), input_name='dockerfile'), ))
         if self.vmMemory is not None:
             outfile.write(' vmMemory="%s"' % self.format_integer(self.vmMemory, input_name='vmMemory'))
+        if self.dockerRepositoryName is not None:
+            outfile.write(' dockerRepositoryName=%s' % (self.format_string(quote_attrib(self.dockerRepositoryName).encode(ExternalEncoding), input_name='dockerRepositoryName'), ))
         if self.installLabelPath is not None:
             outfile.write(' installLabelPath=%s' % (self.format_string(quote_attrib(self.installLabelPath).encode(ExternalEncoding), input_name='installLabelPath'), ))
         if self.unionfs is not None:
@@ -1730,16 +1731,12 @@ class imageType(GeneratedsSuper):
         if self.showMediaCheck is not None:
             outfile.write(' showMediaCheck="%s"' % self.format_boolean(str_lower(str(self.showMediaCheck)), input_name='showMediaCheck'))
     def exportChildren(self, outfile, level, namespace_='rpd:', name_='imageType'):
-        if self.valueOf_.find('![CDATA') > -1:
-            value=quote_xml('%s' % self.valueOf_)
-            value=value.replace('![CDATA','<![CDATA')
-            value=value.replace(']]',']]>')
-            outfile.write(value.encode(ExternalEncoding))
-        else:
-            outfile.write(quote_xml('%s' % self.valueOf_.encode(ExternalEncoding)))
+        if self.dockerfile is not None:
+            showIndent(outfile, level)
+            outfile.write('<%sdockerfile>%s</%sdockerfile>\n' % (namespace_, self.format_string(quote_xml(self.dockerfile).encode(ExternalEncoding), input_name='dockerfile'), namespace_))
     def hasContent_(self):
         if (
-            self.valueOf_
+            self.dockerfile is not None
             ):
             return True
         else:
@@ -1798,12 +1795,12 @@ class imageType(GeneratedsSuper):
         if self.anacondaTemplatesTrove is not None:
             showIndent(outfile, level)
             outfile.write('anacondaTemplatesTrove = %s,\n' % (self.anacondaTemplatesTrove,))
-        if self.dockerfile is not None:
-            showIndent(outfile, level)
-            outfile.write('dockerfile = "%s",\n' % (self.dockerfile,))
         if self.vmMemory is not None:
             showIndent(outfile, level)
             outfile.write('vmMemory = %d,\n' % (self.vmMemory,))
+        if self.dockerRepositoryName is not None:
+            showIndent(outfile, level)
+            outfile.write('dockerRepositoryName = "%s",\n' % (self.dockerRepositoryName,))
         if self.installLabelPath is not None:
             showIndent(outfile, level)
             outfile.write('installLabelPath = "%s",\n' % (self.installLabelPath,))
@@ -1835,12 +1832,12 @@ class imageType(GeneratedsSuper):
             showIndent(outfile, level)
             outfile.write('showMediaCheck = %s,\n' % (self.showMediaCheck,))
     def exportLiteralChildren(self, outfile, level, name_):
-        showIndent(outfile, level)
-        outfile.write('valueOf_ = """%s""",\n' % (self.valueOf_,))
+        if self.dockerfile is not None:
+            showIndent(outfile, level)
+            outfile.write('dockerfile=%s,\n' % quote_python(self.dockerfile).encode(ExternalEncoding))
     def build(self, node_):
         attrs = node_.attributes
         self.buildAttributes(attrs)
-        self.valueOf_ = ''
         for child_ in node_.childNodes:
             nodeName_ = child_.nodeName.split(':')[-1]
             self.buildChildren(child_, nodeName_)
@@ -1917,8 +1914,6 @@ class imageType(GeneratedsSuper):
                 raise ValueError('Bad boolean attribute (buildOVF10)')
         if attrs.get('anacondaTemplatesTrove'):
             self.anacondaTemplatesTrove = attrs.get('anacondaTemplatesTrove').value
-        if attrs.get('dockerfile'):
-            self.dockerfile = attrs.get('dockerfile').value
         if attrs.get('vmMemory'):
             try:
                 self.vmMemory = int(attrs.get('vmMemory').value)
@@ -1926,6 +1921,8 @@ class imageType(GeneratedsSuper):
                 raise ValueError('Bad integer attribute (vmMemory): %s' % exp)
             if self.vmMemory < 0:
                 raise ValueError('Invalid NonNegativeInteger (vmMemory)')
+        if attrs.get('dockerRepositoryName'):
+            self.dockerRepositoryName = attrs.get('dockerRepositoryName').value
         if attrs.get('installLabelPath'):
             self.installLabelPath = attrs.get('installLabelPath').value
         if attrs.get('unionfs'):
@@ -1972,10 +1969,12 @@ class imageType(GeneratedsSuper):
             else:
                 raise ValueError('Bad boolean attribute (showMediaCheck)')
     def buildChildren(self, child_, nodeName_):
-        if child_.nodeType == Node.TEXT_NODE:
-            self.valueOf_ += child_.nodeValue
-        elif child_.nodeType == Node.CDATA_SECTION_NODE:
-            self.valueOf_ += '![CDATA['+child_.nodeValue+']]'
+        if child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'dockerfile':
+            dockerfile_ = ''
+            for text__content_ in child_.childNodes:
+                dockerfile_ += text__content_.nodeValue
+            self.dockerfile = dockerfile_
 
     def getFields(self):
         fieldNames = [ x.get_name()

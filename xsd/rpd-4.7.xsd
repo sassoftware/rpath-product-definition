@@ -129,6 +129,10 @@
     </xsd:complexType>
 
     <xsd:complexType name="imageType">
+        <xsd:sequence>
+            <xsd:element name="dockerfile" type="xsd:string" minOccurs="0"
+                maxOccurs="1"/>
+        </xsd:sequence>
         <xsd:attribute name="containerFormat">
             <xsd:simpleType>
                 <xsd:restriction base="xsd:string">
@@ -181,7 +185,6 @@
         <xsd:attribute name="betaNag" type="xsd:boolean" />
         <xsd:attribute name="bugsUrl" type="xsd:string" />
         <xsd:attribute name="buildOVF10" type="xsd:boolean" />
-        <xsd:attribute name="dockerfile" type="xsd:string" />
         <xsd:attribute name="ebsBacked" type="xsd:boolean" />
         <xsd:attribute name="freespace" type="xsd:nonNegativeInteger" />
         <xsd:attribute name="installLabelPath" type="xsd:string" />
@@ -197,6 +200,7 @@
         <xsd:attribute name="vmSnapshots" type="xsd:boolean" />
         <xsd:attribute name="zisofs" type="xsd:boolean" />
         <xsd:attribute name="baseImageTrove" type="xsd:string" />
+        <xsd:attribute name="dockerRepositoryName" type="xsd:string" />
     </xsd:complexType>
 
     <xsd:complexType name="buildType">

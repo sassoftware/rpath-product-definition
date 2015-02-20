@@ -1114,6 +1114,7 @@ class ProductDefinitionTest(BaseTest):
                 ('bugsUrl', str),
                 ('buildOVF10', bool),
                 ('diskAdapter', str),
+                ('dockerRepositoryName', str),
                 ('dockerfile', str),
                 ('ebsBacked', bool),
                 ('freespace', int),
@@ -1132,6 +1133,37 @@ class ProductDefinitionTest(BaseTest):
                 ('vmSnapshots', bool),
                 ('zisofs', bool),
             ])
+
+    def testDockerfile(self):
+        pd = self.newProductDefinition()
+        dockerFileContents = """
+EXPOSE 80
+ENTRYPOINT [ "/usr/sbin/httpd" ]
+CMD ["-X"]
+"""
+        img = pd.imageType('dockerImage', fields=dict(
+            dockerfile=dockerFileContents,
+            dockerRepositoryName="test-appengine"))
+        pd.addBuildDefinition(name="docker-httpd-64bit", image=img)
+        sio = StringIO.StringIO()
+        pd.serialize(sio)
+        sio.seek(0)
+        et = etree.parse(sio)
+        nsmap = dict(X=et.getroot().nsmap[None])
+        buildDefs = et.xpath('X:buildDefinition/X:build', namespaces=nsmap)
+        self.assertEquals(
+                [ x.xpath('X:image/X:dockerfile/text()', namespaces=nsmap)
+                    for x in buildDefs ],
+                [[ dockerFileContents ]])
+        self.assertEquals(
+                [ x.xpath('X:image/@dockerRepositoryName', namespaces=nsmap)
+                    for x in buildDefs ],
+                [['test-appengine']])
+        self.assertEquals(
+                [ x.xpath('X:image/@containerFormat', namespaces=nsmap)
+                    for x in buildDefs ],
+                [['dockerImage']])
+        print etree.tostring(buildDefs[0])
 
     def testValidate(self):
         schemaFile = resources.get_xsd('rpd-%s.xsd' % proddef.ProductDefinition.version)
