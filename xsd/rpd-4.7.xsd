@@ -212,7 +212,11 @@
                 </xsd:complexType>
             </xsd:element>
             <xsd:sequence>
-                <xsd:element name="imageGroup" type="rpd:troveSpecType" minOccurs="0" maxOccurs="1"/>
+                <xsd:choice>
+                    <xsd:element name="imageGroup" type="rpd:troveSpecType" minOccurs="0" maxOccurs="1"/>
+                    <!-- For multi-item system models - one has to use either imageGroup or systemModelItem -->
+                    <xsd:element name="systemModelItem" type="rpd:systemModelItemType" minOccurs="0" maxOccurs="unbounded"/>
+                </xsd:choice>
                 <xsd:element name="sourceGroup" type="rpd:troveSpecType" minOccurs="0" maxOccurs="1"/>
             </xsd:sequence>
             <xsd:element name="partitionScheme" type="rpd:referenceType" minOccurs="0" maxOccurs="1" />
@@ -237,6 +241,22 @@
         </xsd:element>
       </xsd:sequence>
     </xsd:complexType>
+
+    <xsd:complexType name="systemModelItemType">
+      <xsd:sequence>
+        <xsd:element name="trove" type="rpd:troveSpecType" minOccurs="1" maxOccurs="unbounded"/>
+      </xsd:sequence>
+      <xsd:attribute name="operation" type="rpd:systemModelOperationType" use="required" />
+    </xsd:complexType>
+
+    <xsd:simpleType name="systemModelOperationType">
+      <xsd:restriction base="xsd:string">
+        <xsd:enumeration value="erase" />
+        <xsd:enumeration value="install" />
+        <xsd:enumeration value="search" />
+        <xsd:enumeration value="update" />
+      </xsd:restriction>
+    </xsd:simpleType>
 
     <xsd:complexType name="promoteMapsType">
       <xsd:sequence>

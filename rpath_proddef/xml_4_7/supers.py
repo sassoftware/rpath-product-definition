@@ -1998,12 +1998,13 @@ class buildType(GeneratedsSuper):
         MemberSpec_('image', 'imageType', 0),
         MemberSpec_('stage', 'stage', 1),
         MemberSpec_('imageGroup', ['troveSpecType', 'xsd:string'], 0),
+        MemberSpec_('systemModelItem', 'systemModelItemType', 1),
         MemberSpec_('sourceGroup', ['troveSpecType', 'xsd:string'], 0),
         MemberSpec_('partitionScheme', 'referenceType', 0),
         ]
     subclass = None
     superclass = None
-    def __init__(self, containerTemplateRef=None, architectureRef=None, name=None, flavor=None, flavorSetRef=None, image=None, stage=None, imageGroup=None, sourceGroup=None, partitionScheme=None):
+    def __init__(self, containerTemplateRef=None, architectureRef=None, name=None, flavor=None, flavorSetRef=None, image=None, stage=None, imageGroup=None, systemModelItem=None, sourceGroup=None, partitionScheme=None):
         self.containerTemplateRef = _cast(None, containerTemplateRef)
         self.architectureRef = _cast(None, architectureRef)
         self.name = _cast(None, name)
@@ -2015,6 +2016,10 @@ class buildType(GeneratedsSuper):
         else:
             self.stage = stage
         self.imageGroup = imageGroup
+        if systemModelItem is None:
+            self.systemModelItem = []
+        else:
+            self.systemModelItem = systemModelItem
         self.sourceGroup = sourceGroup
         self.partitionScheme = partitionScheme
     def factory(*args_, **kwargs_):
@@ -2034,6 +2039,10 @@ class buildType(GeneratedsSuper):
     def validate_imageGroup(self, value):
         # validate type imageGroup
         pass
+    def get_systemModelItem(self): return self.systemModelItem
+    def set_systemModelItem(self, systemModelItem): self.systemModelItem = systemModelItem
+    def add_systemModelItem(self, value): self.systemModelItem.append(value)
+    def insert_systemModelItem(self, index, value): self.systemModelItem[index] = value
     def get_sourceGroup(self): return self.sourceGroup
     def set_sourceGroup(self, sourceGroup): self.sourceGroup = sourceGroup
     def validate_sourceGroup(self, value):
@@ -2080,6 +2089,8 @@ class buildType(GeneratedsSuper):
         if self.imageGroup is not None:
             showIndent(outfile, level)
             outfile.write('<%simageGroup>%s</%simageGroup>\n' % (namespace_, self.format_string(quote_xml(self.imageGroup).encode(ExternalEncoding), input_name='imageGroup'), namespace_))
+        for systemModelItem_ in self.systemModelItem:
+            systemModelItem_.export(outfile, level, namespace_, name_='systemModelItem')
         if self.sourceGroup is not None:
             showIndent(outfile, level)
             outfile.write('<%ssourceGroup>%s</%ssourceGroup>\n' % (namespace_, self.format_string(quote_xml(self.sourceGroup).encode(ExternalEncoding), input_name='sourceGroup'), namespace_))
@@ -2090,6 +2101,7 @@ class buildType(GeneratedsSuper):
             self.image is not None or
             self.stage or
             self.imageGroup is not None or
+            self.systemModelItem or
             self.sourceGroup is not None or
             self.partitionScheme is not None
             ):
@@ -2139,6 +2151,18 @@ class buildType(GeneratedsSuper):
         if self.imageGroup is not None:
             showIndent(outfile, level)
             outfile.write('imageGroup=%s,\n' % quote_python(self.imageGroup).encode(ExternalEncoding))
+        showIndent(outfile, level)
+        outfile.write('systemModelItem=[\n')
+        level += 1
+        for systemModelItem_ in self.systemModelItem:
+            showIndent(outfile, level)
+            outfile.write('model_.systemModelItemType(\n')
+            systemModelItem_.exportLiteral(outfile, level, name_='systemModelItemType')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        level -= 1
+        showIndent(outfile, level)
+        outfile.write('],\n')
         if self.sourceGroup is not None:
             showIndent(outfile, level)
             outfile.write('sourceGroup=%s,\n' % quote_python(self.sourceGroup).encode(ExternalEncoding))
@@ -2183,6 +2207,11 @@ class buildType(GeneratedsSuper):
                 imageGroup_ += text__content_.nodeValue
             self.imageGroup = imageGroup_
             self.validate_imageGroup(self.imageGroup)    # validate type imageGroup
+        elif child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'systemModelItem':
+            obj_ = systemModelItemType.factory()
+            obj_.build(child_)
+            self.systemModelItem.append(obj_)
         elif child_.nodeType == Node.ELEMENT_NODE and \
             nodeName_ == 'sourceGroup':
             sourceGroup_ = ''
@@ -2462,6 +2491,97 @@ class secondaryLabel(GeneratedsSuper):
     setLabel = setValueOf_
     label = property(getLabel, setLabel)
 # end class secondaryLabel
+
+
+class systemModelItemType(GeneratedsSuper):
+    member_data_items_ = [
+        MemberSpec_('operation', 'rpd:systemModelOperationType', 0),
+        MemberSpec_('trove', ['troveSpecType', 'xsd:string'], 1),
+        ]
+    subclass = None
+    superclass = None
+    def __init__(self, operation=None, trove=None):
+        self.operation = _cast(None, operation)
+        if trove is None:
+            self.trove = []
+        else:
+            self.trove = trove
+    def factory(*args_, **kwargs_):
+        if systemModelItemType.subclass:
+            return systemModelItemType.subclass(*args_, **kwargs_)
+        else:
+            return systemModelItemType(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_trove(self): return self.trove
+    def set_trove(self, trove): self.trove = trove
+    def add_trove(self, value): self.trove.append(value)
+    def insert_trove(self, index, value): self.trove[index] = value
+    def validate_trove(self, value):
+        # validate type trove
+        pass
+    def get_operation(self): return self.operation
+    def set_operation(self, operation): self.operation = operation
+    def export(self, outfile, level, namespace_='rpd:', name_='systemModelItemType', namespacedef_=''):
+        showIndent(outfile, level)
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        self.exportAttributes(outfile, level, namespace_, name_='systemModelItemType')
+        if self.hasContent_():
+            outfile.write('>\n')
+            self.exportChildren(outfile, level + 1, namespace_, name_)
+            showIndent(outfile, level)
+            outfile.write('</%s%s>\n' % (namespace_, name_))
+        else:
+            outfile.write('/>\n')
+    def exportAttributes(self, outfile, level, namespace_='rpd:', name_='systemModelItemType'):
+        outfile.write(' operation=%s' % (quote_attrib(self.operation), ))
+    def exportChildren(self, outfile, level, namespace_='rpd:', name_='systemModelItemType'):
+        for trove_ in self.trove:
+            showIndent(outfile, level)
+            outfile.write('<%strove>%s</%strove>\n' % (namespace_, self.format_string(quote_xml(trove_).encode(ExternalEncoding), input_name='trove'), namespace_))
+    def hasContent_(self):
+        if (
+            self.trove
+            ):
+            return True
+        else:
+            return False
+    def exportLiteral(self, outfile, level, name_='systemModelItemType'):
+        level += 1
+        self.exportLiteralAttributes(outfile, level, name_)
+        if self.hasContent_():
+            self.exportLiteralChildren(outfile, level, name_)
+    def exportLiteralAttributes(self, outfile, level, name_):
+        if self.operation is not None:
+            showIndent(outfile, level)
+            outfile.write('operation = %s,\n' % (self.operation,))
+    def exportLiteralChildren(self, outfile, level, name_):
+        showIndent(outfile, level)
+        outfile.write('trove=[\n')
+        level += 1
+        for trove_ in self.trove:
+            showIndent(outfile, level)
+            outfile.write('%s,\n' % quote_python(trove_).encode(ExternalEncoding))
+        level -= 1
+        showIndent(outfile, level)
+        outfile.write('],\n')
+    def build(self, node_):
+        attrs = node_.attributes
+        self.buildAttributes(attrs)
+        for child_ in node_.childNodes:
+            nodeName_ = child_.nodeName.split(':')[-1]
+            self.buildChildren(child_, nodeName_)
+    def buildAttributes(self, attrs):
+        if attrs.get('operation'):
+            self.operation = attrs.get('operation').value
+    def buildChildren(self, child_, nodeName_):
+        if child_.nodeType == Node.ELEMENT_NODE and \
+            nodeName_ == 'trove':
+            trove_ = ''
+            for text__content_ in child_.childNodes:
+                trove_ += text__content_.nodeValue
+            self.trove.append(trove_)
+            self.validate_trove(self.trove)    # validate type trove
+# end class systemModelItemType
 
 
 class promoteMapsType(GeneratedsSuper):

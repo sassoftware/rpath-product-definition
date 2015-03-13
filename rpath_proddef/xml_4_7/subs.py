@@ -126,8 +126,8 @@ supermod.imageType.subclass = imageTypeSub
 
 
 class buildTypeSub(supermod.buildType):
-    def __init__(self, containerTemplateRef=None, architectureRef=None, name=None, flavor=None, flavorSetRef=None, image=None, stage=None, imageGroup=None, sourceGroup=None, partitionScheme=None):
-        supermod.buildType.__init__(self, containerTemplateRef, architectureRef, name, flavor, flavorSetRef, image, stage, imageGroup, sourceGroup, partitionScheme)
+    def __init__(self, containerTemplateRef=None, architectureRef=None, name=None, flavor=None, flavorSetRef=None, image=None, stage=None, imageGroup=None, systemModelItem=None, sourceGroup=None, partitionScheme=None):
+        supermod.buildType.__init__(self, containerTemplateRef, architectureRef, name, flavor, flavorSetRef, image, stage, imageGroup, systemModelItem, sourceGroup, partitionScheme)
 supermod.buildType.subclass = buildTypeSub
 # end class buildTypeSub
 
@@ -151,6 +151,13 @@ class secondaryLabelSub(supermod.secondaryLabel):
         supermod.secondaryLabel.__init__(self, name, valueOf_)
 supermod.secondaryLabel.subclass = secondaryLabelSub
 # end class secondaryLabelSub
+
+
+class systemModelItemTypeSub(supermod.systemModelItemType):
+    def __init__(self, operation=None, trove=None):
+        supermod.systemModelItemType.__init__(self, operation, trove)
+supermod.systemModelItemType.subclass = systemModelItemTypeSub
+# end class systemModelItemTypeSub
 
 
 class promoteMapsTypeSub(supermod.promoteMapsType):

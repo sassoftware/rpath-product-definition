@@ -1163,7 +1163,44 @@ CMD ["-X"]
                 [ x.xpath('X:image/@containerFormat', namespaces=nsmap)
                     for x in buildDefs ],
                 [['dockerImage']])
-        print etree.tostring(buildDefs[0])
+
+    def testSystemModelItems(self):
+        pd = self.newProductDefinition()
+        img = pd.imageType('vmwareImage')
+        systemModelItems = [
+                pd.systemModelItem("search", troves=['group-os=cny.tv@ns:1/1-2-3']),
+                pd.systemModelItem("install", troves=['group-os', "gcc",]),
+                pd.systemModelItem("update", troves=['python', 'python-crypto']),
+                ]
+        pd.addBuildDefinition(name="foo-64bit", image=img,
+                systemModelItems=systemModelItems)
+        sio = StringIO.StringIO()
+        pd.serialize(sio)
+        sio.seek(0)
+        et = etree.parse(sio)
+        nsmap = dict(X=et.getroot().nsmap[None])
+        buildDefs = et.xpath('X:buildDefinition/X:build', namespaces=nsmap)
+        self.assertEquals([ x.attrib['name'] for x in buildDefs ],
+                ['foo-64bit'])
+        self.assertEquals(
+                [ x.xpath('X:systemModelItem/@operation', namespaces=nsmap)
+                    for x in buildDefs ],
+                [[ x.get_operation() for x in systemModelItems ]])
+        smiList = buildDefs[0].xpath('X:systemModelItem', namespaces=nsmap)
+        self.assertEquals(
+                [ x.xpath('X:trove/text()', namespaces=nsmap)
+                    for x in smiList ],
+                [ x.get_trove() for x in systemModelItems ])
+        sio.seek(0)
+        pd = proddef.ProductDefinition(fromStream = sio)
+        bdefs = pd.getBuildDefinitions()
+        items = bdefs[0].systemModelItem
+        self.assertEquals([ (x.operation, x.trove) for x in items ],
+                [
+                    ("search", ['group-os=cny.tv@ns:1/1-2-3']),
+                    ("install", ['group-os', "gcc",]),
+                    ("update", ['python', 'python-crypto']),
+                    ])
 
     def testValidate(self):
         schemaFile = resources.get_xsd('rpd-%s.xsd' % proddef.ProductDefinition.version)

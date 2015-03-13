@@ -839,6 +839,11 @@ class BaseDefinition(object):
             del fields['vhdDiskType']
         return xmlsubs.imageTypeSub.factory(**fields)
 
+    def systemModelItem(self, operation, troves=None):
+        xmlsubs = self.xmlFactory()
+        return xmlsubs.systemModelItemTypeSub.factory(operation=operation,
+                trove=troves or None)
+
     @classmethod
     def parseFlavor(cls, flv):
         try:
@@ -1571,7 +1576,8 @@ class ProductDefinitionRecipe(PackageRecipe):
     buildDefinition = property(getBuildDefinitions)
 
     def addBuildDefinition(self, name = None, image = None, stages = None,
-                           imageGroup = None, sourceGroup = None, 
+                           imageGroup = None, systemModelItems=None,
+                           sourceGroup = None,
                            architectureRef = None,
                            containerTemplateRef = None, buildTemplateRef = None,
                            flavorSetRef = None, flavor = None,
@@ -1591,6 +1597,8 @@ class ProductDefinitionRecipe(PackageRecipe):
         @param imageGroup: An optional image group that will override the
         product definition's image group
         @type imageGroup: C{str}
+        @param systemModelItems: If present, overrides imageGroup.
+        @type systemModelItems: C{list}
         @param sourceGroup: An optional source group that will override the
         product definition's source group
         @type sourceGroup: C{str}
@@ -1626,8 +1634,13 @@ class ProductDefinitionRecipe(PackageRecipe):
             if not fs:
                 self.getPlatformFlavorSet(flavorSetRef)
 
+        if systemModelItems:
+            if imageGroup is not None:
+                raise ProductDefinitionError("Conflicting options: imageGroup and systemModelItems")
+
         obj = xmlsubs.buildTypeSub.factory(name = name, image = image,
                 imageGroup = imageGroup,
+                systemModelItem = systemModelItems,
                 sourceGroup = sourceGroup,
                 architectureRef = architectureRef,
                 containerTemplateRef = containerTemplateRef,
