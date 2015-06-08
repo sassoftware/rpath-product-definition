@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
+ 
 export schemaversion = $(shell ls -1 xsd/rpd-*xsd | tail -1 | sed 's^xsd/rpd-^^;s^.xsd^^')
 
 all: default-subdirs default-all
