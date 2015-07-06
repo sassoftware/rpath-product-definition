@@ -3142,6 +3142,14 @@ def _convertBuildTemplates(fromObj, proddef, newModule):
         nbuild.flavorSetRef = flavorSetRef
         nbuild.containerTemplateRef = containerTemplateRef
 
+class DigesterMd5FLO(object):
+    """ file-like object that produces a MD5 hexdigest from content that is written to it """
+    def __init__(self):
+        self._digest = digestlib.md5()
+        self.hexdigest = self._digest.hexdigest
+    def write(self, data):
+        self._digest.update(data)
+
 class MigrationManager(object):
     __slots__ = [ '_version', '_path' ]
     _transitions = {}

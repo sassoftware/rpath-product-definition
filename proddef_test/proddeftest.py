@@ -3952,6 +3952,14 @@ version="%(version)s">
             elif bdef.name == 'superspecial-2':
                 self.assertEquals(bdef.partitionScheme, None)
 
+
+class DigesterMd5Test(testhelp.TestCase):
+    def testDigester(self):
+        digester = proddef.DigesterMd5FLO()
+        digester.write('hello')
+        self.assertEquals(digester.hexdigest(), '5d41402abc4b2a76b9719d911017c592')
+
+
 class MigrationTest(BaseTest):
     def testMigration1(self):
         xmlPath = os.path.join(self.getArchiveDir(), 'migration', 'old-1.xml')
